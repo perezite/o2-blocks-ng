@@ -55,7 +55,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{71ba3082-afac-433b-b51c-17e3c244fea7}</ProjectGuid>
     <Keyword>Android</Keyword>
-    <ProjectName>Orbis2D.Android</ProjectName>
+    <ProjectName>Application.Android</ProjectName>
     <RootNamespace>Application</RootNamespace>
     <DefaultLanguage>en-US</DefaultLanguage>
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
