@@ -17,6 +17,8 @@ float getDeltaSeconds()
 	return delta;
 }
 
+inline float getDesktopAspectRatio() { return 16.0f / 9.0f; }
+
 void version() {
 	#ifdef _DEBUG
 		std::string configuration = "Debug";
@@ -27,7 +29,7 @@ void version() {
 }
 
 void demo0() {
-	sb::Window window;
+	sb::Window window(400, int(400 * getDesktopAspectRatio()));
 
 	while (window.isOpen()) {
 		sb::Input::update();
