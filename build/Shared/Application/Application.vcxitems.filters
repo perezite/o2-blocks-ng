@@ -132,6 +132,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Sound.h">
       <Filter>_Orbis2D\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Demo.h">
+      <Filter>Blocks</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Window.cpp">
@@ -213,6 +216,9 @@
       <Filter>_Orbis2D</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Main.cpp">
+      <Filter>Blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Demo.cpp">
       <Filter>Blocks</Filter>
     </ClCompile>
   </ItemGroup>
