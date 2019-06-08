@@ -6,20 +6,6 @@
 #include "TextureSheet.h"
 #include "Sprite.h"
 
-float getSeconds() {
-	static sb::Stopwatch sw;
-	return sw.getElapsedSeconds();
-}
-
-float getDeltaSeconds()
-{
-	static float lastElapsed = 0;
-	float elapsed = getSeconds();
-	float delta = elapsed - lastElapsed;
-	lastElapsed = elapsed;
-	return delta;
-}
-
 void init0(std::vector<sb::Sprite>& stones, sb::Texture& stonesTex) {
 	sb::Vector2i size(128, 128);
 	sb::Vector2f scale(0.2f, 0.2f);
