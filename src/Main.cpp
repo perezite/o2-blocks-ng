@@ -45,8 +45,8 @@ void init0(std::vector<sb::Sprite>& stones, sb::Texture& stonesTex) {
 
 	for (std::size_t i = 0; i < stones.size(); i++) {
 		sb::Vector2i gridPos(i % 3, i / 3);
-		float x = (gridPos.x - 1) * scale.x;
-		float y = (gridPos.y - 1) * scale.y;
+		float x = (gridPos.x - 1) * scale.x * 1.1f;
+		float y = (gridPos.y - 1) * scale.y * 1.1f;
 		stones[i].setPosition(x, y);
 		stones[i].setScale(scale);
 	}
@@ -71,9 +71,35 @@ void demo0() {
 		sb::Input::update();
 		window.update();
  
-		window.clear(sb::Color(1, 1, 1, 1));
+		window.clear();
 		draw0(batch, stones);
 		window.draw(batch);
+		window.display();
+	}
+}
+
+void init1(sb::Mesh& background, sb::Camera& camera) {
+	sb::Vector2f extent(camera.getWidth() * 0.5f, camera.getWidth() * camera.getInverseAspectRatio() * 0.5f);
+	sb::Color bottomColor = sb::Color(252.0f / 255.0f, 182.0f / 255.0f, 159.0f / 255.0f, 1);
+	sb::Color topColor = sb::Color(255.0f / 255.0f, 236.0f / 255.0f, 210.0f / 255.0f, 1);
+	background[0] = sb::Vertex(sb::Vector2f(-extent.x, -extent.y), bottomColor);
+	background[1] = sb::Vertex(sb::Vector2f(+extent.x, -extent.y), bottomColor);
+	background[2] = sb::Vertex(sb::Vector2f(-extent.x, +extent.y), topColor);
+	background[3] = sb::Vertex(sb::Vector2f(+extent.x, +extent.y), topColor);
+}
+
+void demo1() {
+	sb::Window window(400, int(400 * getDesktopAspectRatio()));
+	sb::Mesh background(4, sb::PrimitiveType::TriangleStrip);
+
+	init1(background, window.getCamera());
+
+	while (window.isOpen()) {
+		sb::Input::update();
+		window.update();
+
+		window.clear();
+		window.draw(background.getVertices(), sb::PrimitiveType::TriangleStrip);
 		window.display();
 	}
 }
@@ -81,7 +107,9 @@ void demo0() {
 int main() {
 	version();
 
-	demo0();
+	demo1();
+
+	// demo0();
 
 	return 0;
 }
