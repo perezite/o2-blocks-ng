@@ -1,5 +1,6 @@
 #include "Window.h"
 #include "DrawBatch.h"
+#include "Quad.h"
 #include "Input.h"
 #include "Stopwatch.h"
 #include "TextureSheet.h"
@@ -19,8 +20,6 @@ float getDeltaSeconds()
 	lastElapsed = elapsed;
 	return delta;
 }
-
-inline float getDesktopAspectRatio() { return 16.0f / 9.0f; }
 
 void version() {
 	#ifdef _DEBUG
@@ -59,7 +58,8 @@ void draw0(sb::DrawBatch& batch, std::vector<sb::Sprite>& stones) {
 }
 
 void demo0() {
-	sb::Window window(400, int(400 * getDesktopAspectRatio()));
+	float aspect = 3 / 2.0f;
+	sb::Window window(400, int(400 * aspect));
 	sb::DrawBatch batch(512);
 	sb::Texture stoneTex;
 	std::vector<sb::Sprite> stones(7);
@@ -89,7 +89,8 @@ void init1(sb::Mesh& background, sb::Camera& camera) {
 }
 
 void demo1() {
-	sb::Window window(400, int(400 * getDesktopAspectRatio()));
+	float aspect = 3 / 2.0f;
+	sb::Window window(400, int(400 * aspect));
 	sb::Mesh background(4, sb::PrimitiveType::TriangleStrip);
 
 	init1(background, window.getCamera());
@@ -104,10 +105,45 @@ void demo1() {
 	}
 }
 
+void initCamera(sb::Camera& camera, float minInverseAspectRatio) {
+	float minHeight = minInverseAspectRatio;
+	float height = camera.getWidth() * camera.getInverseAspectRatio();
+	if (height < minHeight) {
+		float ratio = minHeight / height;
+		camera.setWidth(camera.getWidth() * ratio);
+	}
+}
+
+void demo2() {
+	float inverseAspect = 2 / 4.0f;
+	sb::Window window(400, int(400 * inverseAspect));
+	sb::Texture coordinatesTex;
+	sb::Sprite coordinates;
+	sb::Quad reference;
+
+	initCamera(window.getCamera(), 3 / 2.0f);
+	coordinatesTex.loadFromAsset("Textures/CoordinateSystem.png");
+	coordinates.setTexture(coordinatesTex);
+	reference.setScale(0.1f, 1.45f);
+
+	while (window.isOpen()) {
+		sb::Input::update();
+		window.update();
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(coordinates);
+		window.draw(reference);
+
+		window.display();
+	}
+}
+
 int main() {
 	version();
 
-	demo1();
+	demo2();
+
+	//demo1();
 
 	// demo0();
 
