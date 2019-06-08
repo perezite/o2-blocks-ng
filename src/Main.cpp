@@ -138,10 +138,77 @@ void demo2() {
 	}
 }
 
+inline float getCameraHeight(sb::Camera& camera) { 
+	return camera.getWidth() * camera.getInverseAspectRatio(); 
+}
+
+inline sb::Color colorFromRgba(unsigned char r, unsigned char g, unsigned char b, unsigned char a = 255) {
+	return sb::Color(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
+}
+
+class Border : public sb::Drawable, public sb::Transformable {
+private:
+	sb::Mesh _mesh;
+	float _height;
+
+public:
+	Border(float height, float thickness)
+		: _mesh(10, sb::PrimitiveType::TriangleStrip), _height(height) {
+		sb::Vector2f extent(0.5f, height / 2);
+		sb::Color innerColor = colorFromRgba(143, 211, 244);
+		sb::Color outerColor = colorFromRgba(132, 250, 176);
+
+		_mesh[0] = sb::Vertex(sb::Vector2f(-extent.x, -extent.y), outerColor);
+		_mesh[1] = sb::Vertex(sb::Vector2f(-extent.x + thickness, -extent.y + thickness), innerColor);
+		_mesh[2] = sb::Vertex(sb::Vector2f(+extent.x, -extent.y), outerColor);
+		_mesh[3] = sb::Vertex(sb::Vector2f(+extent.x - thickness, -extent.y + thickness), innerColor);
+		_mesh[4] = sb::Vertex(sb::Vector2f(+extent.x, +extent.y), outerColor);
+		_mesh[5] = sb::Vertex(sb::Vector2f(+extent.x - thickness, +extent.y - thickness), innerColor);
+		_mesh[6] = sb::Vertex(sb::Vector2f(-extent.x, +extent.y), outerColor);
+		_mesh[7] = sb::Vertex(sb::Vector2f(-extent.x + thickness, +extent.y - thickness), innerColor);
+		_mesh[8] = sb::Vertex(sb::Vector2f(-extent.x, -extent.y), outerColor);
+		_mesh[9] = sb::Vertex(sb::Vector2f(-extent.x + thickness, -extent.y + thickness), innerColor);
+	}
+
+	inline float getHeight() const { return _height; }
+
+	void attachToTop(sb::Camera& targetCamera) {
+		float middle = getCameraHeight(targetCamera) / 2 - getHeight() / 2;
+		translate(0, middle);
+	}
+
+	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
+		states.transform *= getTransform();
+		target.draw(_mesh.getVertices(), _mesh.getPrimitiveType(), states);
+	}
+};
+
+void demo3() {
+	float aspect = 3 / 2.0f;
+	sb::Window window(400, int(400 * aspect));
+	sb::Mesh background(4, sb::PrimitiveType::TriangleStrip);
+	Border border(0.9f * getCameraHeight(window.getCamera()), 0.01f);
+	
+	init1(background, window.getCamera());
+	border.attachToTop(window.getCamera());
+
+	while (window.isOpen()) {
+		sb::Input::update();
+		window.update();
+
+		window.clear();
+		window.draw(background.getVertices(), background.getPrimitiveType());
+		window.draw(border);
+		window.display();
+	}
+}
+
 int main() {
 	version();
 
-	demo2();
+	demo3();
+
+	//demo2();
 
 	//demo1();
 
