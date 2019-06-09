@@ -228,22 +228,32 @@ public:
 	}
 };
 
-void game() {
-	sb::DrawBatch batch(2048);
-	sb::Window window(400, int(1.5f * 400));
-	Board board(15, 10);
+struct Scene : public sb::Drawable {
+	sb::DrawBatch batch = sb::DrawBatch(2048);
+	Board board = Board(15, 10);
 
-	board.setScale(1, (float)board.getNumRows() / (float)board.getNumColumns());
+	void update() {
+		float ds = getDeltaSeconds();
+		board.update(ds);
+	}
+
+	virtual void draw(sb::DrawTarget& target, sb::DrawStates drawStates = sb::DrawStates::getDefault()) {
+		batch.draw(board);
+		target.draw(batch);
+	}
+};
+
+void game() {
+	sb::Window window(400, int(1.5f * 400));
+	Scene scene;
 
 	while (window.isOpen()) {
-		float ds = getDeltaSeconds();
 		sb::Input::update();
 		window.update();
-		board.update(ds);
+		scene.update();
 
 		window.clear(sb::Color(1, 1, 1, 1));
-		batch.draw(board);
-		window.draw(batch);
+		window.draw(scene);
 		window.display();
 	}
 }
