@@ -10,6 +10,9 @@
     <Filter Include="_Orbis2D\Headers">
       <UniqueIdentifier>{6a093035-40a9-4d05-8877-0bc31d58b5c3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Blocks\Headers">
+      <UniqueIdentifier>{636bc02d-8be0-4527-9be7-7361a8c4b787}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Color.h">
@@ -133,7 +136,10 @@
       <Filter>_Orbis2D\Headers</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Demo.h">
-      <Filter>Blocks</Filter>
+      <Filter>Blocks\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Game.h">
+      <Filter>Blocks\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -219,6 +225,9 @@
       <Filter>Blocks</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Demo.cpp">
+      <Filter>Blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Game.cpp">
       <Filter>Blocks</Filter>
     </ClCompile>
   </ItemGroup>
