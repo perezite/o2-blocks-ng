@@ -37,7 +37,7 @@ protected:
 		else if (type == 'j')
 			_sprite.setTexture(getTexture(), getTextureArea(2, 2));
 		else
-			SB_ERROR("Tetromino type " << type << " not supported");
+			SB_ERROR("Invalid Tetromino type " << type);
 	}
 
 	sb::IntRect getTextureArea(std::size_t row, std::size_t col) {
@@ -58,32 +58,28 @@ public:
 };
 
 class Board : public sb::Drawable, public sb::Transformable {
-	struct Slot {
-		Block* block = NULL;
-		bool active = false;
-	};
-
 	struct Item {
 		Block block;
-		bool dropping = true;
 		std::size_t row, col;
 		Item(char type, std::size_t row_, std::size_t col_)
 			: block(type), row(row_), col(col_) 
 		{ }
 	};
 
+	struct Tetromino {
+		std::vector<Item> items;
+		char type;
+	};
+
 	std::size_t _numRows;
 	std::size_t _numCols;
-	std::vector<Slot> _slots;
 	std::vector<Item> _items;
-	float _dropIntervalInSeconds;
-	float _secondsSinceLastDrop;
+	bool _hasDroppingTetromino;
+	Tetromino _droppingTetromino;
+	float _stepIntervalInSeconds;
+	float _secondsSinceLastStep;
 
 protected:
-	inline Slot& getSlot(std::size_t row, std::size_t col) { 
-		return _slots[row * _numCols + col]; 
-	}
-
 	void spawnITetromino() {
 		spawnBlock('i', _numRows - 1, _numCols / 2 - 2);
 		spawnBlock('i', _numRows - 1, _numCols / 2 - 1);
@@ -105,7 +101,7 @@ protected:
 	void spawnBlock(char type, std::size_t row, std::size_t col) {
 		Item item(type, row, col);
 		initBlock(item.block, item.row, item.col);
-		_items.push_back(item);
+		_droppingTetromino.items.push_back(item);
 	}
 
 	void initBlock(Block& block, std::size_t row, std::size_t col) {
@@ -123,39 +119,35 @@ protected:
 		block.setPosition(pos);
 	}
 
-	void dropBlocks(float ds) {
-		_secondsSinceLastDrop += ds;
-		std::sort(_items.begin(), _items.end(), compareHeight);
-		while (_secondsSinceLastDrop > _dropIntervalInSeconds) {
-			dropAllBlocks();
-			_secondsSinceLastDrop -= _dropIntervalInSeconds;
-		}
-	}
-
-	static bool compareHeight(const Item& left, const Item& right) {
-		return left.row < right.row;
-	}
-
-	void dropAllBlocks() {
-		for (std::size_t i = 0; i < _items.size(); i++) {
-			dropBlock(_items[i]);
-		}
-	}
-
-	void dropBlock(Item& item) {
-		if (canDrop(item))
-			dropItem(item);
+	void step(float ds) {
+		if (!_hasDroppingTetromino)
+			spawn();
 		else
-			item.dropping = false;
+			dropTetromino();
 	}
 
-	inline bool canDrop(Item& item) {
-		return item.dropping && item.row > 0 && isPositionEmpty(item.row - 1, item.col);
+	void spawn() {
+		static const std::vector<char> types = { 'i', 'j'};
+		spawnTetromino(types[rand() % types.size()]);
 	}
 
-	void dropItem(Item& item) {
-		item.row--;
-		setBlockPosition(item.block, item.row, item.col);
+	void dropTetromino() {
+		if (canTetrominoDrop())
+			dropTetrominoItems();
+		else
+			freezeDroppingTetromino();
+	}
+
+	bool canTetrominoDrop() {
+		for (std::size_t i = 0; i < _droppingTetromino.items.size(); i++)
+			if (!canItemDrop(_droppingTetromino.items[i]))
+				return false;
+
+		return true;
+	}
+
+	inline bool canItemDrop(Item& item) {
+		return item.row > 0 && isPositionEmpty(item.row - 1, item.col);
 	}
 
 	bool isPositionEmpty(std::size_t row, std::size_t col) {
@@ -167,12 +159,28 @@ protected:
 		return true;
 	}
 
+	void dropTetrominoItems() {
+		for (std::size_t i = 0; i < _droppingTetromino.items.size(); i++)
+			dropItem(_droppingTetromino.items[i]);
+	}
+
+	void dropItem(Item& item) {
+		item.row--;
+		setBlockPosition(item.block, item.row, item.col);
+	}
+
+	void freezeDroppingTetromino() {
+		_hasDroppingTetromino = false;
+		_items.insert(_items.end(), _droppingTetromino.items.begin(), _droppingTetromino.items.end());
+	}
+
 public:
 	Board(std::size_t numRows, std::size_t numColumns) 
-		: _numRows(numRows), _numCols(numColumns), _slots(numRows * numColumns), 
-		_dropIntervalInSeconds(0.1f), _secondsSinceLastDrop(0)
+		: _numRows(numRows), _numCols(numColumns), _hasDroppingTetromino(false),
+		_stepIntervalInSeconds(0.1f), _secondsSinceLastStep(0)
 	{
 		setScale(1, (float)_numRows / (float)_numCols);
+		spawn();
 	}
 
 	inline std::size_t getNumRows() const { return _numRows; }
@@ -181,6 +189,9 @@ public:
 
 	void spawnTetromino(char type_) {
 		char type = tolower(type_);
+		_hasDroppingTetromino = true;
+		_droppingTetromino.items.clear();
+		_droppingTetromino.type = type;
 
 		if (type == 'i')
 			spawnITetromino();
@@ -189,7 +200,7 @@ public:
 		else if (type == 'm')
 			spawnMTetromino();
 		else
-			SB_ERROR("Tetromino type " << type << " not supported");
+			SB_ERROR("Invalid Tetromino type " << type);
 	}
 
 	void fill(char type) {
@@ -200,14 +211,20 @@ public:
 	}
 
 	void update(float ds) {
-		dropBlocks(ds);
+		_secondsSinceLastStep += ds;
+		while (_secondsSinceLastStep > _stepIntervalInSeconds) {
+			step(ds);
+			_secondsSinceLastStep -= _stepIntervalInSeconds;
+		}
 	}
 
 	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
 		states.transform *= getTransform();
-		for (std::size_t i = 0; i < _items.size(); i++) {
+		for (std::size_t i = 0; i < _items.size(); i++) 
 			target.draw(_items[i].block, states);
-		}
+		for (std::size_t i = 0; i < _droppingTetromino.items.size(); i++)
+			target.draw(_droppingTetromino.items[i].block, states);
+		
 	}
 };
 
@@ -216,7 +233,6 @@ void game() {
 	sb::Window window(400, int(1.5f * 400));
 	Board board(15, 10);
 
-	board.spawnTetromino('j');
 	board.setScale(1, (float)board.getNumRows() / (float)board.getNumColumns());
 
 	while (window.isOpen()) {
