@@ -78,24 +78,64 @@ class Board : public sb::Drawable, public sb::Transformable {
 	Tetromino _droppingTetromino;
 	float _stepIntervalInSeconds;
 	float _secondsSinceLastStep;
+	bool _isAlive;
 
 protected:
-	void spawnITetromino() {
-		spawnBlock('i', _numRows - 1, _numCols / 2 - 1);
-		spawnBlock('i', _numRows - 1, _numCols / 2 - 2);
-		spawnBlock('i', _numRows - 1, _numCols / 2 + 0);
-		spawnBlock('i', _numRows - 1, _numCols / 2 + 1);
-	}
-	
-	void spawnJTetromino() {
-		spawnBlock('j', _numRows - 2, _numCols / 2 - 2);
-		spawnBlock('j', _numRows - 1, _numCols / 2 - 2);
-		spawnBlock('j', _numRows - 2, _numCols / 2 - 1);
-		spawnBlock('j', _numRows - 2, _numCols / 2 + 0);
+	void spawnTetrominoBlocks(char type) {
+		std::vector<sb::Vector2i> blockPositions;
+		if (type == 'i')
+			blockPositions = getITetrominoBlockPositions();
+		else if (type == 'j')
+			blockPositions = getJTetrominoBlockPositions();
+		else if (type == 'm')
+			blockPositions = getMTetrominoBlockPositions();
+		else
+			SB_ERROR("Invalid Tetromino type " << type);
+
+		spawnTetrominoBlocks(type, blockPositions);
 	}
 
-	void spawnMTetromino() {
-		spawnBlock('i', _numRows - 1, _numCols / 2);
+	std::vector<sb::Vector2i> getITetrominoBlockPositions() {
+		return std::vector<sb::Vector2i> {
+			sb::Vector2i(_numRows - 1, _numCols / 2 - 1),
+			sb::Vector2i(_numRows - 1, _numCols / 2 - 2),
+			sb::Vector2i(_numRows - 1, _numCols / 2 + 0),
+			sb::Vector2i(_numRows - 1, _numCols / 2 + 1) 
+		};
+	}
+	
+	std::vector<sb::Vector2i> getJTetrominoBlockPositions() {
+		return std::vector<sb::Vector2i> {
+			sb::Vector2i(_numRows - 2, _numCols / 2 - 2),
+			sb::Vector2i(_numRows - 1, _numCols / 2 - 2),
+			sb::Vector2i(_numRows - 2, _numCols / 2 - 1),
+			sb::Vector2i(_numRows - 2, _numCols / 2 + 0) 
+		};
+	}
+
+	std::vector<sb::Vector2i> getMTetrominoBlockPositions() {
+		return std::vector<sb::Vector2i> {
+			sb::Vector2i(_numRows - 1, _numCols / 2)
+		};
+	}
+
+	void spawnTetrominoBlocks(char type, std::vector<sb::Vector2i> positions) {
+		if (!canSpawnBlocks(positions)) {
+			_isAlive = false;
+			return;
+		}
+
+		for (std::size_t i = 0; i < positions.size(); i++) {
+			spawnBlock(type, positions[i].x, positions[i].y);
+		}
+	}
+
+	bool canSpawnBlocks(std::vector<sb::Vector2i> positions) {
+		for (std::size_t i = 0; i < positions.size(); i++)
+			if (!isPositionAllowed(positions[i].x, positions[i].y))
+				return false;
+
+		return true;
 	}
 
 	void spawnBlock(char type, std::size_t row, std::size_t col) {
@@ -214,7 +254,7 @@ protected:
 public:
 	Board(std::size_t numRows, std::size_t numColumns) 
 		: _numRows(numRows), _numCols(numColumns), _hasDroppingTetromino(false),
-		_stepIntervalInSeconds(1), _secondsSinceLastStep(0)
+		_stepIntervalInSeconds(0.2f), _secondsSinceLastStep(0)
 	{
 		setScale(1, (float)_numRows / (float)_numCols);
 		spawn();
@@ -224,20 +264,15 @@ public:
 
 	inline std::size_t getNumColumns() const { return _numCols; }
 
+	inline bool isAlive() const { return _isAlive; }
+
 	void spawnTetromino(char type_) {
 		char type = tolower(type_);
 		_hasDroppingTetromino = true;
 		_droppingTetromino.items.clear();
 		_droppingTetromino.type = type;
 
-		if (type == 'i')
-			spawnITetromino();
-		else if (type == 'j')
-			spawnJTetromino();
-		else if (type == 'm')
-			spawnMTetromino();
-		else
-			SB_ERROR("Invalid Tetromino type " << type);
+		spawnTetrominoBlocks(type);
 	}
 
 	void fill(char type) {
@@ -275,14 +310,17 @@ struct Scene : public sb::Drawable {
 	Board board = Board(15, 10);
 
 	void input() {
-		if (sb::Input::isKeyGoingDown(sb::KeyCode::r))
+		if (board.isAlive() && sb::Input::isKeyGoingDown(sb::KeyCode::r))
 			board.rotateTetromino();
 	}
 
 	void update() {
 		float ds = getDeltaSeconds();
 		input();
-		board.update(ds);
+		if (board.isAlive())
+			board.update(ds);
+		else
+			SB_MESSAGE("You DIED!!");
 	}
 
 	virtual void draw(sb::DrawTarget& target, sb::DrawStates drawStates = sb::DrawStates::getDefault()) {
