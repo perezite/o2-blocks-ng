@@ -81,15 +81,15 @@ class Board : public sb::Drawable, public sb::Transformable {
 
 protected:
 	void spawnITetromino() {
-		spawnBlock('i', _numRows - 1, _numCols / 2 - 2);
 		spawnBlock('i', _numRows - 1, _numCols / 2 - 1);
+		spawnBlock('i', _numRows - 1, _numCols / 2 - 2);
 		spawnBlock('i', _numRows - 1, _numCols / 2 + 0);
 		spawnBlock('i', _numRows - 1, _numCols / 2 + 1);
 	}
 	
 	void spawnJTetromino() {
-		spawnBlock('j', _numRows - 1, _numCols / 2 - 2);
 		spawnBlock('j', _numRows - 2, _numCols / 2 - 2);
+		spawnBlock('j', _numRows - 1, _numCols / 2 - 2);
 		spawnBlock('j', _numRows - 2, _numCols / 2 - 1);
 		spawnBlock('j', _numRows - 2, _numCols / 2 + 0);
 	}
@@ -119,6 +119,38 @@ protected:
 		block.setPosition(pos);
 	}
 
+	bool canTetrominoRotate() {
+		Item& pivotItem = _droppingTetromino.items[0];
+		for (std::size_t i = 0; i < _droppingTetromino.items.size(); i++) {
+			if (!canItemRotate(_droppingTetromino.items[i], pivotItem.row, pivotItem.col))
+				return false;
+		}
+
+		return true;
+	}
+
+	bool canItemRotate(Item& item, std::size_t pivotRow, std::size_t pivotCol) {
+		sb::Vector2i rotatedPos = rotated(item.row, item.col, pivotRow, pivotCol);
+		return isPositionAllowed(rotatedPos.x, rotatedPos.y);
+	}
+
+	sb::Vector2i rotated(std::size_t row, std::size_t col, std::size_t pivotRow, std::size_t pivotCol) {
+		sb::Vector2i relative(row - pivotRow, col - pivotCol);
+		sb::Vector2i rotated(-relative.y, relative.x);
+		return sb::Vector2i(rotated.x + pivotRow, rotated.y + pivotCol);
+	}
+
+	void rotateDroppingTetromino() {
+		for (std::size_t i = 0; i < _droppingTetromino.items.size(); i++) 
+			rotateItem(_droppingTetromino.items[i]);
+	}
+
+	void rotateItem(Item& item) {
+		Item& pivotItem = _droppingTetromino.items[0];
+		sb::Vector2i rotatedPos = rotated(item.row, item.col, pivotItem.row, pivotItem.col);
+		setItemPosition(item, rotatedPos.x, rotatedPos.y);
+	}
+
 	void step(float ds) {
 		if (!_hasDroppingTetromino)
 			spawn();
@@ -127,7 +159,7 @@ protected:
 	}
 
 	void spawn() {
-		static const std::vector<char> types = { 'i', 'j'};
+		static const std::vector<char> types = { 'i', 'j' };
 		spawnTetromino(types[rand() % types.size()]);
 	}
 
@@ -139,15 +171,17 @@ protected:
 	}
 
 	bool canTetrominoDrop() {
-		for (std::size_t i = 0; i < _droppingTetromino.items.size(); i++)
-			if (!canItemDrop(_droppingTetromino.items[i]))
+		for (std::size_t i = 0; i < _droppingTetromino.items.size(); i++) {
+			Item& item = _droppingTetromino.items[i];
+			if (!isPositionAllowed(item.row, item.col))
 				return false;
+		}
 
 		return true;
 	}
 
-	inline bool canItemDrop(Item& item) {
-		return item.row > 0 && isPositionEmpty(item.row - 1, item.col);
+	inline bool isPositionAllowed(int row, int col) {
+		return row > 0 && row < (int)_numRows && col > 0 && col < (int)_numCols && isPositionEmpty(row - 1, col);
 	}
 
 	bool isPositionEmpty(std::size_t row, std::size_t col) {
@@ -160,12 +194,15 @@ protected:
 	}
 
 	void dropTetrominoItems() {
-		for (std::size_t i = 0; i < _droppingTetromino.items.size(); i++)
-			dropItem(_droppingTetromino.items[i]);
+		for (std::size_t i = 0; i < _droppingTetromino.items.size(); i++) {
+			Item& item = _droppingTetromino.items[i];
+			setItemPosition(item, --item.row, item.col);
+		}
 	}
 
-	void dropItem(Item& item) {
-		item.row--;
+	void setItemPosition(Item& item, std::size_t row, std::size_t col) {
+		item.row = row;
+		item.col = col;
 		setBlockPosition(item.block, item.row, item.col);
 	}
 
@@ -177,7 +214,7 @@ protected:
 public:
 	Board(std::size_t numRows, std::size_t numColumns) 
 		: _numRows(numRows), _numCols(numColumns), _hasDroppingTetromino(false),
-		_stepIntervalInSeconds(0.1f), _secondsSinceLastStep(0)
+		_stepIntervalInSeconds(1), _secondsSinceLastStep(0)
 	{
 		setScale(1, (float)_numRows / (float)_numCols);
 		spawn();
@@ -210,6 +247,11 @@ public:
 		}
 	}
 
+	void rotateTetromino() {
+		if (canTetrominoRotate())
+			rotateDroppingTetromino();
+	}
+
 	void update(float ds) {
 		_secondsSinceLastStep += ds;
 		while (_secondsSinceLastStep > _stepIntervalInSeconds) {
@@ -232,8 +274,14 @@ struct Scene : public sb::Drawable {
 	sb::DrawBatch batch = sb::DrawBatch(2048);
 	Board board = Board(15, 10);
 
+	void input() {
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::r))
+			board.rotateTetromino();
+	}
+
 	void update() {
 		float ds = getDeltaSeconds();
+		input();
 		board.update(ds);
 	}
 
