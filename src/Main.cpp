@@ -31,23 +31,23 @@ float getDeltaSeconds()
 	return delta;
 }
 
-class Stone : public sb::Drawable, public sb::Transformable {
+class Block : public sb::Drawable, public sb::Transformable {
 	sb::Sprite _sprite;
 	bool _dropping;
 
 protected: 
 	sb::Texture& getTexture() {
-		static sb::Texture texture("Textures/Stones.png");
+		static sb::Texture texture("Textures/Blocks.png");
 		return texture;
 	}
 
-	void setTexture(char letter) {
-		if (letter == 'i') 
+	void setTexture(char type) {
+		if (type == 'i') 
 			_sprite.setTexture(getTexture(), getTextureArea(2, 1));
-		else if (letter == 'j')
+		else if (type == 'j')
 			_sprite.setTexture(getTexture(), getTextureArea(2, 2));
 		else
-			SB_ERROR("Tetromino letter " << letter << " not supported");
+			SB_ERROR("Tetromino type " << type << " not supported");
 	}
 
 	sb::IntRect getTextureArea(std::size_t row, std::size_t col) {
@@ -56,10 +56,10 @@ protected:
 	}
 
 public:
-	Stone(char letter) 
+	Block(char type) 
 		: _dropping(true)
 	{ 
-		setTexture(tolower(letter));
+		setTexture(tolower(type));
 	}
 
 	inline bool isDropping() const { return _dropping; }
@@ -74,7 +74,7 @@ public:
 
 class Board : public sb::Drawable, public sb::Transformable {
 	struct Slot {
-		Stone* stone = NULL;
+		Block* block = NULL;
 		bool active = false;
 	};
 
@@ -90,82 +90,82 @@ protected:
 	}
 
 	void spawnITetromino() {
-		spawnStone('i', _numRows - 1, _numCols / 2 - 2);
-		spawnStone('i', _numRows - 1, _numCols / 2 - 1);
-		spawnStone('i', _numRows - 1, _numCols / 2 + 0);
-		spawnStone('i', _numRows - 1, _numCols / 2 + 1);
+		spawnBlock('i', _numRows - 1, _numCols / 2 - 2);
+		spawnBlock('i', _numRows - 1, _numCols / 2 - 1);
+		spawnBlock('i', _numRows - 1, _numCols / 2 + 0);
+		spawnBlock('i', _numRows - 1, _numCols / 2 + 1);
 	}
 	
 	void spawnJTetromino() {
-		spawnStone('j', _numRows - 1, _numCols / 2 - 2);
-		spawnStone('j', _numRows - 2, _numCols / 2 - 2);
-		spawnStone('j', _numRows - 2, _numCols / 2 - 1);
-		spawnStone('j', _numRows - 2, _numCols / 2 + 0);
+		spawnBlock('j', _numRows - 1, _numCols / 2 - 2);
+		spawnBlock('j', _numRows - 2, _numCols / 2 - 2);
+		spawnBlock('j', _numRows - 2, _numCols / 2 - 1);
+		spawnBlock('j', _numRows - 2, _numCols / 2 + 0);
 	}
 
 	void spawnMTetromino() {
-		spawnStone('i', _numRows - 1, _numCols / 2);
+		spawnBlock('i', _numRows - 1, _numCols / 2);
 	}
 
-	void spawnStone(char letter, std::size_t row, std::size_t col) {
+	void spawnBlock(char type, std::size_t row, std::size_t col) {
 		Slot& slot = getSlot(row, col);
-		slot.stone = new Stone(letter);
-		initStone(*slot.stone, row, col);
+		slot.block = new Block(type);
+		initBlock(*slot.block, row, col);
 		slot.active = true;
 	}
 
-	void initStone(Stone& stone, std::size_t row, std::size_t col) {
-		stone.setScale(getSlotSize());
-		setStonePosition(stone, row, col);
+	void initBlock(Block& block, std::size_t row, std::size_t col) {
+		block.setScale(getSlotSize());
+		setBlockPosition(block, row, col);
 	}
 
 	inline sb::Vector2f getSlotSize() {
 		return sb::Vector2f(1.f/ _numCols, 1.f / _numRows);
 	}
 
-	void setStonePosition(Stone& stone, std::size_t row, std::size_t col) {
+	void setBlockPosition(Block& block, std::size_t row, std::size_t col) {
 		sb::Vector2f slotSize = getSlotSize();
 		sb::Vector2f pos = sb::Vector2f((col + 0.5f) * slotSize.x - 0.5f, (row + 0.5f) * slotSize.y - 0.5f);
-		stone.setPosition(pos);
+		block.setPosition(pos);
 	}
 
-	void dropStones(float ds) {
+	void dropBlocks(float ds) {
 		_secondsSinceLastDrop += ds;
 		while (_secondsSinceLastDrop > _dropIntervalInSeconds) {
-			dropAllStones();
+			dropAllBlocks();
 			_secondsSinceLastDrop -= _dropIntervalInSeconds;
 		}
 	}
 
-	void dropAllStones() {
+	void dropAllBlocks() {
 		for (std::size_t i = 0; i < _slots.size(); i++) {
-			if (_slots[i].active && _slots[i].stone->isDropping())
-				dropStone(i);
+			if (_slots[i].active && _slots[i].block->isDropping())
+				dropBlock(i);
 		}
 	}
 
-	void dropStone(std::size_t index) {
+	void dropBlock(std::size_t index) {
 		std::size_t row = index / _numCols;
 		std::size_t col = index % _numCols;
-		Stone& stone = *_slots[index].stone;
+		Block& block = *_slots[index].block;
 
 		if (mustFreeze(row, col)) 
-			stone.freeze();
+			block.freeze();
 		else 
-			moveStone(row, col, row - 1, col);
+			moveBlock(row, col, row - 1, col);
 	}
 
 	bool mustFreeze(std::size_t row, std::size_t col) {
 		return row == 0 || getSlot(row - 1, col).active;
 	}
 
-	void moveStone(std::size_t sourceRow, std::size_t sourceCol, std::size_t destRow, std::size_t destCol) {
+	void moveBlock(std::size_t sourceRow, std::size_t sourceCol, std::size_t destRow, std::size_t destCol) {
 		Slot& source = getSlot(sourceRow, sourceCol);
 		Slot& dest = getSlot(destRow, destCol);
-		dest.stone = source.stone;
-		setStonePosition(*dest.stone, destRow, destCol);
+		dest.block = source.block;
+		setBlockPosition(*dest.block, destRow, destCol);
 		dest.active = true;
-		source.stone = NULL;
+		source.block = NULL;
 		source.active = false;
 	}
 
@@ -179,35 +179,35 @@ public:
 
 	inline std::size_t getNumColumns() const { return _numCols; }
 
-	void spawnTetromino(char letter_) {
-		char letter = tolower(letter_);
+	void spawnTetromino(char type_) {
+		char type = tolower(type_);
 
-		if (letter == 'i')
+		if (type == 'i')
 			spawnITetromino();
-		else if (letter == 'j')
+		else if (type == 'j')
 			spawnJTetromino();
-		else if (letter == 'm')
+		else if (type == 'm')
 			spawnMTetromino();
 		else
-			SB_ERROR("Tetromino letter " << letter << " not supported");
+			SB_ERROR("Tetromino type " << type << " not supported");
 	}
 
-	void fill(char letter) {
+	void fill(char type) {
 		for (std::size_t i = 0; i < _numRows; i++) {
 			for (std::size_t j = 0; j < _numCols; j++)
-				spawnStone(letter, i, j);
+				spawnBlock(type, i, j);
 		}
 	}
 
 	void update(float ds) {
-		dropStones(ds);
+		dropBlocks(ds);
 	}
 
 	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
 		states.transform *= getTransform();
 		for (std::size_t i = 0; i < _slots.size(); i++) {
 			if (_slots[i].active)
-				target.draw(_slots[i].stone, states);
+				target.draw(_slots[i].block, states);
 		}
 	}
 };
