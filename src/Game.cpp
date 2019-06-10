@@ -36,6 +36,8 @@ protected:
 			_sprite.setTexture(getTexture(), getTextureArea(2, 1));
 		else if (type == 'j')
 			_sprite.setTexture(getTexture(), getTextureArea(2, 2));
+		else if (type == 'm')
+			_sprite.setTexture(getTexture(), getTextureArea(2, 1));
 		else
 			SB_ERROR("Invalid Tetromino type " << type);
 	}
@@ -79,6 +81,7 @@ class Board : public sb::Drawable, public sb::Transformable {
 	float _stepIntervalInSeconds;
 	float _secondsSinceLastStep;
 	bool _isAlive;
+	std::vector<char> _types;
 
 protected:
 	void spawnTetrominoBlocks(char type) {
@@ -199,8 +202,7 @@ protected:
 	}
 
 	void spawn() {
-		static const std::vector<char> types = { 'i', 'j' };
-		spawnTetromino(types[rand() % types.size()]);
+		spawnTetromino(_types[rand() % _types.size()]);
 	}
 
 	void dropTetromino() {
@@ -252,9 +254,9 @@ protected:
 	}
 
 public:
-	Board(std::size_t numRows, std::size_t numColumns) 
+	Board(std::size_t numRows, std::size_t numColumns, float stepIntervalInSeconds = 1.f, std::vector<char> types = { 'i', 'j' })
 		: _numRows(numRows), _numCols(numColumns), _hasDroppingTetromino(false),
-		_stepIntervalInSeconds(0.2f), _secondsSinceLastStep(0)
+		_stepIntervalInSeconds(stepIntervalInSeconds), _secondsSinceLastStep(0), _types(types)
 	{
 		setScale(1, (float)_numRows / (float)_numCols);
 		spawn();
@@ -307,7 +309,7 @@ public:
 
 struct Scene : public sb::Drawable {
 	sb::DrawBatch batch = sb::DrawBatch(2048);
-	Board board = Board(15, 10);
+	Board board = Board(2, 2, 1, { 'm' });
 
 	void input() {
 		if (board.isAlive() && sb::Input::isKeyGoingDown(sb::KeyCode::r))
