@@ -74,64 +74,20 @@ struct BoardItem {
 	{ }
 };
 
-struct Tetromino {
+class Tetromino {
 	std::vector<Block> _blocks;
 	sb::Vector2i position;
 	std::size_t numRotationSteps;
 	char type;
 
-	Tetromino(char type_ = 'i', std::size_t row = 0, std::size_t col = 0)
-		: position(row, col), numRotationSteps(0), type(tolower(type_))
-	{
-		spawnBlocks();
-	}
-
-	Tetromino(const Tetromino& other)
-		: position(other.position), numRotationSteps(other.numRotationSteps), type(other.type)
-	{
-		spawnBlocks();
-	}
-
-	inline const std::vector<Block>& getBlocks() const { return _blocks; }
-
-	inline void setPosition(sb::Vector2i position_) { position = position_; }
-
-	inline std::size_t getBlockCount() const { return _blocks.size(); }
-
-	inline char getType() const { return type; }
-
-	inline sb::Vector2i getPosition() const { return position; }
-
-	inline void rotate90Degrees() { numRotationSteps = (numRotationSteps + 1) % 4; }
-
-	sb::Vector2i getBlockPosition(std::size_t index) {
-		sb::Vector2i point(_blocks[index].getRow(), _blocks[index].getCol());
-		rotate(point, numRotationSteps);
-		point += position;
-		return point;
-	}
-
-	std::size_t computeHeight() {
-		int max = _blocks.empty() ? -1 : _blocks[0].getRow();
-		for (std::size_t i = 0; i < _blocks.size(); i++) {
-			if ((int)_blocks[i].getRow() > max)
-				max = _blocks[i].getRow();
-		}
-
-		return max + 1;
-	}
-
-	void rotate(sb::Vector2i& point, std::size_t numRotationSteps_) {
+protected:
+	void rotatePoint(sb::Vector2i& point, std::size_t numRotationSteps_) {
 		if (numRotationSteps == 1)
 			point = sb::Vector2i(point.y, -point.x);
 		else if (numRotationSteps == 2)
 			point = sb::Vector2i(-point.x, -point.y);
 		else if (numRotationSteps == 3)
 			point = sb::Vector2i(-point.y, point.x);
-	}
-
-	void translate(std::size_t numRows, std::size_t numCols) {
-		position += sb::Vector2i(numRows, numCols);
 	}
 
 	void spawnBlocks() {
@@ -162,12 +118,60 @@ struct Tetromino {
 	void spawnMBlocks() {
 		_blocks.push_back(Block('m', 0, 0));
 	}
+
+public:
+	Tetromino(char type_ = 'i', std::size_t row = 0, std::size_t col = 0)
+		: position(row, col), numRotationSteps(0), type(tolower(type_))
+	{
+		spawnBlocks();
+	}
+
+	Tetromino(const Tetromino& other)
+		: position(other.position), numRotationSteps(other.numRotationSteps), type(other.type)
+	{
+		spawnBlocks();
+	}
+
+	inline const std::vector<Block>& getBlocks() const { return _blocks; }
+
+	inline std::vector<Block>& getBlocks() { return _blocks; }
+
+	inline std::size_t getBlockCount() const { return _blocks.size(); }
+
+	inline sb::Vector2i getPosition() const { return position; }
+
+	inline char getType() const { return type; }
+
+	sb::Vector2i getBlockPosition(std::size_t index) {
+		sb::Vector2i point(_blocks[index].getRow(), _blocks[index].getCol());
+		rotatePoint(point, numRotationSteps);
+		point += position;
+		return point;
+	}
+
+	inline void setPosition(sb::Vector2i position_) { position = position_; }
+
+	inline void rotate90Degrees() { numRotationSteps = (numRotationSteps + 1) % 4; }
+
+	void translate(std::size_t numRows, std::size_t numCols) {
+		position += sb::Vector2i(numRows, numCols);
+	}
+
+	std::size_t computeHeight() {
+		int max = _blocks.empty() ? -1 : _blocks[0].getRow();
+		for (std::size_t i = 0; i < _blocks.size(); i++) {
+			if ((int)_blocks[i].getRow() > max)
+				max = _blocks[i].getRow();
+		}
+
+		return max + 1;
+	}
 };
 
 class Board : public sb::Drawable, public sb::Transformable {
 	std::size_t _numRows;
 	std::size_t _numCols;
-	std::vector<BoardItem> _items;
+	std::vector<Block> _blocks;
 	bool _hasTetromino;
 	Tetromino _tetromino;
 	float _stepIntervalInSeconds;
@@ -209,8 +213,8 @@ protected:
 	}
 
 	bool isPositionEmpty(std::size_t row, std::size_t col) {
-		for (std::size_t i = 0; i < _items.size(); i++) {
-			if (_items[i].row == row && _items[i].col == col)
+		for (std::size_t i = 0; i < _blocks.size(); i++) {
+			if (_blocks[i].getRow() == row && _blocks[i].getCol() == col)
 				return false;
 		}
 
@@ -250,7 +254,7 @@ protected:
 	void freezeTetromino() {
 		_hasTetromino = false;
 		const std::vector<Block>& tetrominoItems = _tetromino.getBlocks();
-		// _items.insert(_items.end(), tetrominoItems.begin(), tetrominoItems.end());
+		_blocks.insert(_blocks.end(), tetrominoItems.begin(), tetrominoItems.end());
 	}
 
 public:
@@ -280,8 +284,8 @@ public:
 
 	void fill(char type) {
 		for (std::size_t i = 0; i < _numRows; i++) {
-			/*for (std::size_t j = 0; j < _numCols; j++)
-				spawnBlock(type, i, j);*/
+			for (std::size_t j = 0; j < _numCols; j++)
+				_blocks.push_back(Block(type, i, j));
 		}
 	}
 
@@ -295,10 +299,12 @@ public:
 
 	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
 		states.transform *= getTransform();
-		for (std::size_t i = 0; i < _items.size(); i++) 
-			target.draw(_items[i].block, states);
-		for (std::size_t i = 0; i < _tetromino._blocks.size(); i++)
-			target.draw(_tetromino._blocks[i], states);
+		for (std::size_t i = 0; i < _blocks.size(); i++) 
+			target.draw(_blocks[i], states);
+
+		std::vector<Block>& tetrominoBlocks = _tetromino.getBlocks();
+		for (std::size_t i = 0; i < tetrominoBlocks.size(); i++)
+			target.draw(tetrominoBlocks[i], states);
 		
 	}
 };
