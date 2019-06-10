@@ -26,10 +26,9 @@ struct BoardDrawStates {
 	sb::Vector2f boardSize;
 	std::size_t numBoardRows;
 	std::size_t numBoardCols;
-	sb::Vector2i translation;
 	sb::DrawStates drawStates;
 
-	BoardDrawStates(const sb::Vector2f boardSize_, std::size_t numBoardRows_, std::size_t numBoardCols_, sb::DrawStates states_)
+	BoardDrawStates(const sb::Vector2f& boardSize_, std::size_t numBoardRows_, std::size_t numBoardCols_, sb::DrawStates states_)
 		: boardSize(boardSize_), numBoardRows(numBoardRows_), numBoardCols(numBoardCols_), drawStates(states_)
 	{ }
 };
@@ -73,52 +72,57 @@ public:
 
 	inline std::size_t getCol() const { return _col; }
 
+	inline void setRow(std::size_t row) { _row = row; }
+
+	inline void setCol(std::size_t col) { _col = col; }
+
+	inline sb::Vector2i getPosition() const { return sb::Vector2i(_row, _col); }
+
+	void setPosition(sb::Vector2i position) { 
+		_row = position.x;
+		_col = position.y;
+	}
+
 	void translate(std::size_t numRows, std::size_t numCols) {
 		_row += numRows;
 		_col += numCols;
 	}
 
 	void drawOnBoard(sb::DrawTarget& target, BoardDrawStates boardStates) {
-		sb::Vector2i boardPosition(_row + boardStates.translation.x, _col + boardStates.translation.y);
 		sb::Vector2f cellSize(boardStates.boardSize.x / boardStates.numBoardCols, 
 			boardStates.boardSize.y / boardStates.numBoardRows);
 		sb::Vector2f halfBoardSize = 0.5f * boardStates.boardSize;
 		sb::Vector2f offset(-halfBoardSize.x + cellSize.x / 2, -halfBoardSize.y + cellSize.y / 2);
-		sb::Vector2f position(boardPosition.y * cellSize.x + offset.x, boardPosition.x * cellSize.y + offset.y);
+		sb::Vector2f position(_col * cellSize.x + offset.x, _row * cellSize.y + offset.y);
 		sb::Transform boardTransform(position, cellSize, 0);
-		boardStates.drawStates.transform = boardTransform;
+		boardStates.drawStates.transform = boardStates.drawStates.transform * boardTransform;
 
 		target.draw(_sprite, boardStates.drawStates);
 	}
 };
 
 class Tetromino {
+	std::vector<Block> _originalBlocks;
 	std::vector<Block> _blocks;
-	sb::Vector2i position;
-	std::size_t numRotationSteps;
-	char type;
+	sb::Vector2i _position;
+	std::size_t _numRotationSteps;
+	char _type;
 
 protected:
-	void rotateGridPoint(sb::Vector2i& gridPoint, std::size_t numRotationSteps_) {
-		if (numRotationSteps == 1)
-			gridPoint = sb::Vector2i(gridPoint.y, -gridPoint.x);
-		else if (numRotationSteps == 2)
-			gridPoint = sb::Vector2i(-gridPoint.x, -gridPoint.y);
-		else if (numRotationSteps == 3)
-			gridPoint = sb::Vector2i(-gridPoint.y, gridPoint.x);
-	}
-
 	void spawnBlocks() {
+		_originalBlocks.clear();
 		_blocks.clear();
 
-		if (type == 'i')
+		if (_type == 'i')
 			spawnIBlocks();
-		else if (type == 'j')
+		else if (_type == 'j')
 			spawnJBlocks();
-		else if (type == 'm')
+		else if (_type == 'm')
 			spawnMBlocks();
 		else 
-			SB_ERROR("Invalid Tetromino type " << type);
+			SB_ERROR("Invalid Tetromino type " << _type);
+
+		_originalBlocks = _blocks;
 	}
 
 	void spawnIBlocks() {
@@ -139,18 +143,37 @@ protected:
 		_blocks.push_back(Block('m', 0, 0));
 	}
 
+
+	void setBlockTransform(std::size_t blockIndex, const sb::Vector2i& pos, std::size_t numRotationSteps_) {
+		sb::Vector2i blockPosition = _originalBlocks[blockIndex].getPosition();
+		rotatePosition(blockPosition, numRotationSteps_);
+		blockPosition += pos;
+		_blocks[blockIndex].setPosition(blockPosition);
+	}
+
+	void rotatePosition(sb::Vector2i& pos, std::size_t numRotationSteps_) {
+		if (_numRotationSteps == 1)
+			pos = sb::Vector2i(pos.y, -pos.x);
+		else if (_numRotationSteps == 2)
+			pos = sb::Vector2i(-pos.x, -pos.y);
+		else if (_numRotationSteps == 3)
+			pos = sb::Vector2i(-pos.y, pos.x);
+	}
+
 public:
 	Tetromino(char type_ = 'i', std::size_t row = 0, std::size_t col = 0)
-		: position(row, col), numRotationSteps(0), type(tolower(type_))
+		: _position(row, col), _numRotationSteps(0), _type(tolower(type_))
 	{
 		spawnBlocks();
 	}
 
 	Tetromino(const Tetromino& other)
-		: position(other.position), numRotationSteps(other.numRotationSteps), type(other.type)
+		: _position(other._position), _numRotationSteps(other._numRotationSteps), _type(other._type)
 	{
 		spawnBlocks();
 	}
+
+	Block& operator[](std::size_t index) { return _blocks[index]; }
 
 	inline const std::vector<Block>& getBlocks() const { return _blocks; }
 
@@ -158,30 +181,33 @@ public:
 
 	inline std::size_t getBlockCount() const { return _blocks.size(); }
 
-	inline sb::Vector2i getPosition() const { return position; }
+	inline sb::Vector2i getPosition() const { return _position; }
 
-	inline char getType() const { return type; }
+	inline char getType() const { return _type; }
 
-	sb::Vector2i getBlockPosition(std::size_t index) {
-		sb::Vector2i point(_blocks[index].getRow(), _blocks[index].getCol());
-		rotateGridPoint(point, numRotationSteps);
-		point += position;
-		return point;
+	inline std::size_t getNumRotationSteps() const { return _numRotationSteps; }
+
+	void setPosition(sb::Vector2i position_) { 
+		_position = position_;
+		for (std::size_t i = 0; i < _blocks.size(); i++)
+			setBlockTransform(i, _position, _numRotationSteps);
 	}
 
-	inline void setPosition(sb::Vector2i position_) { position = position_; }
-
-	inline void rotate90Degrees() { numRotationSteps = (numRotationSteps + 1) % 4; }
+	void rotateStep() { 
+		_numRotationSteps = (_numRotationSteps + 1) % 4; 
+		for (std::size_t i = 0; i < _blocks.size(); i++)
+			setBlockTransform(i, _position, _numRotationSteps);
+	}
 
 	void translate(std::size_t numRows, std::size_t numCols) {
-		position += sb::Vector2i(numRows, numCols);
+		setPosition(sb::Vector2i(_position.x + numRows, _position.y + numCols));
 	}
 
 	std::size_t computeHeight() {
-		int max = _blocks.empty() ? -1 : _blocks[0].getRow();
-		for (std::size_t i = 0; i < _blocks.size(); i++) {
-			if ((int)_blocks[i].getRow() > max)
-				max = _blocks[i].getRow();
+		int max = _originalBlocks.empty() ? -1 : _originalBlocks[0].getRow();
+		for (std::size_t i = 0; i < _originalBlocks.size(); i++) {
+			if ((int)_originalBlocks[i].getRow() > max)
+				max = _originalBlocks[i].getRow();
 		}
 
 		return max + 1;
@@ -189,7 +215,6 @@ public:
 
 	void drawOnBoard(sb::DrawTarget& target, BoardDrawStates boardStates) {
 		for (std::size_t i = 0; i < _blocks.size(); i++) {
-			boardStates.translation = position;
 			_blocks[i].drawOnBoard(target, boardStates);
 		}
 	}
@@ -224,7 +249,7 @@ protected:
 
 	bool isTetrominoAllowed(Tetromino& tetromino) {
 		for (std::size_t i = 0; i < tetromino.getBlockCount(); i++) {
-			if (!isPositionAllowed(tetromino.getBlockPosition(i)))
+			if (!isPositionAllowed(tetromino[i].getPosition()))
 				return false;
 		}
 
@@ -232,16 +257,13 @@ protected:
 	}
 
 	inline bool isPositionAllowed(sb::Vector2i position) {
-		return isPositionAllowed(position.x, position.y);
+		return position.x >= 0 && position.x < (int)_numRows && 
+			position.y >= 0 && position.y < (int)_numCols && isPositionEmpty(position);
 	}
 
-	inline bool isPositionAllowed(int row, int col) {
-		return row >= 0 && row < (int)_numRows && col >= 0 && col < (int)_numCols && isPositionEmpty(row, col);
-	}
-
-	bool isPositionEmpty(std::size_t row, std::size_t col) {
+	bool isPositionEmpty(sb::Vector2i position) {
 		for (std::size_t i = 0; i < _blocks.size(); i++) {
-			if (_blocks[i].getRow() == row && _blocks[i].getCol() == col)
+			if (_blocks[i].getRow() == position.x && _blocks[i].getCol() == position.y)
 				return false;
 		}
 
@@ -250,7 +272,7 @@ protected:
 
 	bool canTetrominoRotate() {
 		Tetromino rotatedTetromino(_tetromino);
-		rotatedTetromino.rotate90Degrees();
+		rotatedTetromino.rotateStep();
 		return isTetrominoAllowed(rotatedTetromino);
 	}
 
@@ -283,10 +305,8 @@ protected:
 		_hasTetromino = false;
 		const sb::Vector2i tetrominoPosition = _tetromino.getPosition();
 		const std::vector<Block>& tetrominoBlocks = _tetromino.getBlocks();
-		for (std::size_t i = 0; i < tetrominoBlocks.size(); i++) {
-			_blocks.push_back(tetrominoBlocks[i]);
-			_blocks[_blocks.size() - 1].translate(tetrominoPosition.x, tetrominoPosition.y);
-		}
+		for (std::size_t i = 0; i < tetrominoBlocks.size(); i++) 
+			_blocks.push_back(tetrominoBlocks[i]);	
 	}
 
 public:
@@ -311,7 +331,7 @@ public:
 
 	void rotateTetromino() {
 		if (canTetrominoRotate())
-			_tetromino.rotate90Degrees();
+			_tetromino.rotateStep();
 	}
 
 	void fill(char type) {
@@ -335,15 +355,18 @@ public:
 		for (std::size_t i = 0; i < _blocks.size(); i++)
 			_blocks[i].drawOnBoard(target, boardStates);
 
-		if (_hasTetromino)
+		if (_hasTetromino) {
+			if (_tetromino.getNumRotationSteps() == 1)
+				std::cout << "hit" << std::endl;
 			_tetromino.drawOnBoard(target, boardStates);
+		}
 	}
 };
 
 struct Scene : public sb::Drawable {
 	sb::DrawBatch batch = sb::DrawBatch(2048);
-	Board board = Board(15, 10, 0.1f, { 'm' });
-
+	Board board = Board(15, 10, 1.0f, { 'i' });
+	
 	Scene() { 
 	}
 
