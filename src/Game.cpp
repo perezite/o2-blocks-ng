@@ -87,7 +87,7 @@ class Tetromino {
 	std::vector<Block> _originalBlocks;
 	std::vector<Block> _blocks;
 	sb::Vector2i _position;
-	std::size_t _numRotationSteps;
+	std::size_t _numRotations;
 	char _type;
 
 protected:
@@ -126,31 +126,31 @@ protected:
 	}
 
 
-	void setBlockTransform(std::size_t blockIndex, const sb::Vector2i& pos, std::size_t numRotationSteps_) {
+	void setBlockTransform(std::size_t blockIndex, const sb::Vector2i& pos, std::size_t numRotations_) {
 		sb::Vector2i blockPosition = _originalBlocks[blockIndex].getPosition();
-		rotatePosition(blockPosition, numRotationSteps_);
+		rotatePosition(blockPosition, numRotations_);
 		blockPosition += pos;
 		_blocks[blockIndex].setPosition(blockPosition);
 	}
 
-	void rotatePosition(sb::Vector2i& pos, std::size_t numRotationSteps_) {
-		if (_numRotationSteps == 1)
+	void rotatePosition(sb::Vector2i& pos, std::size_t numRotations_) {
+		if (_numRotations == 1)
 			pos = sb::Vector2i(pos.y, -pos.x);
-		else if (_numRotationSteps == 2)
+		else if (_numRotations == 2)
 			pos = sb::Vector2i(-pos.x, -pos.y);
-		else if (_numRotationSteps == 3)
+		else if (_numRotations == 3)
 			pos = sb::Vector2i(-pos.y, pos.x);
 	}
 
 public:
 	Tetromino(char type_ = 'i', std::size_t row = 0, std::size_t col = 0)
-		: _position(row, col), _numRotationSteps(0), _type(tolower(type_))
+		: _position(row, col), _numRotations(0), _type(tolower(type_))
 	{
 		spawnBlocks();
 	}
 
 	Tetromino(const Tetromino& other)
-		: _position(other._position), _numRotationSteps(other._numRotationSteps), _type(other._type)
+		: _position(other._position), _numRotations(other._numRotations), _type(other._type)
 	{
 		spawnBlocks();
 	}
@@ -163,18 +163,18 @@ public:
 
 	inline char getType() const { return _type; }
 
-	inline std::size_t getNumRotationSteps() const { return _numRotationSteps; }
+	inline std::size_t getNumRotations() const { return _numRotations; }
 
 	void setPosition(sb::Vector2i position_) { 
 		_position = position_;
 		for (std::size_t i = 0; i < _blocks.size(); i++)
-			setBlockTransform(i, _position, _numRotationSteps);
+			setBlockTransform(i, _position, _numRotations);
 	}
 
-	void rotateStep() { 
-		_numRotationSteps = (_numRotationSteps + 1) % 4; 
+	void rotate() { 
+		_numRotations = (_numRotations + 1) % 4; 
 		for (std::size_t i = 0; i < _blocks.size(); i++)
-			setBlockTransform(i, _position, _numRotationSteps);
+			setBlockTransform(i, _position, _numRotations);
 	}
 
 	void translate(const sb::Vector2i& translation) {
@@ -234,8 +234,9 @@ protected:
 	}
 
 	inline bool isPositionAllowed(sb::Vector2i position) {
-		return position.x >= 0 && position.x < _gridSize.x && 
+		bool result = position.x >= 0 && position.x < _gridSize.x && 
 			position.y >= 0 && position.y < _gridSize.y && isPositionEmpty(position);
+		return result;
 	}
 
 	bool isPositionEmpty(sb::Vector2i position) {
@@ -249,7 +250,7 @@ protected:
 
 	bool canTetrominoRotate() {
 		Tetromino rotatedTetromino(_tetromino);
-		rotatedTetromino.rotateStep();
+		rotatedTetromino.rotate();
 		return isTetrominoAllowed(rotatedTetromino);
 	}
 
@@ -275,14 +276,14 @@ protected:
 
 	void freezeTetromino() {
 		_hasTetromino = false;
-		const sb::Vector2i tetrominoPosition = _tetromino.getPosition();
 		for (std::size_t i = 0; i < _tetromino.getBlockCount(); i++) 
 			_blocks.push_back(_tetromino[i]);	
 	}
 
 public:
 	Board(std::size_t numCols, std::size_t numRows, float stepIntervalInSeconds = 1.f, std::vector<char> types = { 'i', 'j' })
-		: _gridSize(numCols, numRows), _hasTetromino(false), _stepIntervalInSeconds(stepIntervalInSeconds), _secondsSinceLastStep(0), _types(types)
+		: _gridSize(numCols, numRows), _hasTetromino(false), _stepIntervalInSeconds(stepIntervalInSeconds), _secondsSinceLastStep(0), 
+		_isAlive(true), _types(types)
 	{
 		setScale(1, float(_gridSize.y) / float(_gridSize.x));
 		spawnRandomTetromino();
@@ -297,7 +298,7 @@ public:
 
 	void rotateTetromino() {
 		if (canTetrominoRotate())
-			_tetromino.rotateStep();
+			_tetromino.rotate();
 	}
 
 	void fill(char type) {
