@@ -23,30 +23,28 @@ float getDeltaSeconds()
 }
 
 struct BoardDrawStates {
-	sb::Vector2f boardSize;
-	std::size_t numBoardRows;
-	std::size_t numBoardCols;
+	sb::Vector2f boardScale;
+	sb::Vector2i boardSize;
 	sb::DrawStates drawStates;
 
-	BoardDrawStates(const sb::Vector2f& boardSize_, std::size_t numBoardRows_, std::size_t numBoardCols_, sb::DrawStates states_)
-		: boardSize(boardSize_), numBoardRows(numBoardRows_), numBoardCols(numBoardCols_), drawStates(states_)
+	BoardDrawStates(const sb::Vector2f& boardScale_, const sb::Vector2i& boardSize_, sb::DrawStates states_)
+		: boardScale(boardScale_), boardSize(boardSize_), drawStates(states_)
 	{ }
 };
 
 class Block {
 	sb::Sprite _sprite;
 	char _type;
-	std::size_t _row;
-	std::size_t _col;
+	sb::Vector2i _position;
 
-protected: 
+protected:
 	sb::Texture& getTexture() {
 		static sb::Texture texture("Textures/Blocks.png");
 		return texture;
 	}
 
 	void setTexture(char type) {
-		if (type == 'i') 
+		if (type == 'i')
 			_sprite.setTexture(getTexture(), getTextureArea(2, 1));
 		else if (type == 'j')
 			_sprite.setTexture(getTexture(), getTextureArea(2, 2));
@@ -62,30 +60,22 @@ protected:
 	}
 
 public:
-	Block(char type, std::size_t row, std::size_t col)
-		: _type(type), _row(row), _col(col)
-	{ 
+	Block(char type, std::size_t col, std::size_t row)
+		: _type(type), _position(col, row)
+	{
 		setTexture(tolower(type));
 	}
 
-	inline sb::Vector2i getPosition() const { return sb::Vector2i(_row, _col); }
+	inline sb::Vector2i getPosition() const { return _position; }
 
-	void setPosition(sb::Vector2i position) { 
-		_row = position.x;
-		_col = position.y;
-	}
-
-	void translate(std::size_t numRows, std::size_t numCols) {
-		_row += numRows;
-		_col += numCols;
-	}
+	inline void setPosition(sb::Vector2i position) { _position = position; }
 
 	void drawOnBoard(sb::DrawTarget& target, BoardDrawStates boardStates) {
-		sb::Vector2f cellSize(boardStates.boardSize.x / boardStates.numBoardCols, 
-			boardStates.boardSize.y / boardStates.numBoardRows);
-		sb::Vector2f halfBoardSize = 0.5f * boardStates.boardSize;
+		sb::Vector2f cellSize(boardStates.boardScale.x / boardStates.boardSize.x, 
+			boardStates.boardScale.y / boardStates.boardSize.y);
+		sb::Vector2f halfBoardSize = 0.5f * boardStates.boardScale;
 		sb::Vector2f offset(-halfBoardSize.x + cellSize.x / 2, -halfBoardSize.y + cellSize.y / 2);
-		sb::Vector2f position(_col * cellSize.x + offset.x, _row * cellSize.y + offset.y);
+		sb::Vector2f position(_position.x * cellSize.x + offset.x, _position.y * cellSize.y + offset.y);
 		sb::Transform boardTransform(position, cellSize, 0);
 		boardStates.drawStates.transform = boardStates.drawStates.transform * boardTransform;
 
@@ -167,10 +157,6 @@ public:
 
 	Block& operator[](std::size_t index) { return _blocks[index]; }
 
-	inline const std::vector<Block>& getBlocks() const { return _blocks; }
-
-	inline std::vector<Block>& getBlocks() { return _blocks; }
-
 	inline std::size_t getBlockCount() const { return _blocks.size(); }
 
 	inline sb::Vector2i getPosition() const { return _position; }
@@ -191,15 +177,15 @@ public:
 			setBlockTransform(i, _position, _numRotationSteps);
 	}
 
-	void translate(std::size_t numRows, std::size_t numCols) {
-		setPosition(sb::Vector2i(_position.x + numRows, _position.y + numCols));
+	void translate(const sb::Vector2i& translation) {
+		setPosition(sb::Vector2i(_position.x + translation.x, _position.y + translation.y));
 	}
 
 	std::size_t computeHeight() {
-		int max = _originalBlocks.empty() ? -1 : _originalBlocks[0].getPosition().x;
+		int max = _originalBlocks.empty() ? -1 : _originalBlocks[0].getPosition().y;
 		for (std::size_t i = 0; i < _originalBlocks.size(); i++) {
-			if ((int)_originalBlocks[i].getPosition().x > max)
-				max = _originalBlocks[i].getPosition().x;
+			if ((int)_originalBlocks[i].getPosition().y > max)
+				max = _originalBlocks[i].getPosition().y;
 		}
 
 		return max + 1;
@@ -213,8 +199,7 @@ public:
 };
 
 class Board : public sb::Drawable, public sb::Transformable {
-	std::size_t _numRows;
-	std::size_t _numCols;
+	sb::Vector2i _gridSize;
 	std::vector<Block> _blocks;
 	bool _hasTetromino;
 	Tetromino _tetromino;
@@ -231,7 +216,7 @@ protected:
 	void spawnTheTetromino(char type) {
 		_hasTetromino = true;
 		Tetromino newTetromino(type);
-		newTetromino.setPosition(sb::Vector2i(_numRows - newTetromino.computeHeight(), _numCols / 2));
+		newTetromino.setPosition(sb::Vector2i(_gridSize.x / 2, _gridSize.y - newTetromino.computeHeight()));
 		
 		if (isTetrominoAllowed(newTetromino))
 			_tetromino = newTetromino;	
@@ -249,8 +234,8 @@ protected:
 	}
 
 	inline bool isPositionAllowed(sb::Vector2i position) {
-		return position.x >= 0 && position.x < (int)_numRows && 
-			position.y >= 0 && position.y < (int)_numCols && isPositionEmpty(position);
+		return position.x >= 0 && position.x < _gridSize.x && 
+			position.y >= 0 && position.y < _gridSize.y && isPositionEmpty(position);
 	}
 
 	bool isPositionEmpty(sb::Vector2i position) {
@@ -277,37 +262,31 @@ protected:
 
 	void dropTetromino() {
 		if (canTetrominoDrop())
-			_tetromino.translate(-1, 0);
+			_tetromino.translate(sb::Vector2i(0, -1));
 		else 
 			freezeTetromino();
 	}
 
 	bool canTetrominoDrop() {
 		Tetromino droppedTetromino(_tetromino);
-		droppedTetromino.translate(-1, 0);
+		droppedTetromino.translate(sb::Vector2i(0, -1));
 		return isTetrominoAllowed(droppedTetromino);
 	}
 
 	void freezeTetromino() {
 		_hasTetromino = false;
 		const sb::Vector2i tetrominoPosition = _tetromino.getPosition();
-		const std::vector<Block>& tetrominoBlocks = _tetromino.getBlocks();
-		for (std::size_t i = 0; i < tetrominoBlocks.size(); i++) 
-			_blocks.push_back(tetrominoBlocks[i]);	
+		for (std::size_t i = 0; i < _tetromino.getBlockCount(); i++) 
+			_blocks.push_back(_tetromino[i]);	
 	}
 
 public:
-	Board(std::size_t numRows, std::size_t numColumns, float stepIntervalInSeconds = 1.f, std::vector<char> types = { 'i', 'j' })
-		: _numRows(numRows), _numCols(numColumns), _hasTetromino(false),
-		_stepIntervalInSeconds(stepIntervalInSeconds), _secondsSinceLastStep(0), _types(types)
+	Board(std::size_t numCols, std::size_t numRows, float stepIntervalInSeconds = 1.f, std::vector<char> types = { 'i', 'j' })
+		: _gridSize(numCols, numRows), _hasTetromino(false), _stepIntervalInSeconds(stepIntervalInSeconds), _secondsSinceLastStep(0), _types(types)
 	{
-		setScale(1, (float)_numRows / (float)_numCols);
+		setScale(1, float(_gridSize.y) / float(_gridSize.x));
 		spawnRandomTetromino();
 	}
-
-	inline std::size_t getNumRows() const { return _numRows; }
-
-	inline std::size_t getNumColumns() const { return _numCols; }
 
 	inline bool isAlive() const { return _isAlive; }
 
@@ -322,8 +301,8 @@ public:
 	}
 
 	void fill(char type) {
-		for (std::size_t i = 0; i < _numRows; i++) {
-			for (std::size_t j = 0; j < _numCols; j++)
+		for (int i = 0; i < _gridSize.x; i++) {
+			for (int j = 0; j < _gridSize.y; j++)
 				_blocks.push_back(Block(type, i, j));
 		}
 	}
@@ -337,7 +316,7 @@ public:
 	}
 	
 	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
-		BoardDrawStates boardStates(getScale(), _numRows, _numCols, states);
+		BoardDrawStates boardStates(getScale(), _gridSize, states);
 
 		for (std::size_t i = 0; i < _blocks.size(); i++)
 			_blocks[i].drawOnBoard(target, boardStates);
@@ -349,7 +328,7 @@ public:
 
 struct Scene : public sb::Drawable {
 	sb::DrawBatch batch = sb::DrawBatch(2048);
-	Board board = Board(15, 10, 0.1f, { 'i', 'j' });
+	Board board = Board(10, 15, 1, { 'i', 'j' });
 	
 	Scene() { 
 	}
