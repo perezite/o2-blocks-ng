@@ -22,7 +22,19 @@ float getDeltaSeconds()
 	return delta;
 }
 
-class Block : public sb::Drawable {
+struct BoardDrawStates {
+	sb::Vector2f boardSize;
+	std::size_t numBoardRows;
+	std::size_t numBoardCols;
+	sb::Vector2i translation;
+	sb::DrawStates drawStates;
+
+	BoardDrawStates(const sb::Vector2f boardSize_, std::size_t numBoardRows_, std::size_t numBoardCols_, sb::DrawStates states_)
+		: boardSize(boardSize_), numBoardRows(numBoardRows_), numBoardCols(numBoardCols_), drawStates(states_)
+	{ }
+};
+
+class Block {
 	sb::Sprite _sprite;
 	char _type;
 	std::size_t _row;
@@ -61,17 +73,23 @@ public:
 
 	inline std::size_t getCol() const { return _col; }
 
-	virtual void draw(sb::DrawTarget& target, sb::DrawStates drawStates = sb::DrawStates::getDefault()) {
-		target.draw(_sprite);
+	void translate(std::size_t numRows, std::size_t numCols) {
+		_row += numRows;
+		_col += numCols;
 	}
-};
 
-struct BoardItem {
-	Block block;
-	std::size_t row, col;
-	BoardItem(char type, std::size_t row_, std::size_t col_)
-		: block(type, row, col), row(row_), col(col_) 
-	{ }
+	void drawOnBoard(sb::DrawTarget& target, BoardDrawStates boardStates) {
+		sb::Vector2i boardPosition(_row + boardStates.translation.x, _col + boardStates.translation.y);
+		sb::Vector2f cellSize(boardStates.boardSize.x / boardStates.numBoardCols, 
+			boardStates.boardSize.y / boardStates.numBoardRows);
+		sb::Vector2f halfBoardSize = 0.5f * boardStates.boardSize;
+		sb::Vector2f offset(-halfBoardSize.x + cellSize.x / 2, -halfBoardSize.y + cellSize.y / 2);
+		sb::Vector2f position(boardPosition.y * cellSize.x + offset.x, boardPosition.x * cellSize.y + offset.y);
+		sb::Transform boardTransform(position, cellSize, 0);
+		boardStates.drawStates.transform = boardTransform;
+
+		target.draw(_sprite, boardStates.drawStates);
+	}
 };
 
 class Tetromino {
@@ -81,13 +99,13 @@ class Tetromino {
 	char type;
 
 protected:
-	void rotatePoint(sb::Vector2i& point, std::size_t numRotationSteps_) {
+	void rotateGridPoint(sb::Vector2i& gridPoint, std::size_t numRotationSteps_) {
 		if (numRotationSteps == 1)
-			point = sb::Vector2i(point.y, -point.x);
+			gridPoint = sb::Vector2i(gridPoint.y, -gridPoint.x);
 		else if (numRotationSteps == 2)
-			point = sb::Vector2i(-point.x, -point.y);
+			gridPoint = sb::Vector2i(-gridPoint.x, -gridPoint.y);
 		else if (numRotationSteps == 3)
-			point = sb::Vector2i(-point.y, point.x);
+			gridPoint = sb::Vector2i(-gridPoint.y, gridPoint.x);
 	}
 
 	void spawnBlocks() {
@@ -99,6 +117,8 @@ protected:
 			spawnJBlocks();
 		else if (type == 'm')
 			spawnMBlocks();
+		else 
+			SB_ERROR("Invalid Tetromino type " << type);
 	}
 
 	void spawnIBlocks() {
@@ -144,7 +164,7 @@ public:
 
 	sb::Vector2i getBlockPosition(std::size_t index) {
 		sb::Vector2i point(_blocks[index].getRow(), _blocks[index].getCol());
-		rotatePoint(point, numRotationSteps);
+		rotateGridPoint(point, numRotationSteps);
 		point += position;
 		return point;
 	}
@@ -165,6 +185,13 @@ public:
 		}
 
 		return max + 1;
+	}
+
+	void drawOnBoard(sb::DrawTarget& target, BoardDrawStates boardStates) {
+		for (std::size_t i = 0; i < _blocks.size(); i++) {
+			boardStates.translation = position;
+			_blocks[i].drawOnBoard(target, boardStates);
+		}
 	}
 };
 
@@ -187,7 +214,7 @@ protected:
 	void spawnTheTetromino(char type) {
 		_hasTetromino = true;
 		Tetromino newTetromino(type);
-		newTetromino.setPosition(sb::Vector2i(_numRows - 1 - newTetromino.computeHeight(), _numCols / 2));
+		newTetromino.setPosition(sb::Vector2i(_numRows - newTetromino.computeHeight(), _numCols / 2));
 		
 		if (isTetrominoAllowed(newTetromino))
 			_tetromino = newTetromino;	
@@ -209,7 +236,7 @@ protected:
 	}
 
 	inline bool isPositionAllowed(int row, int col) {
-		return row > 0 && row < (int)_numRows && col > 0 && col < (int)_numCols && isPositionEmpty(row - 1, col);
+		return row >= 0 && row < (int)_numRows && col >= 0 && col < (int)_numCols && isPositionEmpty(row, col);
 	}
 
 	bool isPositionEmpty(std::size_t row, std::size_t col) {
@@ -219,10 +246,6 @@ protected:
 		}
 
 		return true;
-	}
-
-	inline sb::Vector2f getSlotSize() {
-		return sb::Vector2f(1.f/ _numCols, 1.f / _numRows);
 	}
 
 	bool canTetrominoRotate() {
@@ -239,10 +262,15 @@ protected:
 	}
 
 	void dropTetromino() {
+		std::cout << _tetromino.getPosition().x << " " << _tetromino.getPosition().y << std::endl;
+
 		if (canTetrominoDrop())
 			_tetromino.translate(-1, 0);
-		else
+		else {
+			std::cout << "freeze" << std::endl;
 			freezeTetromino();
+		}
+
 	}
 
 	bool canTetrominoDrop() {
@@ -253,8 +281,12 @@ protected:
 
 	void freezeTetromino() {
 		_hasTetromino = false;
-		const std::vector<Block>& tetrominoItems = _tetromino.getBlocks();
-		_blocks.insert(_blocks.end(), tetrominoItems.begin(), tetrominoItems.end());
+		const sb::Vector2i tetrominoPosition = _tetromino.getPosition();
+		const std::vector<Block>& tetrominoBlocks = _tetromino.getBlocks();
+		for (std::size_t i = 0; i < tetrominoBlocks.size(); i++) {
+			_blocks.push_back(tetrominoBlocks[i]);
+			_blocks[_blocks.size() - 1].translate(tetrominoPosition.x, tetrominoPosition.y);
+		}
 	}
 
 public:
@@ -296,22 +328,24 @@ public:
 			_secondsSinceLastStep -= _stepIntervalInSeconds;
 		}
 	}
-
+	
 	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
-		states.transform *= getTransform();
-		for (std::size_t i = 0; i < _blocks.size(); i++) 
-			target.draw(_blocks[i], states);
+		BoardDrawStates boardStates(getScale(), _numRows, _numCols, states);
 
-		std::vector<Block>& tetrominoBlocks = _tetromino.getBlocks();
-		for (std::size_t i = 0; i < tetrominoBlocks.size(); i++)
-			target.draw(tetrominoBlocks[i], states);
-		
+		for (std::size_t i = 0; i < _blocks.size(); i++)
+			_blocks[i].drawOnBoard(target, boardStates);
+
+		if (_hasTetromino)
+			_tetromino.drawOnBoard(target, boardStates);
 	}
 };
 
 struct Scene : public sb::Drawable {
 	sb::DrawBatch batch = sb::DrawBatch(2048);
-	Board board = Board(2, 2, 1, { 'm' });
+	Board board = Board(15, 10, 0.1f, { 'm' });
+
+	Scene() { 
+	}
 
 	void input() {
 		if (sb::Input::isKeyGoingDown(sb::KeyCode::r))
@@ -323,7 +357,7 @@ struct Scene : public sb::Drawable {
 		if (board.isAlive()) {
 			input();
 			board.update(ds);
-		} 
+		}
 		else
 			SB_MESSAGE("You DIED!!");
 	}
