@@ -76,8 +76,8 @@ class Board : public sb::Drawable, public sb::Transformable {
 	std::size_t _numRows;
 	std::size_t _numCols;
 	std::vector<Item> _items;
-	bool _hasDroppingTetromino;
-	Tetromino _droppingTetromino;
+	bool _hasTetromino;
+	Tetromino _tetromino;
 	float _stepIntervalInSeconds;
 	float _secondsSinceLastStep;
 	bool _isAlive;
@@ -141,10 +141,14 @@ protected:
 		return true;
 	}
 
+	inline bool isPositionAllowed(int row, int col) {
+		return row > 0 && row < (int)_numRows && col > 0 && col < (int)_numCols && isPositionEmpty(row - 1, col);
+	}
+
 	void spawnBlock(char type, std::size_t row, std::size_t col) {
 		Item item(type, row, col);
 		initBlock(item.block, item.row, item.col);
-		_droppingTetromino.items.push_back(item);
+		_tetromino.items.push_back(item);
 	}
 
 	void initBlock(Block& block, std::size_t row, std::size_t col) {
@@ -163,9 +167,9 @@ protected:
 	}
 
 	bool canTetrominoRotate() {
-		Item& pivotItem = _droppingTetromino.items[0];
-		for (std::size_t i = 0; i < _droppingTetromino.items.size(); i++) {
-			if (!canItemRotate(_droppingTetromino.items[i], pivotItem.row, pivotItem.col))
+		Item& pivotItem = _tetromino.items[0];
+		for (std::size_t i = 0; i < _tetromino.items.size(); i++) {
+			if (!canItemRotate(_tetromino.items[i], pivotItem.row, pivotItem.col))
 				return false;
 		}
 
@@ -183,19 +187,19 @@ protected:
 		return sb::Vector2i(rotated.x + pivotRow, rotated.y + pivotCol);
 	}
 
-	void rotateDroppingTetromino() {
-		for (std::size_t i = 0; i < _droppingTetromino.items.size(); i++) 
-			rotateItem(_droppingTetromino.items[i]);
+	void rotateTheTetromino() {
+		for (std::size_t i = 0; i < _tetromino.items.size(); i++) 
+			rotateItem(_tetromino.items[i]);
 	}
 
 	void rotateItem(Item& item) {
-		Item& pivotItem = _droppingTetromino.items[0];
+		Item& pivotItem = _tetromino.items[0];
 		sb::Vector2i rotatedPos = rotated(item.row, item.col, pivotItem.row, pivotItem.col);
 		setItemPosition(item, rotatedPos.x, rotatedPos.y);
 	}
 
 	void step(float ds) {
-		if (!_hasDroppingTetromino)
+		if (!_hasTetromino)
 			spawn();
 		else
 			dropTetromino();
@@ -209,21 +213,17 @@ protected:
 		if (canTetrominoDrop())
 			dropTetrominoItems();
 		else
-			freezeDroppingTetromino();
+			freezeTetromino();
 	}
 
 	bool canTetrominoDrop() {
-		for (std::size_t i = 0; i < _droppingTetromino.items.size(); i++) {
-			Item& item = _droppingTetromino.items[i];
+		for (std::size_t i = 0; i < _tetromino.items.size(); i++) {
+			Item& item = _tetromino.items[i];
 			if (!isPositionAllowed(item.row, item.col))
 				return false;
 		}
 
 		return true;
-	}
-
-	inline bool isPositionAllowed(int row, int col) {
-		return row > 0 && row < (int)_numRows && col > 0 && col < (int)_numCols && isPositionEmpty(row - 1, col);
 	}
 
 	bool isPositionEmpty(std::size_t row, std::size_t col) {
@@ -236,8 +236,8 @@ protected:
 	}
 
 	void dropTetrominoItems() {
-		for (std::size_t i = 0; i < _droppingTetromino.items.size(); i++) {
-			Item& item = _droppingTetromino.items[i];
+		for (std::size_t i = 0; i < _tetromino.items.size(); i++) {
+			Item& item = _tetromino.items[i];
 			setItemPosition(item, --item.row, item.col);
 		}
 	}
@@ -248,14 +248,14 @@ protected:
 		setBlockPosition(item.block, item.row, item.col);
 	}
 
-	void freezeDroppingTetromino() {
-		_hasDroppingTetromino = false;
-		_items.insert(_items.end(), _droppingTetromino.items.begin(), _droppingTetromino.items.end());
+	void freezeTetromino() {
+		_hasTetromino = false;
+		_items.insert(_items.end(), _tetromino.items.begin(), _tetromino.items.end());
 	}
 
 public:
 	Board(std::size_t numRows, std::size_t numColumns, float stepIntervalInSeconds = 1.f, std::vector<char> types = { 'i', 'j' })
-		: _numRows(numRows), _numCols(numColumns), _hasDroppingTetromino(false),
+		: _numRows(numRows), _numCols(numColumns), _hasTetromino(false),
 		_stepIntervalInSeconds(stepIntervalInSeconds), _secondsSinceLastStep(0), _types(types)
 	{
 		setScale(1, (float)_numRows / (float)_numCols);
@@ -270,11 +270,15 @@ public:
 
 	void spawnTetromino(char type_) {
 		char type = tolower(type_);
-		_hasDroppingTetromino = true;
-		_droppingTetromino.items.clear();
-		_droppingTetromino.type = type;
-
+		_hasTetromino = true;
+		_tetromino.items.clear();
+		_tetromino.type = type; 
 		spawnTetrominoBlocks(type);
+	}
+
+	void rotateTetromino() {
+		if (canTetrominoRotate())
+			rotateTheTetromino();
 	}
 
 	void fill(char type) {
@@ -282,11 +286,6 @@ public:
 			for (std::size_t j = 0; j < _numCols; j++)
 				spawnBlock(type, i, j);
 		}
-	}
-
-	void rotateTetromino() {
-		if (canTetrominoRotate())
-			rotateDroppingTetromino();
 	}
 
 	void update(float ds) {
@@ -301,8 +300,8 @@ public:
 		states.transform *= getTransform();
 		for (std::size_t i = 0; i < _items.size(); i++) 
 			target.draw(_items[i].block, states);
-		for (std::size_t i = 0; i < _droppingTetromino.items.size(); i++)
-			target.draw(_droppingTetromino.items[i].block, states);
+		for (std::size_t i = 0; i < _tetromino.items.size(); i++)
+			target.draw(_tetromino.items[i].block, states);
 		
 	}
 };
@@ -312,15 +311,16 @@ struct Scene : public sb::Drawable {
 	Board board = Board(2, 2, 1, { 'm' });
 
 	void input() {
-		if (board.isAlive() && sb::Input::isKeyGoingDown(sb::KeyCode::r))
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::r))
 			board.rotateTetromino();
 	}
 
 	void update() {
 		float ds = getDeltaSeconds();
-		input();
-		if (board.isAlive())
+		if (board.isAlive()) {
+			input();
 			board.update(ds);
+		} 
 		else
 			SB_MESSAGE("You DIED!!");
 	}
