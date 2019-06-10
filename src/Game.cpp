@@ -68,14 +68,6 @@ public:
 		setTexture(tolower(type));
 	}
 
-	inline std::size_t getRow() const { return _row; }
-
-	inline std::size_t getCol() const { return _col; }
-
-	inline void setRow(std::size_t row) { _row = row; }
-
-	inline void setCol(std::size_t col) { _col = col; }
-
 	inline sb::Vector2i getPosition() const { return sb::Vector2i(_row, _col); }
 
 	void setPosition(sb::Vector2i position) { 
@@ -204,10 +196,10 @@ public:
 	}
 
 	std::size_t computeHeight() {
-		int max = _originalBlocks.empty() ? -1 : _originalBlocks[0].getRow();
+		int max = _originalBlocks.empty() ? -1 : _originalBlocks[0].getPosition().x;
 		for (std::size_t i = 0; i < _originalBlocks.size(); i++) {
-			if ((int)_originalBlocks[i].getRow() > max)
-				max = _originalBlocks[i].getRow();
+			if ((int)_originalBlocks[i].getPosition().x > max)
+				max = _originalBlocks[i].getPosition().x;
 		}
 
 		return max + 1;
@@ -263,7 +255,7 @@ protected:
 
 	bool isPositionEmpty(sb::Vector2i position) {
 		for (std::size_t i = 0; i < _blocks.size(); i++) {
-			if (_blocks[i].getRow() == position.x && _blocks[i].getCol() == position.y)
+			if (_blocks[i].getPosition().x == position.x && _blocks[i].getPosition().y == position.y)
 				return false;
 		}
 
@@ -284,15 +276,10 @@ protected:
 	}
 
 	void dropTetromino() {
-		std::cout << _tetromino.getPosition().x << " " << _tetromino.getPosition().y << std::endl;
-
 		if (canTetrominoDrop())
 			_tetromino.translate(-1, 0);
-		else {
-			std::cout << "freeze" << std::endl;
+		else 
 			freezeTetromino();
-		}
-
 	}
 
 	bool canTetrominoDrop() {
@@ -355,17 +342,14 @@ public:
 		for (std::size_t i = 0; i < _blocks.size(); i++)
 			_blocks[i].drawOnBoard(target, boardStates);
 
-		if (_hasTetromino) {
-			if (_tetromino.getNumRotationSteps() == 1)
-				std::cout << "hit" << std::endl;
+		if (_hasTetromino) 
 			_tetromino.drawOnBoard(target, boardStates);
-		}
 	}
 };
 
 struct Scene : public sb::Drawable {
 	sb::DrawBatch batch = sb::DrawBatch(2048);
-	Board board = Board(15, 10, 1.0f, { 'i' });
+	Board board = Board(15, 10, 0.1f, { 'i', 'j' });
 	
 	Scene() { 
 	}
