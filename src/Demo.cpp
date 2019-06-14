@@ -284,11 +284,11 @@ protected:
 			SB_ERROR("Invalid Tetromino type " << type);
 	}
 
-	sb::Vector2f transformDirection(const sb::Transform& transform, sb::Vector2f& v) {
+	sb::Vector2f transformDirection(const sb::Transform& transform, sb::Vector2f& dir) {
 		const float* m = transform.getMatrix();
  		return sb::Vector2f(
-			m[0] * v.x + m[3] * v.y,
-			m[1] * v.x + m[4] * v.y);
+			m[0] * dir.x + m[3] * dir.y,
+			m[1] * dir.x + m[4] * dir.y);
 	}
 
 	void updateLighting(const sb::Transform& transform) {
@@ -415,7 +415,7 @@ protected:
 		sb::Vector2i blockDimensions = getBlockDimensions();
 		setScale(float(blockDimensions.x), float(blockDimensions.y));
 	}
-
+	
 public:
 	Tetromino(char type = 'i') {
 		setType(type);
@@ -425,6 +425,11 @@ public:
 		clear();
 		createBlocks(tolower(type));
 		updateScale();
+	}
+
+	inline void setLight(Light& light) { 
+		for (std::size_t i = 0; i < _blocks.size(); i++)
+			_blocks[i].setLight(light);
 	}
 
 	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
@@ -520,10 +525,57 @@ void demo7() {
 	}
 }
 
+void init8a(Tetromino& tetromino, sb::Triangle& spotlight, Light& light) {
+	tetromino.setScale(0.1f * tetromino.getScale());
+	tetromino.setPosition(-0.2f, 0.2f);
+	tetromino.setLight(light);
+	spotlight.setScale(0.05f, 0.05f);
+}
+
+void init8b(Tetromino& tetromino, Light& light) {
+	tetromino.setScale(0.1f * tetromino.getScale());
+	tetromino.setPosition(0.2f, -0.2f);
+	tetromino.setLight(light);
+}
+
+void update8(sb::Triangle& spotlight, Light& light, Tetromino& tetromino) {
+	float t = getSeconds();
+	sb::Vector2f relativePosition(0.2f * cos(-t), 0.2f * sin(-t));
+	spotlight.setPosition(tetromino.getPosition() + relativePosition);
+	light.setDirection(-relativePosition);
+}
+
+void demo8() {
+	sb::Window window(400, getWindowHeight(400));
+	Light light1;
+	Light light2;
+	sb::Triangle spotlight;
+	Tetromino tetromino1('i');
+	Tetromino tetromino2('j');
+
+	init8a(tetromino1, spotlight, light1);
+	init8b(tetromino2, light2);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		update8(spotlight, light1, tetromino1);
+		tetromino2.rotate(ds);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(tetromino1);
+		window.draw(tetromino2);
+		window.draw(spotlight);
+		window.display();
+	}
+}
 
 
 void demo() {
-	demo7();
+	demo8();
+
+	//demo7();
 
 	//demo6();
 
