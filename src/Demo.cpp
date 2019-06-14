@@ -363,6 +363,7 @@ inline int getWindowHeight(int width) {
 class Tetromino : public sb::Drawable, public sb::Transformable {
 	std::vector<Block> _blocks;
 	std::vector<sb::Vector2i> _blockPositions;
+	sb::IntRect _blockBounds;
 
 protected:
 	void clear() {
@@ -370,31 +371,35 @@ protected:
 		_blockPositions.clear();	
 	}
 
-	sb::Vector2i getBlockDimensions() {
-		sb::Vector2i minimum(_blockPositions[0].x, _blockPositions[0].y);
-		sb::Vector2i maximum(minimum);
+	template <class V>
+	void computeExtents(std::vector<V> v, V& min, V& max) {
+		min = max = V(v[0].x, v[0].y);
 
-		for (size_t i = 0; i < _blockPositions.size(); i++) {
-			sb::Vector2i& pos = _blockPositions[i];
-			if (pos.x < minimum.x)
-				minimum.x = pos.x;
-			if (pos.x > maximum.x)
-				maximum.x = pos.x;
-			if (pos.y < minimum.y)
-				minimum.y = pos.y;
-			if (pos.y > maximum.y)
-				maximum.y = pos.y;
+		for (size_t i = 0; i < v.size(); i++) {
+			V& val = v[i];
+			if (val.x < min.x)
+				min.x = val.x;
+			if (val.x > max.x)
+				max.x = val.x;
+			if (val.y < min.y)
+				min.y = val.y;
+			if (val.y > max.y)
+				max.y = val.y;
 		}
+	}
 
-		return maximum - minimum + sb::Vector2i(1, 1);
+	void computeBlockBounds() {
+		sb::Vector2i minimum, maximum;
+		computeExtents(_blockPositions, minimum, maximum);
+		_blockBounds = sb::IntRect(minimum.x, minimum.y, maximum.x - minimum.x + 1, maximum.y - minimum.y + 1);
 	}
 
 	void createBlocks(const std::vector<sb::Vector2i>& positions, char type) {
-		sb::Vector2i blockDimensions = getBlockDimensions();
+		computeBlockBounds();
 		for (size_t i = 0; i < positions.size(); i++) {
 			Block block;
-			block.setPosition(positions[i].x / float(blockDimensions.x), positions[i].y / float(blockDimensions.y));
-			block.setScale(1.0f / blockDimensions.x, 1.0f / blockDimensions.y);
+			block.setPosition(positions[i].x / float(_blockBounds.width), positions[i].y / float(_blockBounds.height));
+			block.setScale(1.0f / _blockBounds.width, 1.0f / _blockBounds.height);
 			block.setType(type);
 			_blocks.push_back(block);
 		}
@@ -412,10 +417,23 @@ protected:
 	}
 
 	void updateScale() {
-		sb::Vector2i blockDimensions = getBlockDimensions();
-		setScale(float(blockDimensions.x), float(blockDimensions.y));
+		setScale(float(_blockBounds.width), float(_blockBounds.height));
 	}
 	
+	sb::FloatRect getTransformedBounds(sb::FloatRect& bounds) {
+		std::vector<sb::Vector2f> edges(4);
+		edges[0] = sb::Vector2f(bounds.left, bounds.bottom);
+		edges[1] = sb::Vector2f(bounds.left + bounds.width, bounds.bottom);
+		edges[2] = sb::Vector2f(bounds.left, bounds.bottom + bounds.height);
+		edges[3] = sb::Vector2f(bounds.left + bounds.width, bounds.bottom + bounds.height);
+		for (size_t i = 0; i < edges.size(); i++) 
+			edges[i] *= getTransform();
+
+		sb::Vector2f min, max;
+		computeExtents(edges, min, max);
+		return sb::FloatRect(min.x, min.y, max.x - min.x, max.y - min.y);
+	}
+
 public:
 	Tetromino(char type = 'i') {
 		setType(type);
@@ -430,6 +448,20 @@ public:
 	inline void setLight(Light& light) { 
 		for (std::size_t i = 0; i < _blocks.size(); i++)
 			_blocks[i].setLight(light);
+	}
+
+	void setWidth(float width) {
+		float factor = width / getScale().x;
+		setScale(factor * getScale());
+	}
+
+	sb::FloatRect getBounds() {
+		sb::Vector2f scale = getScale();
+		sb::Vector2f blockSize(scale.x / _blockBounds.width, scale.y / _blockBounds.height);
+		sb::FloatRect bounds((_blockBounds.left - 0.5f) * blockSize.x, (_blockBounds.bottom - 0.5f) * blockSize.y,
+			_blockBounds.width * blockSize.x, _blockBounds.height * blockSize.y);
+
+		return getTransformedBounds(bounds);
 	}
 
 	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
@@ -571,9 +603,116 @@ void demo8() {
 	}
 }
 
+class Line : public sb::Drawable, public sb::Transformable {
+	std::vector<sb::Vector2f> _points;
+	float _thickness;
+	sb::Color _color;
+	std::vector<sb::Vertex> _vertices;
+	bool _verticesNeedUpdate;
+
+protected:
+	void addSegment(const sb::Vector2f& start, const sb::Vector2f& end) {
+		float half = _thickness / 2;
+		sb::Vector2f dist = end - start;
+		sb::Vector2f perp = sb::Vector2f(-dist.y, dist.x).normalized();
+		std::vector<sb::Vertex> segment(6);
+
+		segment[0] = sb::Vertex(start - half * perp, _color);
+		segment[1] = segment[0];
+		segment[2] = sb::Vertex(start + half * perp, _color);
+		segment[3] = sb::Vertex(end - half * perp, _color);
+		segment[4] = sb::Vertex(end + half * perp, _color);
+		segment[5] = segment[4];
+
+		_vertices.insert(_vertices.end(), segment.begin(), segment.end());
+	}
+
+	void updateVertices() {
+		_vertices.clear();
+		for (size_t i = 1; i < _points.size(); i++)
+			addSegment(_points[i - 1], _points[i]);
+
+		_verticesNeedUpdate = false;
+	}
+
+public:
+	Line(float thickness = 0.1f, const sb::Color& color = sb::Color(1, 0, 0, 1)) 
+		: _thickness(thickness), _color(color), _verticesNeedUpdate(false) 
+	{ }
+
+	void addPoint(float x, float y) {
+		_points.push_back(sb::Vector2f(x, y));
+		_verticesNeedUpdate = true;
+	}
+
+	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
+		states.transform *= getTransform();
+		if (_verticesNeedUpdate)
+			updateVertices();
+
+		target.draw(_vertices, sb::PrimitiveType::TriangleStrip, states);
+	}
+};
+
+void computeOutline(sb::FloatRect rect, Line& line) {
+	line.addPoint(rect.left, rect.bottom);
+	line.addPoint(rect.right(), rect.bottom);
+	line.addPoint(rect.right(), rect.top());
+	line.addPoint(rect.left, rect.top());
+	line.addPoint(rect.left, rect.bottom);
+}
+
+void demo9() {
+	sb::Window window(400, getWindowHeight(400));
+	Line line(0.01f);
+	sb::FloatRect bounds(-0.3f, -0.4f, 0.2f, 0.3f);
+	computeOutline(bounds, line);
+
+	while (window.isOpen()) {
+		sb::Input::update();
+		window.update();
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(line);
+		window.display();
+	}
+}
+
+void draw10(Tetromino& tetromino) {
+	sb::FloatRect bounds = tetromino.getBounds();
+	// Line line;
+	// line.addPoint(bounds.left, bounds.bottom);
+	// line.addPoint(bounds.right(), bounds.bottom);
+	// line.addPoint(bounds.left, bounds.top());
+	// line.addPoint(bounds.right(), bounds.top());
+}
+
+void demo10() {
+	sb::Window window(400, getWindowHeight(400));
+	Light light;
+	Tetromino tetromino('j');
+
+	tetromino.setWidth(0.3f);
+	tetromino.setLight(light);
+
+	while (window.isOpen()) {
+		sb::Input::update();
+		window.update();
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::r))
+			tetromino.rotate(-90 * sb::ToRadian);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(tetromino);
+		window.display();
+	}
+}
 
 void demo() {
-	demo8();
+	//demo10();
+
+	demo9();
+
+	//demo8();
 
 	//demo7();
 

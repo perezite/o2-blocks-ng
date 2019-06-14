@@ -2,26 +2,35 @@
 
 namespace sb 
 {
-	struct IntRect 
+	template <class T>
+	struct Rect 
 	{
-		IntRect()
+		Rect()
 			: left(0), bottom(0), width(0), height(0)
 		{ }
 
-		IntRect(int left_, int bottom_, int width_, int height_)
+		Rect(T left_, T bottom_, T width_, T height_)
 			: left(left_), bottom(bottom_), width(width_), height(height_)
 		{ }
 
-		IntRect(const IntRect& area)
+		Rect(const Rect& area)
 			: left(area.left), bottom(area.bottom), width(area.width), height(area.height)
 		{ }
 
-		int left; int bottom;
-		int width; int height;
+		inline T right() { return left + width; }
+		
+		inline T top() { return bottom + height; }
+
+		T left; T bottom;
+		T width; T height;
 	};
 
-	inline bool operator==(const IntRect& first, const IntRect&& second) {
+	template <class T>
+	inline bool operator==(const Rect<T>& first, const Rect<T>& second) {
 		return  first.left == second.left && first.bottom == second.bottom &&
 			first.width == second.width && first.height == second.height;
 	}
+
+	typedef Rect<int> IntRect;
+	typedef Rect<float> FloatRect;
 }
