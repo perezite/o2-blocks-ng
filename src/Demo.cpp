@@ -284,10 +284,18 @@ protected:
 			SB_ERROR("Invalid Tetromino type " << type);
 	}
 
-	void updateLighting() {
+	sb::Vector2f transformDirection(const sb::Transform& transform, sb::Vector2f& v) {
+		const float* m = transform.getMatrix();
+ 		return sb::Vector2f(
+			m[0] * v.x + m[3] * v.y,
+			m[1] * v.x + m[4] * v.y);
+	}
+
+	void updateLighting(const sb::Transform& transform) {
 		if (_light) {
 			sb::Vector2f up(0, 1);
-			float angle = sb::angle(-_light->getDirection(), up) + 45 * sb::ToRadian;
+			sb::Vector2f transformedUp = transformDirection(transform, up);
+			float angle = sb::angle(-_light->getDirection(), transformedUp) + 45 * sb::ToRadian;
 			angle = angle < 0 ? angle + 2 * sb::Pi : angle;
 			int steps = int(angle / (90 * sb::ToRadian));
 			 _sprite.setRotation(-steps * 90 * sb::ToRadian);
@@ -309,7 +317,7 @@ public:
 
 	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
 		states.transform *= getTransform();
-		updateLighting();
+		updateLighting(states.transform);
 		target.draw(_sprite, states);
 	}
 };
@@ -464,41 +472,55 @@ namespace {
 		static sb::Stopwatch sw;
 		return sw.getElapsedSeconds();
 	}
+
+	float getDeltaSeconds() {
+		static float lastElapsed = 0;
+		float elapsed = getSeconds();
+		float delta = elapsed - lastElapsed;
+		lastElapsed = elapsed;
+		return delta;
+	}
 }
 
-void setSpotlightPosition(sb::Triangle& spotlight, Light& light, const sb::Vector2f& position) {
-	spotlight.setPosition(position);
-	light.setDirection(-spotlight.getPosition());
-}
-
-void update7(sb::Triangle& spotlight, Light& light) {
+void update7(sb::Triangle& spotlight, Light& light, Block& block) {
 	float t = getSeconds();
-	sb::Vector2f spotlightPosition(0.2f * cos(-t), 0.2f * sin(-t));
-	setSpotlightPosition(spotlight, light, spotlightPosition);
+	sb::Vector2f relativePosition(0.2f * cos(-t), 0.2f * sin(-t));
+	spotlight.setPosition(block.getPosition() + relativePosition);
+	light.setDirection(-relativePosition);
 }
 
 void demo7() {
 	sb::Window window(400, getWindowHeight(400));
-	Block block('i');
-	Light light;
-	sb::Triangle spotlight;
+	Light light1;
+	Light light2;
+	Block block1('i');
+	Block block2('j');
+	sb::Triangle spotlight1;
 
-	block.setScale(0.2f, 0.2f);
-	block.setLight(light);
-	spotlight.setScale(0.05f, 0.05f);
-
+	block1.setScale(0.2f, 0.2f);
+	block1.setPosition(-0.2f, 0.2f);
+	block1.setLight(light1);
+	block2.setScale(0.2f, 0.2f);
+	block2.setPosition(0.2f, -0.2f);
+	block2.setLight(light2);
+	spotlight1.setScale(0.05f, 0.05f);
 
 	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
 		sb::Input::update();
 		window.update();
-		 update7(spotlight, light);
+		update7(spotlight1, light1, block1);
+		block2.rotate(ds);
 
 		window.clear(sb::Color(1, 1, 1, 1));
-		window.draw(block);
-		window.draw(spotlight);
+		window.draw(block1);
+		window.draw(block2);
+		window.draw(spotlight1);
 		window.display();
 	}
 }
+
+
 
 void demo() {
 	demo7();
