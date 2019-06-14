@@ -8,6 +8,7 @@
 #include "Math.h"
 #include <cstddef>
 #include <vector>
+#include <map>
 
 void init0(std::vector<sb::Sprite>& stones, sb::Texture& stonesTex) {
 	sb::Vector2i size(128, 128);
@@ -286,7 +287,7 @@ public:
 };
 
 void init5(std::vector<Block>& blocks) {
-	static std::vector<char> types = { 'i', 'j' };
+	static std::vector<char> types = { 'i', 'j', 'm' };
 	for (size_t i = 0; i < blocks.size(); i++) {
 		blocks[i].setType(types[rand() % types.size()]);
 		blocks[i].setPosition(sb::random2D(-0.5f, 0.5f));
@@ -318,8 +319,123 @@ void demo5() {
 	}
 }
 
+inline int getWindowHeight(int width) {
+	float aspect = 3 / 2.0f;
+	return int(width * aspect);
+}
+
+class Tetromino : public sb::Drawable, public sb::Transformable {
+	std::vector<Block> _blocks;
+	std::vector<sb::Vector2i> _blockPositions;
+
+protected:
+	void clear() {
+		_blocks.clear();
+		_blockPositions.clear();	
+	}
+
+	sb::Vector2i getBlockDimensions() {
+		sb::Vector2i minimum(_blockPositions[0].x, _blockPositions[0].y);
+		sb::Vector2i maximum(minimum);
+
+		for (size_t i = 0; i < _blockPositions.size(); i++) {
+			sb::Vector2i& pos = _blockPositions[i];
+			if (pos.x < minimum.x)
+				minimum.x = pos.x;
+			if (pos.x > maximum.x)
+				maximum.x = pos.x;
+			if (pos.y < minimum.y)
+				minimum.y = pos.y;
+			if (pos.y > maximum.y)
+				maximum.y = pos.y;
+		}
+
+		return maximum - minimum + sb::Vector2i(1, 1);
+	}
+
+	void createBlocks(const std::vector<sb::Vector2i>& positions, char type) {
+		sb::Vector2i blockDimensions = getBlockDimensions();
+		for (size_t i = 0; i < positions.size(); i++) {
+			Block block;
+			block.setPosition(positions[i].x / float(blockDimensions.x), positions[i].y / float(blockDimensions.y));
+			block.setScale(1.0f / blockDimensions.x, 1.0f / blockDimensions.y);
+			block.setType(type);
+			_blocks.push_back(block);
+		}
+	}
+
+	void createBlocks(char type) {
+		if (type == 'i')
+			_blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(-1, 0), sb::Vector2i(1, 0), sb::Vector2i(2, 0) };
+		else if (type == 'j')
+			_blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(-1, 0), sb::Vector2i(0, -1), sb::Vector2i(1, -1) };
+		else if (type == 'm')
+			_blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(1, 0) };
+
+		createBlocks(_blockPositions, type);
+	}
+
+
+	void updateScale() {
+		sb::Vector2i blockDimensions = getBlockDimensions();
+		setScale(float(blockDimensions.x), float(blockDimensions.y));
+	}
+
+public:
+	Tetromino(char type = 'i') {
+		setType(type);
+	}
+
+	void setType(char type) {
+		clear();
+		createBlocks(tolower(type));
+		updateScale();
+	}
+
+	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
+		states.transform *= getTransform();
+		for (size_t i = 0; i < _blocks.size(); i++)
+			target.draw(_blocks[i], states);
+	}
+};
+
+void init6(std::vector<Tetromino>& tetrominos) {
+	srand(385949385);
+	static std::vector<char> types = { 'i', 'j' };
+	for (size_t i = 0; i < tetrominos.size(); i++) {
+		tetrominos[i].setType(types[rand() % types.size()]);
+		tetrominos[i].setPosition(sb::random2D(-0.5f, 0.5f));
+		tetrominos[i].setScale(sb::random(0.05f, 0.1f) * tetrominos[i].getScale());
+	}
+}
+
+void draw6(sb::DrawBatch& batch, std::vector<Tetromino>& tetrominos) {
+	for (size_t i = 0; i < tetrominos.size(); i++)
+		batch.draw(tetrominos[i]);
+}
+
+void demo6() {
+	sb::DrawBatch batch(512);
+	sb::Window window(400, getWindowHeight(400));
+	std::vector<Tetromino> tetrominos(10);
+
+	init6(tetrominos);
+
+	while (window.isOpen()) {
+		sb::Input::update();
+		window.update();
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		draw6(batch, tetrominos);
+		window.draw(batch);
+		window.display();
+	}
+}
+
 void demo() {
-	demo5();
+	demo6();
+
+	//demo5();
 
 	// demo4();
 
