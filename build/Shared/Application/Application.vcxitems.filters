@@ -102,9 +102,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Camera.h">
       <Filter>_Orbis2D\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\IntRect.h">
-      <Filter>_Orbis2D\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TextureSheet.h">
       <Filter>_Orbis2D\Headers</Filter>
     </ClInclude>
@@ -140,6 +137,9 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Game.h">
       <Filter>Blocks\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Rect.h">
+      <Filter>_Orbis2D\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

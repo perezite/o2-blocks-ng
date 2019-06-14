@@ -29,7 +29,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Game.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Image.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Input.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\IntRect.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Rect.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Logger.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\GL.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Memory.h" />

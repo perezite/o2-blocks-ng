@@ -3,7 +3,7 @@
 #include "Drawable.h"
 #include "Transformable.h"
 #include "Texture.h"
-#include "IntRect.h"
+#include "Rect.h"
 
 namespace sb
 {

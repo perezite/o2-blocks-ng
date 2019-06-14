@@ -4,7 +4,7 @@
 #include "Color.h"
 #include "Vector2.h"
 #include "Transform.h"
-#include "IntRect.h"
+#include "Rect.h"
 #include "Image.h"
 #include <string>
 
