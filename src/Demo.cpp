@@ -456,12 +456,10 @@ public:
     }
 
     sb::FloatRect getBounds() {
-        sb::Vector2f scale = getScale();
-        sb::Vector2f blockSize(scale.x / _blockBounds.width, scale.y / _blockBounds.height);
-        sb::FloatRect bounds((_blockBounds.left - 0.5f) * blockSize.x, (_blockBounds.bottom - 0.5f) * blockSize.y,
-            _blockBounds.width * blockSize.x, _blockBounds.height * blockSize.y);
+        sb::Vector2f blockSize(1.f / _blockBounds.width, 1.f / _blockBounds.height);
+        sb::FloatRect bounds((_blockBounds.left - 0.5f) * blockSize.x, (_blockBounds.bottom - 0.5f) * blockSize.y, 1, 1);
 
-        return getTransformedBounds(bounds);
+		return getTransformedBounds(bounds);
     }
 
     virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
@@ -654,7 +652,7 @@ public:
     }
 };
 
-void computeOutline(sb::FloatRect rect, Line& line) {
+void computeOutline(const sb::FloatRect rect, Line& line) {
     line.addPoint(rect.left, rect.bottom);
     line.addPoint(rect.right(), rect.bottom);
     line.addPoint(rect.right(), rect.top());
@@ -678,13 +676,21 @@ void demo9() {
     }
 }
 
-void draw10(Tetromino& tetromino) {
-    sb::FloatRect bounds = tetromino.getBounds();
-    // Line line;
-    // line.addPoint(bounds.left, bounds.bottom);
-    // line.addPoint(bounds.right(), bounds.bottom);
-    // line.addPoint(bounds.left, bounds.top());
-    // line.addPoint(bounds.right(), bounds.top());
+void drawOutline(sb::DrawTarget& target, const sb::FloatRect& rect, float thickness = 0.01f, const sb::Color& color = sb::Color(1, 0, 0, 1)) {
+	Line outline(thickness, color);
+	computeOutline(rect, outline);
+	target.draw(outline);
+}
+
+bool isTouchGoingDown(sb::Window& window, Tetromino& tetromino) {
+	if (sb::Input::isTouchGoingDown(1)) {
+		sb::Vector2f touch = sb::Input::getTouchPosition(window);
+		std::cout << touch.x << " " << touch.y << std::endl;
+		if (tetromino.getBounds().contains(touch))
+			return true;
+	}
+
+	return false;
 }
 
 void demo10() {
@@ -698,19 +704,21 @@ void demo10() {
     while (window.isOpen()) {
         sb::Input::update();
         window.update();
-        if (sb::Input::isKeyGoingDown(sb::KeyCode::r))
+        if (isTouchGoingDown(window, tetromino))
             tetromino.rotate(-90 * sb::ToRadian);
 
         window.clear(sb::Color(1, 1, 1, 1));
         window.draw(tetromino);
+		drawOutline(window, tetromino.getBounds(), 0.01f);
+
         window.display();
     }
 }
 
 void demo() {
-    //demo10();
+    demo10();
 
-    demo9();
+    //demo9();
 
     //demo8();
 

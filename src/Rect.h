@@ -17,9 +17,13 @@ namespace sb
 			: left(area.left), bottom(area.bottom), width(area.width), height(area.height)
 		{ }
 
-		inline T right() { return left + width; }
+		inline T right() const { return left + width; }
 		
-		inline T top() { return bottom + height; }
+		inline T top() const { return bottom + height; }
+
+		inline bool contains(sb::Vector2<T> pos) {
+			return pos.x >= left && pos.x <= right() && pos.y >= bottom && pos.y <= top();
+		}
 
 		T left; T bottom;
 		T width; T height;

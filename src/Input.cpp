@@ -32,6 +32,7 @@ namespace sb
 					m_keysDown.erase((KeyCode)event.key.keysym.sym);
 					break;
 				case SDL_FINGERDOWN:
+					m_fingerPosition = sb::Vector2f(event.tfinger.x, event.tfinger.y);
 					m_touchesDown.insert(event.tfinger.fingerId);
 					m_touchesGoingDown.insert(event.tfinger.fingerId);
 					break;
@@ -39,6 +40,7 @@ namespace sb
 					m_touchesDown.erase(event.tfinger.fingerId);
 					break;
 				case SDL_MOUSEBUTTONDOWN:
+					m_mousePosition = sb::Vector2f((float)event.motion.x, (float)event.motion.y);
 					m_touchesDown.insert(event.button.button);
 					m_touchesGoingDown.insert(event.button.button);
 					break;
@@ -71,9 +73,8 @@ namespace sb
 	const sb::Vector2f Input::getTouchPosition(const sb::Window& window)
 	{
 		sb::Vector2f pixelPosition = getTouchPixelPosition(window);
-
-		return sb::Vector2f(pixelPosition.x * 2 / window.getResolution().x - 1, 
-			pixelPosition.y * 2 * window.getInverseAspect() / window.getResolution().y - window.getInverseAspect());
+		return sb::Vector2f(pixelPosition.x / window.getResolution().x - 0.5f, 
+			pixelPosition.y * window.getInverseAspect() / window.getResolution().y - 0.5f * window.getInverseAspect());
 	}
 
 	const sb::Vector2f Input::getTouchPixelPosition(const sb::Window& window)
