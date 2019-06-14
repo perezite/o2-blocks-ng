@@ -685,7 +685,6 @@ void drawOutline(sb::DrawTarget& target, const sb::FloatRect& rect, float thickn
 bool isTouchGoingDown(sb::Window& window, Tetromino& tetromino) {
 	if (sb::Input::isTouchGoingDown(1)) {
 		sb::Vector2f touch = sb::Input::getTouchPosition(window);
-		std::cout << touch.x << " " << touch.y << std::endl;
 		if (tetromino.getBounds().contains(touch))
 			return true;
 	}
@@ -715,8 +714,44 @@ void demo10() {
     }
 }
 
+bool isTouchDown(sb::Window& window, Tetromino& tetromino) {
+	if (sb::Input::isTouchDown(1)) {
+		sb::Vector2f touch = sb::Input::getTouchPosition(window);
+		if (tetromino.getBounds().contains(touch))
+			return true;
+	}
+
+	return false;
+}
+
+
+
+void demo11() {
+	sb::Window window(400, getWindowHeight(400));
+	Light light;
+	Tetromino tetromino('j');
+
+	tetromino.setWidth(0.3f);
+	tetromino.setLight(light);
+
+	while (window.isOpen()) {
+		sb::Input::update();
+		window.update();
+		if (isTouchDown(window, tetromino))
+			tetromino.setPosition(sb::Input::getTouchPosition(window).x, tetromino.getPosition().y);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(tetromino);
+		drawOutline(window, tetromino.getBounds(), 0.01f);
+
+		window.display();
+	}
+}
+
 void demo() {
-    demo10();
+	demo11();
+
+    //demo10();
 
     //demo9();
 
