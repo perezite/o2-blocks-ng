@@ -184,12 +184,12 @@ void demo3() {
     }
 }
 
-class Grid : public sb::Drawable {
+class Grid2 : public sb::Drawable {
 private:
     sb::Mesh _mesh;
 
 public:
-    Grid(std::size_t numColums, std::size_t numRows, float width, float height, float thickness, const sb::Color& color = sb::Color(1, 0, 0, 1))
+    Grid2(std::size_t numColums, std::size_t numRows, float width, float height, float thickness, const sb::Color& color = sb::Color(1, 0, 0, 1))
         : _mesh((numRows + numColums + 2) * 6, sb::PrimitiveType::TriangleStrip)
     {
         addVerticalLines(numColums + 1, numRows + 1, width, height, thickness, color);
@@ -234,7 +234,7 @@ public:
 void demo4() {
     float aspect = 3 / 2.0f;
     sb::Window window(400, int(400 * aspect));
-    Grid grid(10, 18, 1, getCameraHeight(window.getCamera()), 0.005f);
+    Grid2 grid(10, 18, 1, getCameraHeight(window.getCamera()), 0.005f);
 
     while (window.isOpen()) {
         sb::Input::update();
@@ -625,18 +625,26 @@ protected:
         _vertices.insert(_vertices.end(), segment.begin(), segment.end());
     }
 
-    void updateVertices() {
-        _vertices.clear();
-        for (size_t i = 1; i < _points.size(); i++)
-            addSegment(_points[i - 1], _points[i]);
+	void updateVertices() {
+		_vertices.clear();
+		for (size_t i = 1; i < _points.size(); i++)
+			addSegment(_points[i - 1], _points[i]);
 
-        _verticesNeedUpdate = false;
-    }
+		_verticesNeedUpdate = false;
+	}
 
 public:
     Line(float thickness = 0.1f, const sb::Color& color = sb::Color(1, 0, 0, 1)) 
         : _thickness(thickness), _color(color), _verticesNeedUpdate(false) 
     { }
+
+	const std::vector<sb::Vertex>& getVertices() { 
+		if (_verticesNeedUpdate)
+			updateVertices();
+		return _vertices; 
+	}
+
+	inline void addPoint(const sb::Vector2f& point) { addPoint(point.x, point.y); }
 
     void addPoint(float x, float y) {
         _points.push_back(sb::Vector2f(x, y));
@@ -724,8 +732,6 @@ bool isTouchDown(sb::Window& window, Tetromino& tetromino) {
 	return false;
 }
 
-
-
 void demo11() {
 	sb::Window window(400, getWindowHeight(400));
 	Light light;
@@ -743,13 +749,90 @@ void demo11() {
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(tetromino);
 		drawOutline(window, tetromino.getBounds(), 0.01f);
+		
+		window.display();
+	}
+}
 
+class Grid : public sb::Drawable, public sb::Transformable {
+	sb::Vector2i _gridSize;
+	float _thickness;
+	sb::Color _color;
+	std::vector<sb::Vertex> _vertices;
+
+protected:
+	void computeLine(const sb::Vector2f& start, const sb::Vector2f& end) {
+		Line line(_thickness, _color);
+		line.addPoint(start);
+		line.addPoint(end);
+		_vertices.insert(_vertices.end(), line.getVertices().begin(), line.getVertices().end());
+	}
+
+	inline sb::Vector2f getSize() {
+		return sb::Vector2f(1, _gridSize.y / float(_gridSize.x));
+	}
+
+	void computeVerticalLines() {
+		sb::Vector2f size = getSize();
+		sb::Vector2f halfSize = 0.5f * size;
+		float delta = size.x / _gridSize.x;
+		for (int i = 0; i <= _gridSize.x; i++) {
+			sb::Vector2f start(i * delta - halfSize.x, -halfSize.y);
+			sb::Vector2f end(i * delta - halfSize.x, +halfSize.y);
+			computeLine(start, end);
+		}
+	}
+
+	void computeHorizontalLines() {
+		sb::Vector2f size = getSize();
+		sb::Vector2f halfSize = 0.5f * size;
+		float delta = size.y / _gridSize.y;
+		for (int i = 0; i <= _gridSize.y; i++) {
+			sb::Vector2f start(-halfSize.x, i * delta - halfSize.y);
+			sb::Vector2f end(+halfSize.x, i * delta -halfSize.y);
+			computeLine(start, end);
+		}
+	}
+
+	void computeLines() {
+		_vertices.clear();
+		sb::Vector2f delta(1.f / _gridSize.x, 1.f / _gridSize.y);
+		
+		computeVerticalLines();
+		computeHorizontalLines();
+	}
+
+public:
+	Grid(sb::Vector2i gridSize, float thickness = 0.1f, const sb::Color& color = sb::Color(1, 0, 0, 1)) 
+		: _gridSize(gridSize), _thickness(thickness), _color(color)
+	{
+		computeLines();
+	}
+
+	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
+		states.transform *= getTransform();
+		target.draw(_vertices, sb::PrimitiveType::TriangleStrip, states);
+	}
+};
+
+void demo12() {
+	sb::Window window(400, getWindowHeight(400));
+	Grid grid(sb::Vector2i(10, 15), 0.005f);
+
+	while (window.isOpen()) {
+		sb::Input::update();
+		window.update();
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(grid);
 		window.display();
 	}
 }
 
 void demo() {
-	demo11();
+	demo12();
+
+	//demo11();
 
     //demo10();
 
