@@ -1,5 +1,6 @@
 #include "Window.h"
 #include "DrawBatch.h"
+#include "Triangle.h"
 #include "Quad.h"
 #include "Input.h"
 #include "Stopwatch.h"
@@ -245,8 +246,21 @@ void demo4() {
 	}
 }
 
+class Light {
+	sb::Vector2f _direction;
+
+public: 
+	Light(const sb::Vector2f& direction = sb::Vector2f(0, -1)) : _direction(direction)
+	{ }
+
+	inline void setDirection(const sb::Vector2f& direction) { _direction = direction; }
+
+	inline const sb::Vector2f& getDirection() const { return _direction; }
+};
+
 class Block : public sb::Drawable, public sb::Transformable {
 	sb::Sprite _sprite;
+	const Light* _light;
 
 protected:
 	static sb::Texture& getSheet() {
@@ -270,8 +284,19 @@ protected:
 			SB_ERROR("Invalid Tetromino type " << type);
 	}
 
+	void updateLighting() {
+		if (_light) {
+			sb::Vector2f up(0, 1);
+			float angle = sb::angle(-_light->getDirection(), up) + 45 * sb::ToRadian;
+			angle = angle < 0 ? angle + 2 * sb::Pi : angle;
+			int steps = int(angle / (90 * sb::ToRadian));
+			 _sprite.setRotation(-steps * 90 * sb::ToRadian);
+		}
+	}
+
 public:
-	Block(char type = 'i') {
+	Block(char type = 'i') : _light(NULL) 
+	{
 		setType(type);
 	}
 
@@ -280,8 +305,11 @@ public:
 		setTexture(type);
 	}
 
+	inline void setLight(const Light& light) { _light = &light; }
+
 	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
 		states.transform *= getTransform();
+		updateLighting();
 		target.draw(_sprite, states);
 	}
 };
@@ -375,7 +403,6 @@ protected:
 		createBlocks(_blockPositions, type);
 	}
 
-
 	void updateScale() {
 		sb::Vector2i blockDimensions = getBlockDimensions();
 		setScale(float(blockDimensions.x), float(blockDimensions.y));
@@ -405,7 +432,7 @@ void init6(std::vector<Tetromino>& tetrominos) {
 	for (size_t i = 0; i < tetrominos.size(); i++) {
 		tetrominos[i].setType(types[rand() % types.size()]);
 		tetrominos[i].setPosition(sb::random2D(-0.5f, 0.5f));
-		tetrominos[i].setScale(sb::random(0.05f, 0.1f) * tetrominos[i].getScale());
+		tetrominos[i].setScale(sb::random(0.01f, 0.1f) * tetrominos[i].getScale());
 	}
 }
 
@@ -432,8 +459,51 @@ void demo6() {
 	}
 }
 
+namespace {
+	float getSeconds() {
+		static sb::Stopwatch sw;
+		return sw.getElapsedSeconds();
+	}
+}
+
+void setSpotlightPosition(sb::Triangle& spotlight, Light& light, const sb::Vector2f& position) {
+	spotlight.setPosition(position);
+	light.setDirection(-spotlight.getPosition());
+}
+
+void update7(sb::Triangle& spotlight, Light& light) {
+	float t = getSeconds();
+	sb::Vector2f spotlightPosition(0.2f * cos(-t), 0.2f * sin(-t));
+	setSpotlightPosition(spotlight, light, spotlightPosition);
+}
+
+void demo7() {
+	sb::Window window(400, getWindowHeight(400));
+	Block block('i');
+	Light light;
+	sb::Triangle spotlight;
+
+	block.setScale(0.2f, 0.2f);
+	block.setLight(light);
+	spotlight.setScale(0.05f, 0.05f);
+
+
+	while (window.isOpen()) {
+		sb::Input::update();
+		window.update();
+		 update7(spotlight, light);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(block);
+		window.draw(spotlight);
+		window.display();
+	}
+}
+
 void demo() {
-	demo6();
+	demo7();
+
+	//demo6();
 
 	//demo5();
 
