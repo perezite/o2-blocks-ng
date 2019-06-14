@@ -398,8 +398,7 @@ protected:
         computeBlockBounds();
         for (size_t i = 0; i < positions.size(); i++) {
             Block block;
-            block.setPosition(positions[i].x / float(_blockBounds.width), positions[i].y / float(_blockBounds.height));
-            block.setScale(1.0f / _blockBounds.width, 1.0f / _blockBounds.height);
+            block.setPosition((float)positions[i].x, (float)positions[i].y);
             block.setType(type);
             _blocks.push_back(block);
         }
@@ -416,10 +415,6 @@ protected:
         createBlocks(_blockPositions, type);
     }
 
-    void updateScale() {
-        setScale(float(_blockBounds.width), float(_blockBounds.height));
-    }
-    
     sb::FloatRect getTransformedBounds(sb::FloatRect& bounds) {
         std::vector<sb::Vector2f> edges(4);
         edges[0] = sb::Vector2f(bounds.left, bounds.bottom);
@@ -442,7 +437,6 @@ public:
     void setType(char type) {
         clear();
         createBlocks(tolower(type));
-        updateScale();
     }
 
     inline void setLight(Light& light) { 
@@ -450,14 +444,9 @@ public:
             _blocks[i].setLight(light);
     }
 
-    void setWidth(float width) {
-        float factor = width / getScale().x;
-        setScale(factor * getScale());
-    }
-
     sb::FloatRect getBounds() {
-        sb::Vector2f blockSize(1.f / _blockBounds.width, 1.f / _blockBounds.height);
-        sb::FloatRect bounds((_blockBounds.left - 0.5f) * blockSize.x, (_blockBounds.bottom - 0.5f) * blockSize.y, 1, 1);
+        sb::Vector2f blockSize(1.f, 1.f);
+        sb::FloatRect bounds(_blockBounds.left - 0.5f, _blockBounds.bottom - 0.5f, (float)_blockBounds.width, (float)_blockBounds.height);
 
 		return getTransformedBounds(bounds);
     }
@@ -705,7 +694,8 @@ void demo10() {
     Light light;
     Tetromino tetromino('j');
 
-    tetromino.setWidth(0.3f);
+	tetromino.setPosition(0.2f, 0.2f);
+    tetromino.setScale(0.15f);
     tetromino.setLight(light);
 
     while (window.isOpen()) {
@@ -737,7 +727,7 @@ void demo11() {
 	Light light;
 	Tetromino tetromino('j');
 
-	tetromino.setWidth(0.3f);
+	tetromino.setScale(0.15f);
 	tetromino.setLight(light);
 
 	while (window.isOpen()) {
@@ -829,8 +819,26 @@ void demo12() {
 	}
 }
 
+void demo13() {
+	sb::Window window(400, getWindowHeight(400));
+	Tetromino tetromino('m');
+
+	tetromino.setScale(0.25f);
+
+	while (window.isOpen()) {
+		sb::Input::update();
+		window.update();
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(tetromino);
+		window.display();
+	}
+}
+
 void demo() {
-	demo12();
+	demo13();
+
+	//demo12();
 
 	//demo11();
 
@@ -846,7 +854,7 @@ void demo() {
 
     //demo5();
 
-    // demo4();
+    //demo4();
 
     //demo3();
 
