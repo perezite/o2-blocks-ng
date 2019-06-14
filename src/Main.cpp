@@ -15,9 +15,9 @@ void version() {
 int main() {
 	version();
 	
-	//demo();
+	demo();
 
-	game();
+	//game();
 	
 	return 0;
 }

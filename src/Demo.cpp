@@ -5,6 +5,9 @@
 #include "Stopwatch.h"
 #include "TextureSheet.h"
 #include "Sprite.h"
+#include "Math.h"
+#include <cstddef>
+#include <vector>
 
 void init0(std::vector<sb::Sprite>& stones, sb::Texture& stonesTex) {
 	sb::Vector2i size(128, 128);
@@ -241,8 +244,84 @@ void demo4() {
 	}
 }
 
+class Block : public sb::Drawable, public sb::Transformable {
+	sb::Sprite _sprite;
+
+protected:
+	static sb::Texture& getSheet() {
+		static sb::Texture texture("Textures/Blocks.png");
+		return texture;
+	}
+
+	inline const sb::IntRect getTextureArea(std::size_t row, std::size_t col) {
+		static sb::Vector2i blockSize(128, 128);
+		return sb::IntRect(col * blockSize.x, row * blockSize.y, blockSize.x, blockSize.y);
+	}
+
+	void setTexture(char type) {
+		if (type == 'i')
+			_sprite.setTexture(getSheet(), getTextureArea(2, 1));
+		else if (type == 'j')
+			_sprite.setTexture(getSheet(), getTextureArea(2, 2));
+		else if (type == 'm')
+			_sprite.setTexture(getSheet(), getTextureArea(2, 1));
+		else
+			SB_ERROR("Invalid Tetromino type " << type);
+	}
+
+public:
+	Block(char type = 'i') {
+		setType(type);
+	}
+
+	void setType(char type) {
+		type = tolower(type);
+		setTexture(type);
+	}
+
+	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
+		states.transform *= getTransform();
+		target.draw(_sprite, states);
+	}
+};
+
+void init5(std::vector<Block>& blocks) {
+	static std::vector<char> types = { 'i', 'j' };
+	for (size_t i = 0; i < blocks.size(); i++) {
+		blocks[i].setType(types[rand() % types.size()]);
+		blocks[i].setPosition(sb::random2D(-0.5f, 0.5f));
+		blocks[i].setScale(sb::random(0.1f, 0.2f));
+	}
+}
+
+void draw5(sb::DrawBatch& batch, std::vector<Block>& blocks) {
+	for (size_t i = 0; i < blocks.size(); i++)
+		batch.draw(blocks[i]);
+}
+
+void demo5() {
+	float aspect = 3 / 2.0f;
+	sb::DrawBatch batch(512);
+	sb::Window window(400, int(400 * aspect));
+	std::vector<Block> blocks(20);
+
+	init5(blocks);
+
+	while (window.isOpen()) {
+		sb::Input::update();
+		window.update();
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		draw5(batch, blocks);
+		window.draw(batch);
+		window.display();
+	}
+}
+
 void demo() {
-	demo4();
+	demo5();
+
+	// demo4();
 
 	//demo3();
 
