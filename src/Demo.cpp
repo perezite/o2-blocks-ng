@@ -361,6 +361,7 @@ inline int getWindowHeight(int width) {
 }
 
 class Tetromino : public sb::Drawable, public sb::Transformable {
+	char _type;
     std::vector<Block> _blocks;
     std::vector<sb::Vector2i> _blockPositions;
     sb::IntRect _blockBounds;
@@ -434,11 +435,18 @@ public:
         setType(type);
     }
 
+	inline char getType() const { return _type; }
+
 	inline const std::vector<sb::Vector2i>& getBlockPositions() const { return _blockPositions; }
+
+	inline static const std::vector<char> getTypes() {
+		return{ 'i', 'j' };
+	}
 
     void setType(char type) {
         clear();
-        createBlocks(tolower(type));
+		_type = tolower(type);
+        createBlocks(_type);
     }
 
     inline void setLight(Light& light) { 
@@ -899,11 +907,19 @@ protected:
 	}
 
 	void freeze(Tetromino& tetromino) {
+		char type = tetromino.getType();
+		sb::Vector2i tetrominoPosition = worldToBoardPosition(tetromino.getPosition());
+		const std::vector<sb::Vector2i>& blockPositions = tetromino.getBlockPositions();
 
+		for (size_t i = 0; i < blockPositions.size(); i++) {
+			sb::Vector2i boardPosition = tetrominoPosition + blockPositions[i];
+			createBlock(type, boardPosition);
+		}
 	}
 
 	void createRandomTetromino() {
-
+		const std::vector<char> types = Tetromino::getTypes();
+		createTetromino(types[rand() % types.size()]);
 	}
 
 	void dropStep(Tetromino& tetromino) {
@@ -946,7 +962,6 @@ public:
 
 	void createBlock(char type, const sb::Vector2i& position) {
 		Block block(type);
-		auto test = boardToWorldPosition(position);
 		block.setPosition(boardToWorldPosition(position));
 		block.setScale(getCellSize());
 		_blocks.push_back(block);
@@ -954,8 +969,9 @@ public:
 
 	void createTetromino(char type) {
 		Tetromino tetromino(type);
+
 		sb::Vector2i boardPosition(_boardSize.x / 2 - (_boardSize.x % 2 ? 0 : 1), 
-			_boardSize.y - tetromino.getBlockBounds().height);
+			_boardSize.y - tetromino.getBlockBounds().top());
 		tetromino.setPosition(boardToWorldPosition(boardPosition));
 		tetromino.setScale(getCellSize());
 		_tetromino = tetromino;
@@ -1056,10 +1072,13 @@ void demo17() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
 	Board board(sb::Vector2i(10, 18));
 
+	sb::FloatRect test(0, 0, 2, 1);
+	auto test2 = test.right();
+
 	adjustCameraToBoard(window.getCamera(), board);
 	board.enableGrid(true);
-	board.createBlock('j', sb::Vector2i(5, 14));
 	board.createTetromino('i');
+	board.createBlock('j', sb::Vector2i(5, 10));
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
