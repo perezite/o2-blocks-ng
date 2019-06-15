@@ -434,6 +434,8 @@ public:
         setType(type);
     }
 
+	inline const std::vector<sb::Vector2i>& getBlockPositions() const { return _blockPositions; }
+
     void setType(char type) {
         clear();
         createBlocks(tolower(type));
@@ -867,10 +869,53 @@ protected:
 		return sb::Vector2f(1.f / _boardSize.x, 1.f / _boardSize.x);
 	}
 
+	void move(Tetromino& tetromino, const sb::Vector2i& translation) {
+		sb::Vector2i position = worldToBoardPosition(tetromino.getPosition());
+		position += translation;
+		tetromino.setPosition(boardToWorldPosition(position));
+	}
+
+	bool isOccupied(const sb::Vector2i& position) {
+		for (size_t i = 0; i < _blocks.size(); i++) {
+			const sb::Vector2i blockPosition = worldToBoardPosition(_blocks[i].getPosition());
+			if (blockPosition == position)
+				return true;
+		}
+
+		return false;
+	}
+
+	bool isOccupied(const Tetromino& tetromino) {
+		sb::Vector2i tetrominoPosition = worldToBoardPosition(tetromino.getPosition());
+		const std::vector<sb::Vector2i>& blockPositions = tetromino.getBlockPositions();
+
+		for (std::size_t i = 0; i < blockPositions.size(); i++) {
+			sb::Vector2i boardPosition = tetrominoPosition + blockPositions[i];
+			if (isOccupied(boardPosition))
+				return true;
+		}
+
+		return false;
+	}
+
+	void freeze(Tetromino& tetromino) {
+
+	}
+
+	void createRandomTetromino() {
+
+	}
+
 	void dropStep(Tetromino& tetromino) {
-		 sb::Vector2i position = worldToBoardPosition(tetromino.getPosition());
-		 position -= sb::Vector2i(0, 1);
-		 tetromino.setPosition(boardToWorldPosition(position));
+		sb::Vector2f previousPosition = tetromino.getPosition();
+		move(tetromino, sb::Vector2i(0, -1));
+
+		if (isOccupied(tetromino)) {
+			tetromino.setPosition(previousPosition);
+			freeze(tetromino);
+			createRandomTetromino();
+			std::cout << "A collision, sir" << std::endl;
+		}
 	}
 
 	void drop(Tetromino& tetromino, float ds) {
@@ -992,7 +1037,7 @@ void demo16() {
 
 	adjustCameraToBoard(window.getCamera(), board);
 	board.enableGrid(true);
-	//board.createBlock('i', sb::Vector2i(2, 0));
+	board.createBlock('j', sb::Vector2i(5, 10));
 	board.createTetromino('i');
 
 	while (window.isOpen()) {
@@ -1007,8 +1052,32 @@ void demo16() {
 	}
 }
 
+void demo17() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Board board(sb::Vector2i(10, 18));
+
+	adjustCameraToBoard(window.getCamera(), board);
+	board.enableGrid(true);
+	board.createBlock('j', sb::Vector2i(5, 14));
+	board.createTetromino('i');
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		board.update(ds);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(board);
+		window.display();
+	}
+}
+
+
 void demo() {
-	demo16();
+	demo17();
+
+	//demo16();
 
 	//demo15();
 
