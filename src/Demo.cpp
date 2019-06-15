@@ -411,7 +411,7 @@ protected:
         else if (type == 'j')
             _blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(-1, 0), sb::Vector2i(0, -1), sb::Vector2i(1, -1) };
         else if (type == 'm')
-            _blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(1, 0) };
+            _blockPositions = { sb::Vector2i(0, 0)/*, sb::Vector2i(1, 0)*/ };
 
         createBlocks(_blockPositions, type);
     }
@@ -856,6 +856,7 @@ class Board : public sb::Drawable, public sb::Transformable {
 	bool _hasTetromino;
 	float _dropIntervalInSeconds;
 	float _secondsSinceLastDrop;
+	bool _isDead;
 
 protected:
 	sb::Vector2f boardToWorldPosition(const sb::Vector2i& boardPos) {
@@ -866,11 +867,14 @@ protected:
 			-halfSize.y + (boardPos.y + 0.5f) * delta.y);
 	}
 
+	inline int floori(float x) { return int(floor(x)); }
+
 	sb::Vector2i worldToBoardPosition(const sb::Vector2f& worldPos) {
 		sb::Vector2f size(1, _boardSize.y / float(_boardSize.x));
 		sb::Vector2f delta(size.x / _boardSize.x, size.y / _boardSize.y);
 		sb::Vector2f adjustedPos = worldPos + 0.5f * size;
-		return sb::Vector2i(int(adjustedPos.x / delta.x), int(adjustedPos.y / delta.y));
+		auto result = sb::Vector2i(floori(adjustedPos.x / delta.x), floori(adjustedPos.y / delta.y));
+		return result;
 	}
 
 	sb::Vector2f getCellSize() {
@@ -893,13 +897,19 @@ protected:
 		return false;
 	}
 
-	bool isOccupied(const Tetromino& tetromino) {
+	bool isOutsideBoard(const sb::Vector2i& position) {
+		return position.x < 0 || position.x >= _boardSize.x || 
+			position.y < 0 || position.y >= _boardSize.y;
+	}
+
+	bool isPositionInvalid(const Tetromino& tetromino) {
+		auto test = tetromino.getPosition();
 		sb::Vector2i tetrominoPosition = worldToBoardPosition(tetromino.getPosition());
 		const std::vector<sb::Vector2i>& blockPositions = tetromino.getBlockPositions();
 
 		for (std::size_t i = 0; i < blockPositions.size(); i++) {
 			sb::Vector2i boardPosition = tetrominoPosition + blockPositions[i];
-			if (isOccupied(boardPosition))
+			if (isOccupied(boardPosition) || isOutsideBoard(boardPosition))
 				return true;
 		}
 
@@ -917,20 +927,27 @@ protected:
 		}
 	}
 
+	void death() {
+		std::cout << "You, sir, are a dead man!" << std::endl;
+		_isDead = true;
+	}
+
 	void createRandomTetromino() {
 		const std::vector<char> types = Tetromino::getTypes();
 		createTetromino(types[rand() % types.size()]);
+		if (isPositionInvalid(_tetromino))
+			death();
 	}
 
 	void dropStep(Tetromino& tetromino) {
 		sb::Vector2f previousPosition = tetromino.getPosition();
 		move(tetromino, sb::Vector2i(0, -1));
 
-		if (isOccupied(tetromino)) {
+		if (isPositionInvalid(tetromino)) {
+			std::cout << "A collision, sir" << std::endl;
 			tetromino.setPosition(previousPosition);
 			freeze(tetromino);
 			createRandomTetromino();
-			std::cout << "A collision, sir" << std::endl;
 		}
 	}
 
@@ -946,8 +963,10 @@ protected:
 public:
 	Board(const sb::Vector2i& boardSize) 
 		: _boardSize(boardSize), _grid(boardSize, 0.01f), _isGridEnabled(false), 
-		_hasTetromino(false), _dropIntervalInSeconds(0.5f), _secondsSinceLastDrop(0)
-	{ }
+		_hasTetromino(false), _dropIntervalInSeconds(0.5f), _secondsSinceLastDrop(0), _isDead(false)
+	{
+		createRandomTetromino();
+	}
 
 	inline const sb::Vector2i& getBoardSize() const { return _boardSize; }
 
@@ -979,7 +998,9 @@ public:
 	}
 
 	void update(float ds) {
-		drop(_tetromino, ds);
+		if (!_isDead) {
+			drop(_tetromino, ds);
+		}
 	}
 
 	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
@@ -1070,15 +1091,12 @@ void demo16() {
 
 void demo17() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
-	Board board(sb::Vector2i(10, 18));
-
-	sb::FloatRect test(0, 0, 2, 1);
-	auto test2 = test.right();
+	Board board(sb::Vector2i(10, 5));
 
 	adjustCameraToBoard(window.getCamera(), board);
 	board.enableGrid(true);
-	board.createTetromino('i');
-	board.createBlock('j', sb::Vector2i(5, 10));
+	//board.createTetromino('j');
+	//board.createBlock('j', sb::Vector2i(5, 10));
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
