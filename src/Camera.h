@@ -27,6 +27,8 @@ namespace sb
 
 		void setWidth(float width);
 
+		void setHeight(float height);
+
 		void setAspectRatio(float aspect);
 
 		void setRotation(float rotation);

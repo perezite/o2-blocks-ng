@@ -10,9 +10,12 @@ namespace sb
 	class Window : public DrawTarget
 	{
 	public:
+		Window(sb::Vector2i resolution) : Window(resolution.x, resolution.y)
+		{ }
+
 		Window(int width = 400, int height = 400);
 
-		~Window();
+		virtual ~Window();
 
 		inline const sb::Vector2f& getResolution() const { return m_resolution; }
 

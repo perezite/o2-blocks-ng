@@ -840,6 +840,7 @@ void demo13() {
 class Board : public sb::Drawable, public sb::Transformable {
 	sb::Vector2i _boardSize;
 	Grid _grid;
+	bool _isGridEnabled;
 	std::vector<Block> _blocks;
 	Tetromino _tetromino;
 	bool _hasTetromino;
@@ -858,8 +859,17 @@ protected:
 	}
 
 public:
-	Board(const sb::Vector2i& boardSize) : _boardSize(boardSize), _grid(boardSize, 0.005f), _hasTetromino(false)
+	Board(const sb::Vector2i& boardSize) : _boardSize(boardSize), _grid(boardSize, 0.01f), _isGridEnabled(false), _hasTetromino(false)
 	{ }
+
+	inline const sb::Vector2i& getBoardSize() const { return _boardSize; }
+
+	sb::Vector2f getSize() const {
+		float inverseAspect = _boardSize.y / float(_boardSize.x);
+		return sb::Vector2f(getScale().x * 1.f, getScale().y * inverseAspect);
+	}
+
+	inline void enableGrid(bool enabled) { _isGridEnabled = enabled; }
 
 	void createBlock(char type, const sb::Vector2i& position) {
 		Block block(type);
@@ -880,7 +890,8 @@ public:
 	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
 		states.transform *= getTransform();
 
-		target.draw(_grid, states);
+		if (_isGridEnabled)
+			target.draw(_grid, states);
 		if (_hasTetromino)
 			target.draw(_tetromino, states);
 
@@ -888,7 +899,6 @@ public:
 			target.draw(_blocks[i], states);
 		}
 	}
-
 };
 
 void demo14() {
@@ -908,10 +918,46 @@ void demo14() {
 	}
 }
 
-void demo() {
-	demo14();
+sb::Vector2i getWindowSize(size_t width, float inverseAspect) {
+	return sb::Vector2i(width, int(inverseAspect * width));
+}
 
-	demo13();
+void adjustCameraToBoard(sb::Camera& camera, const Board& board) {
+	float cameraAspect = camera.getAspectRatio();
+	const sb::Vector2f& boardSize = board.getSize();
+	float boardAspect = boardSize.x / boardSize.y;
+
+	if (boardAspect > cameraAspect)
+		camera.setWidth(board.getSize().x);
+	else
+		camera.setHeight(board.getSize().y);	
+}
+
+void demo15() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Board board(sb::Vector2i(10, 18));
+
+	adjustCameraToBoard(window.getCamera(), board);
+	board.enableGrid(true);
+	board.createBlock('j', sb::Vector2i(5, 5));
+	board.createTetromino('i');
+
+	while (window.isOpen()) {
+		sb::Input::update();
+		window.update();
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(board);
+		window.display();
+	}
+}
+
+void demo() {
+	demo15();
+
+	//demo14();
+
+	//demo13();
 
 	//demo12();
 

@@ -9,7 +9,7 @@ namespace sb
 
 		return m_transform;
 	}
-
+	
 	void Camera::setPosition(const sb::Vector2f & position)
 	{
 		m_position = position;
@@ -20,6 +20,11 @@ namespace sb
 	{
 		m_width = width;
 		m_transformNeedsUpdate = true;
+	}
+
+	void Camera::setHeight(float height)
+	{
+		setWidth(height * getAspectRatio());
 	}
 
 	void Camera::setAspectRatio(float aspect)
