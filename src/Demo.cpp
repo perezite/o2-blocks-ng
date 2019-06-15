@@ -444,6 +444,8 @@ public:
             _blocks[i].setLight(light);
     }
 
+	inline const sb::IntRect& getBlockBounds() const { return _blockBounds; }
+
     sb::FloatRect getBounds() {
         sb::Vector2f blockSize(1.f, 1.f);
         sb::FloatRect bounds(_blockBounds.left - 0.5f, _blockBounds.bottom - 0.5f, (float)_blockBounds.width, (float)_blockBounds.height);
@@ -839,14 +841,16 @@ class Board : public sb::Drawable, public sb::Transformable {
 	sb::Vector2i _boardSize;
 	Grid _grid;
 	std::vector<Block> _blocks;
+	Tetromino _tetromino;
+	bool _hasTetromino;
 
 protected:
 	sb::Vector2f boardToWorldPosition(const sb::Vector2i& boardPos) {
 		sb::Vector2f size(1, _boardSize.y / float(_boardSize.x));
 		sb::Vector2f halfSize = 0.5f * size;
 		sb::Vector2f delta(size.x / _boardSize.x, size.y / _boardSize.y);
-		return sb::Vector2f(-halfSize.x + (boardPos.x - 0.5f) * delta.x,
-			-halfSize.y + (boardPos.y - 0.5f) * delta.y);
+		return sb::Vector2f(-halfSize.x + (boardPos.x + 0.5f) * delta.x,
+			-halfSize.y + (boardPos.y + 0.5f) * delta.y);
 	}
 
 	sb::Vector2f getCellSize() {
@@ -854,7 +858,7 @@ protected:
 	}
 
 public:
-	Board(const sb::Vector2i& boardSize) : _boardSize(boardSize), _grid(boardSize, 0.005f)
+	Board(const sb::Vector2i& boardSize) : _boardSize(boardSize), _grid(boardSize, 0.005f), _hasTetromino(false)
 	{ }
 
 	void createBlock(char type, const sb::Vector2i& position) {
@@ -864,10 +868,21 @@ public:
 		_blocks.push_back(block);
 	}
 
+	void createTetromino(char type) {
+		Tetromino tetromino(type);
+		sb::Vector2i boardPosition(_boardSize.x / 2 - (_boardSize.x % 2 ? 0 : 1), _boardSize.y - tetromino.getBlockBounds().height);
+		tetromino.setPosition(boardToWorldPosition(boardPosition));
+		tetromino.setScale(getCellSize());
+		_tetromino = tetromino;
+		_hasTetromino = true;
+	}
+
 	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
 		states.transform *= getTransform();
 
 		target.draw(_grid, states);
+		if (_hasTetromino)
+			target.draw(_tetromino, states);
 
 		for (size_t i = 0; i < _blocks.size(); i++) {
 			target.draw(_blocks[i], states);
@@ -880,8 +895,8 @@ void demo14() {
 	sb::Window window(400, getWindowHeight(400));
 	Board board(sb::Vector2i(10, 15));
 
-	 board.createBlock('j', sb::Vector2i(5, 5));
-	// board.createTetromino('i');
+	board.createBlock('j', sb::Vector2i(5, 5));
+	board.createTetromino('i');
 
 	while (window.isOpen()) {
 		sb::Input::update();

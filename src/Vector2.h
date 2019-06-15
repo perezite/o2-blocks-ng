@@ -15,7 +15,7 @@ namespace sb
 			: x(s_), y(s_)
 		{ }
 		
-		inline Vector2<T>(T x_, T y_)
+		Vector2<T>(T x_, T y_)
 			: x(x_), y(y_)
 		{ }
 
