@@ -844,6 +844,8 @@ class Board : public sb::Drawable, public sb::Transformable {
 	std::vector<Block> _blocks;
 	Tetromino _tetromino;
 	bool _hasTetromino;
+	float _dropIntervalInSeconds;
+	float _secondsSinceLastDrop;
 
 protected:
 	sb::Vector2f boardToWorldPosition(const sb::Vector2i& boardPos) {
@@ -854,12 +856,36 @@ protected:
 			-halfSize.y + (boardPos.y + 0.5f) * delta.y);
 	}
 
+	sb::Vector2i worldToBoardPosition(const sb::Vector2f& worldPos) {
+		sb::Vector2f size(1, _boardSize.y / float(_boardSize.x));
+		sb::Vector2f delta(size.x / _boardSize.x, size.y / _boardSize.y);
+		sb::Vector2f adjustedPos = worldPos + 0.5f * size;
+		return sb::Vector2i(int(adjustedPos.x / delta.x), int(adjustedPos.y / delta.y));
+	}
+
 	sb::Vector2f getCellSize() {
 		return sb::Vector2f(1.f / _boardSize.x, 1.f / _boardSize.x);
 	}
 
+	void dropStep(Tetromino& tetromino) {
+		 sb::Vector2i position = worldToBoardPosition(tetromino.getPosition());
+		 position -= sb::Vector2i(0, 1);
+		 tetromino.setPosition(boardToWorldPosition(position));
+	}
+
+	void drop(Tetromino& tetromino, float ds) {
+		_secondsSinceLastDrop += ds;
+
+		while (_secondsSinceLastDrop >= _dropIntervalInSeconds) {
+			dropStep(tetromino);
+			_secondsSinceLastDrop -= _dropIntervalInSeconds;
+		}
+	}
+
 public:
-	Board(const sb::Vector2i& boardSize) : _boardSize(boardSize), _grid(boardSize, 0.01f), _isGridEnabled(false), _hasTetromino(false)
+	Board(const sb::Vector2i& boardSize) 
+		: _boardSize(boardSize), _grid(boardSize, 0.01f), _isGridEnabled(false), 
+		_hasTetromino(false), _dropIntervalInSeconds(0.5f), _secondsSinceLastDrop(0)
 	{ }
 
 	inline const sb::Vector2i& getBoardSize() const { return _boardSize; }
@@ -871,8 +897,11 @@ public:
 
 	inline void enableGrid(bool enabled) { _isGridEnabled = enabled; }
 
+	inline void setDropInteval(float dropIntervalInSeconds) { _dropIntervalInSeconds = dropIntervalInSeconds; }
+
 	void createBlock(char type, const sb::Vector2i& position) {
 		Block block(type);
+		auto test = boardToWorldPosition(position);
 		block.setPosition(boardToWorldPosition(position));
 		block.setScale(getCellSize());
 		_blocks.push_back(block);
@@ -880,11 +909,16 @@ public:
 
 	void createTetromino(char type) {
 		Tetromino tetromino(type);
-		sb::Vector2i boardPosition(_boardSize.x / 2 - (_boardSize.x % 2 ? 0 : 1), _boardSize.y - tetromino.getBlockBounds().height);
+		sb::Vector2i boardPosition(_boardSize.x / 2 - (_boardSize.x % 2 ? 0 : 1), 
+			_boardSize.y - tetromino.getBlockBounds().height);
 		tetromino.setPosition(boardToWorldPosition(boardPosition));
 		tetromino.setScale(getCellSize());
 		_tetromino = tetromino;
 		_hasTetromino = true;
+	}
+
+	void update(float ds) {
+		drop(_tetromino, ds);
 	}
 
 	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
@@ -952,8 +986,31 @@ void demo15() {
 	}
 }
 
+void demo16() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Board board(sb::Vector2i(10, 18));
+
+	adjustCameraToBoard(window.getCamera(), board);
+	board.enableGrid(true);
+	//board.createBlock('i', sb::Vector2i(2, 0));
+	board.createTetromino('i');
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		board.update(ds);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(board);
+		window.display();
+	}
+}
+
 void demo() {
-	demo15();
+	demo16();
+
+	//demo15();
 
 	//demo14();
 
