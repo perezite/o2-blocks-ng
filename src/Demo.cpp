@@ -835,7 +835,67 @@ void demo13() {
 	}
 }
 
+class Board : public sb::Drawable, public sb::Transformable {
+	sb::Vector2i _boardSize;
+	Grid _grid;
+	std::vector<Block> _blocks;
+
+protected:
+	sb::Vector2f boardToWorldPosition(const sb::Vector2i& boardPos) {
+		sb::Vector2f size(1, _boardSize.y / float(_boardSize.x));
+		sb::Vector2f halfSize = 0.5f * size;
+		sb::Vector2f delta(size.x / _boardSize.x, size.y / _boardSize.y);
+		return sb::Vector2f(-halfSize.x + (boardPos.x - 0.5f) * delta.x,
+			-halfSize.y + (boardPos.y - 0.5f) * delta.y);
+	}
+
+	sb::Vector2f getCellSize() {
+		return sb::Vector2f(1.f / _boardSize.x, 1.f / _boardSize.x);
+	}
+
+public:
+	Board(const sb::Vector2i& boardSize) : _boardSize(boardSize), _grid(boardSize, 0.005f)
+	{ }
+
+	void createBlock(char type, const sb::Vector2i& position) {
+		Block block(type);
+		block.setPosition(boardToWorldPosition(position));
+		block.setScale(getCellSize());
+		_blocks.push_back(block);
+	}
+
+	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
+		states.transform *= getTransform();
+
+		target.draw(_grid, states);
+
+		for (size_t i = 0; i < _blocks.size(); i++) {
+			target.draw(_blocks[i], states);
+		}
+	}
+
+};
+
+void demo14() {
+	sb::Window window(400, getWindowHeight(400));
+	Board board(sb::Vector2i(10, 15));
+
+	 board.createBlock('j', sb::Vector2i(5, 5));
+	// board.createTetromino('i');
+
+	while (window.isOpen()) {
+		sb::Input::update();
+		window.update();
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(board);
+		window.display();
+	}
+}
+
 void demo() {
+	demo14();
+
 	demo13();
 
 	//demo12();
