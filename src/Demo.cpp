@@ -411,7 +411,7 @@ protected:
         else if (type == 'j')
             _blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(-1, 0), sb::Vector2i(0, -1), sb::Vector2i(1, -1) };
         else if (type == 'm')
-            _blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(1, 0) };
+            _blockPositions = { sb::Vector2i(0, 0)/*, sb::Vector2i(1, 0)*/ };
 
         createBlocks(_blockPositions, type);
     }
@@ -1016,14 +1016,26 @@ public:
 		createTetromino(tetromino, boardPosition);
 	}
 
+	void moveTetromino(const sb::Vector2i& translation) {
+		sb::Vector2f cellSize = getCellSize();
+		sb::Vector2f worldTranslation(translation.x * cellSize.x, translation.y * cellSize.y);
+		_tetromino.translate(worldTranslation);
+
+		if (isInvalid(_tetromino)) {
+			std::cout << "Sorry man, no can do!" << std::endl;
+			_tetromino.translate(-worldTranslation);
+		}
+	}
+
+	inline void moveTetromino(int x, int y) { moveTetromino(sb::Vector2i(x, y)); }
+
 	void rotateTetromino() {
 		_tetromino.rotate(-90 * sb::ToRadian);
 
 		if (isInvalid(_tetromino)) {
 			std::cout << "Sorry, no can do!" << std::endl;
 			_tetromino.rotate(90 * sb::ToRadian);
-		}
-			
+		}			
 	}
 
 	void update(float ds) {
@@ -1189,7 +1201,7 @@ void demo19() {
 	}
 }
 
-void input10(sb::Window& window, Board& board) {
+void input20(sb::Window& window, Board& board) {
 	if (sb::Input::isKeyGoingDown(sb::KeyCode::r) ||
 		isTetrominoTouchGoingDown(window, board))
 		board.rotateTetromino();
@@ -1207,7 +1219,35 @@ void demo20() {
 		sb::Input::update();
 		window.update();
 		board.update(ds);
-		input10(window, board);
+		input20(window, board);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(board);
+		window.display();
+	}
+}
+
+void input21(sb::Window& window, Board& board) {
+	if (sb::Input::isKeyGoingDown(sb::KeyCode::Left))
+		board.moveTetromino(-1, 0);
+	 if (sb::Input::isKeyGoingDown(sb::KeyCode::Right))
+	 	board.moveTetromino(1, 0);
+}
+
+void demo21() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Board board(sb::Vector2i(10, 10));
+
+	adjustCameraToBoard(window.getCamera(), board);
+	board.enableGrid(true);
+	//board.createTetromino('m', sb::Vector2i(1, 1));
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		board.update(ds);
+		input21(window, board);
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(board);
@@ -1216,7 +1256,9 @@ void demo20() {
 }
 
 void demo() {
-	demo20();
+	demo21();
+	
+	//demo20();
 
 	//demo19();
 
