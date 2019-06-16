@@ -411,7 +411,7 @@ protected:
         else if (type == 'j')
             _blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(-1, 0), sb::Vector2i(0, -1), sb::Vector2i(1, -1) };
         else if (type == 'm')
-            _blockPositions = { sb::Vector2i(0, 0)/*, sb::Vector2i(1, 0)*/ };
+            _blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(1, 0) };
 
         createBlocks(_blockPositions, type);
     }
@@ -437,10 +437,17 @@ public:
 
 	inline char getType() const { return _type; }
 
-	inline const std::vector<sb::Vector2i>& getBlockPositions() const { return _blockPositions; }
-
 	inline static const std::vector<char> getTypes() {
 		return{ 'i', 'j' };
+	}
+
+	const std::vector<sb::Vector2f> getBlockPositions() {
+		std::vector<sb::Vector2f> blockPositions;
+		blockPositions.reserve(_blocks.size());
+		for (size_t i = 0; i < _blocks.size(); i++)
+			blockPositions.push_back(getTransform() * _blocks[i].getPosition());
+
+		return blockPositions;
 	}
 
     void setType(char type) {
@@ -872,7 +879,7 @@ protected:
 	void createRandomTetromino() {
 		const std::vector<char> types = Tetromino::getTypes();
 		createTetromino(types[rand() % types.size()]);
-		if (isPositionInvalid(_tetromino))
+		if (isInvalid(_tetromino))
 			death();
 	}
 
@@ -919,13 +926,11 @@ protected:
 			position.y < 0 || position.y >= _boardSize.y;
 	}
 
-	bool isPositionInvalid(const Tetromino& tetromino) {
-		auto test = tetromino.getPosition();
-		sb::Vector2i tetrominoPosition = worldToBoardPosition(tetromino.getPosition());
-		const std::vector<sb::Vector2i>& blockPositions = tetromino.getBlockPositions();
+	bool isInvalid(Tetromino& tetromino) {
+		const std::vector<sb::Vector2f> blockPositions = tetromino.getBlockPositions();
 
 		for (std::size_t i = 0; i < blockPositions.size(); i++) {
-			sb::Vector2i boardPosition = tetrominoPosition + blockPositions[i];
+			sb::Vector2i boardPosition = worldToBoardPosition(blockPositions[i]);
 			if (isOccupied(boardPosition) || isOutsideBoard(boardPosition))
 				return true;
 		}
@@ -935,11 +940,10 @@ protected:
 
 	void freeze(Tetromino& tetromino) {
 		char type = tetromino.getType();
-		sb::Vector2i tetrominoPosition = worldToBoardPosition(tetromino.getPosition());
-		const std::vector<sb::Vector2i>& blockPositions = tetromino.getBlockPositions();
+		const std::vector<sb::Vector2f> blockPositions = tetromino.getBlockPositions();
 
 		for (size_t i = 0; i < blockPositions.size(); i++) {
-			sb::Vector2i boardPosition = tetrominoPosition + blockPositions[i];
+			sb::Vector2i boardPosition = worldToBoardPosition(blockPositions[i]);
 			createBlock(type, boardPosition);
 		}
 	}
@@ -953,7 +957,7 @@ protected:
 		sb::Vector2f previousPosition = tetromino.getPosition();
 		move(tetromino, sb::Vector2i(0, -1));
 
-		if (isPositionInvalid(tetromino)) {
+		if (isInvalid(tetromino)) {
 			std::cout << "A collision, sir" << std::endl;
 			tetromino.setPosition(previousPosition);
 			freeze(tetromino);
@@ -1010,6 +1014,12 @@ public:
 
 	void rotateTetromino() {
 		_tetromino.rotate(-90 * sb::ToRadian);
+
+		if (isInvalid(_tetromino)) {
+			std::cout << "Sorry, no can do!" << std::endl;
+			_tetromino.rotate(90 * sb::ToRadian);
+		}
+			
 	}
 
 	void update(float ds) {
@@ -1125,19 +1135,41 @@ void demo17() {
 
 void demo18() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Grid grid(sb::Vector2i(2, 2), 0.01f);
+	Tetromino tetromino('m');
+
+	tetromino.setPosition(-0.25f, 0.25f);
+	tetromino.setScale(0.5f);
+
+	while (window.isOpen()) {
+		sb::Input::update();
+		window.update();
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::r))
+			tetromino.rotate(-90 * sb::ToRadian);
+		const std::vector<sb::Vector2f> blockPositions = tetromino.getBlockPositions();
+		std::cout << blockPositions[1].x << " " << blockPositions[1].y << std::endl;
+		
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(grid);
+		window.draw(tetromino);
+		window.display();
+	}
+}
+
+void demo19() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
 	Board board(sb::Vector2i(10, 10));
 
 	adjustCameraToBoard(window.getCamera(), board);
 	board.enableGrid(true);
 	board.createTetromino('i', sb::Vector2i(4, 5));
+	board.createBlock('j', sb::Vector2i(2, 5));
 
 	while (window.isOpen()) {
-		float ds = getDeltaSeconds();
 		sb::Input::update();
 		window.update();
 		if (sb::Input::isKeyGoingDown(sb::KeyCode::r))
 			board.rotateTetromino();
-
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(board);
@@ -1146,7 +1178,9 @@ void demo18() {
 }
 
 void demo() {
-	demo18();
+	demo19();
+
+	//demo18();
 
 	//demo17();
 
