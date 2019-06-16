@@ -982,6 +982,10 @@ public:
 		createRandomTetromino();
 	}
 
+	inline bool hasTetromino() const { return _hasTetromino; }
+
+	inline Tetromino& getTetromino() { return _tetromino; }
+
 	inline const sb::Vector2i& getBoardSize() const { return _boardSize; }
 
 	sb::Vector2f getSize() const {
@@ -1156,6 +1160,13 @@ void demo18() {
 	}
 }
 
+bool isTetrominoTouchGoingDown(sb::Window&window, Board& board) {
+	if (board.hasTetromino())
+		return isTouchGoingDown(window, board.getTetromino());
+
+	return false;
+}
+
 void demo19() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
 	Board board(sb::Vector2i(10, 10));
@@ -1168,7 +1179,8 @@ void demo19() {
 	while (window.isOpen()) {
 		sb::Input::update();
 		window.update();
-		if (sb::Input::isKeyGoingDown(sb::KeyCode::r))
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::r) || 
+			isTetrominoTouchGoingDown(window, board))
 			board.rotateTetromino();
 
 		window.clear(sb::Color(1, 1, 1, 1));
