@@ -1173,8 +1173,8 @@ void demo19() {
 
 	adjustCameraToBoard(window.getCamera(), board);
 	board.enableGrid(true);
-	board.createTetromino('i', sb::Vector2i(4, 5));
-	board.createBlock('j', sb::Vector2i(2, 5));
+	board.createTetromino('i', sb::Vector2i(4, 2));
+	board.createBlock('j', sb::Vector2i(2, 2));
 
 	while (window.isOpen()) {
 		sb::Input::update();
@@ -1189,8 +1189,36 @@ void demo19() {
 	}
 }
 
+void input10(sb::Window& window, Board& board) {
+	if (sb::Input::isKeyGoingDown(sb::KeyCode::r) ||
+		isTetrominoTouchGoingDown(window, board))
+		board.rotateTetromino();
+}
+
+void demo20() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Board board(sb::Vector2i(10, 10));
+
+	adjustCameraToBoard(window.getCamera(), board);
+	board.enableGrid(true);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		board.update(ds);
+		input10(window, board);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(board);
+		window.display();
+	}
+}
+
 void demo() {
-	demo19();
+	demo20();
+
+	//demo19();
 
 	//demo18();
 
