@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <vector>
 #include <map>
+#include <algorithm>
 
 void init0(std::vector<sb::Sprite>& stones, sb::Texture& stonesTex) {
     sb::Vector2i size(128, 128);
@@ -1005,10 +1006,11 @@ public:
 
 	inline void setDropInteval(float dropIntervalInSeconds) { _dropIntervalInSeconds = dropIntervalInSeconds; }
 
-	void setHorizontalTetrominoPosition(sb::Vector2f pos) {
+	void setTetrominoPosition(sb::Vector2f pos) {
 		sb::Vector2f previousPos = _tetromino.getPosition();
 		sb::Vector2f newPos = getTransform() * pos;
-		_tetromino.setPosition(newPos.x, _tetromino.getPosition().y);
+		newPos.y = std::min(previousPos.y, newPos.y);
+		_tetromino.setPosition(newPos);
 
 		if (isInvalid(_tetromino))
 			_tetromino.setPosition(previousPos);
@@ -1256,6 +1258,17 @@ bool isTouchDown(sb::Window& window, Board& board) {
 	return false;
 }
 
+void input21(sb::Window& window, Board& board) {
+	if (sb::Input::isKeyGoingDown(sb::KeyCode::Left))
+		board.moveTetromino(-1, 0);
+	if (sb::Input::isKeyGoingDown(sb::KeyCode::Right))
+		board.moveTetromino(1, 0);
+	if (sb::Input::isKeyGoingDown(sb::KeyCode::Down))
+		board.moveTetromino(0, -1);
+	if (isTouchDown(window, board))
+	board.setTetrominoPosition(sb::Input::getTouchPosition(window));
+}
+
 void demo21() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
 	Board board(sb::Vector2i(10, 10));
@@ -1269,8 +1282,7 @@ void demo21() {
 		sb::Input::update();
 		window.update();
 		board.update(ds);
-		if (isTouchDown(window, board))
-			board.setHorizontalTetrominoPosition(sb::Input::getTouchPosition(window));
+		input21(window, board);
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(board);
@@ -1279,36 +1291,7 @@ void demo21() {
 	}
 }
 
-void input22(sb::Window& window, Board& board) {
-	if (sb::Input::isKeyGoingDown(sb::KeyCode::Left))
-		board.moveTetromino(-1, 0);
-	 if (sb::Input::isKeyGoingDown(sb::KeyCode::Right))
-	 	board.moveTetromino(1, 0);
-}
-
-void demo22() {
-	sb::Window window(getWindowSize(400, 3.f / 2.f));
-	Board board(sb::Vector2i(10, 10));
-
-	adjustCameraToBoard(window.getCamera(), board);
-	board.enableGrid(true);
-	//board.createTetromino('m', sb::Vector2i(1, 1));
-
-	while (window.isOpen()) {
-		float ds = getDeltaSeconds();
-		sb::Input::update();
-		window.update();
-		board.update(ds);
-		input22(window, board);
-
-		window.clear(sb::Color(1, 1, 1, 1));
-		window.draw(board);
-		window.display();
-	}
-}
-
 void demo() {
-	//demo22();
 	
 	demo21();
 
