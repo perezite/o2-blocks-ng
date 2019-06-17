@@ -10,26 +10,26 @@ namespace sb
 	class Sprite : public Drawable, public Transformable
 	{
 	public:
-		Sprite() 
-			: m_texture(NULL)
-		{ }
+		Sprite();
 
-		Sprite(Texture& texture)
-			: m_texture(&texture)
-		{ }
-		
+		Sprite(Texture& texture);
+
 		inline Texture* getTexture() { return m_texture; }
 
 		void setTexture(Texture& texture);
 
 		void setTexture(Texture& texture, const IntRect& textureArea);
 
-		inline Mesh& getMesh() { return SpriteMesh; }
+		void setColor(const Color& color);
+
+		inline Mesh& getMesh() { return m_mesh; }
 		
 		virtual void draw(DrawTarget& window, DrawStates states = DrawStates::getDefault());
 
 	private:
 		static Mesh SpriteMesh;
+
+		Mesh m_mesh;
 
 		Texture* m_texture;
 

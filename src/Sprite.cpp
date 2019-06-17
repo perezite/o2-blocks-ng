@@ -10,6 +10,17 @@ namespace sb
 		Vertex(Vector2f( 0.5f,  0.5f), Color(1, 1, 1, 1), Vector2f(1, 1))
 	}, PrimitiveType::TriangleStrip);
 
+	Sprite::Sprite()
+		: m_mesh(Sprite::SpriteMesh)
+	{ }
+
+	Sprite::Sprite(Texture& texture)
+		: m_texture(&texture), m_mesh(Sprite::SpriteMesh)
+	{ }
+
+	void initMesh() {
+	}
+
 	void Sprite::setTexture(Texture& texture)
 	{
 		const Vector2i size = texture.getSize();
@@ -22,11 +33,17 @@ namespace sb
 		texture.computeTransform(textureArea, m_textureTransform);
 	}
 
+	void Sprite::setColor(const Color& color) {
+		for (size_t i = 0; i < m_mesh.getVertexCount(); i++)
+			m_mesh[i].color = color;
+	}
+
+
 	void Sprite::draw(DrawTarget& target, DrawStates states)
 	{
 		states.transform *= getTransform();
 		states.texture = m_texture;
 		states.textureTransform = m_textureTransform;
-		target.draw(SpriteMesh.getVertices(), SpriteMesh.getPrimitiveType(), states);
+		target.draw(m_mesh.getVertices(), m_mesh.getPrimitiveType(), states);
 	}
 }

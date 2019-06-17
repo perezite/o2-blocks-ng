@@ -309,6 +309,8 @@ public:
         setType(type);
     }
 
+	inline void setColor(const sb::Color& color) { _sprite.setColor(color); }
+
     void setType(char type) {
         type = tolower(type);
         setTexture(type);
@@ -450,6 +452,11 @@ public:
 			blockPositions.push_back(getTransform() * _blocks[i].getPosition());
 
 		return blockPositions;
+	}
+
+	void setColor(const sb::Color& color) {
+		for (size_t i = 0; i < _blocks.size(); i++)
+			_blocks[i].setColor(color);
 	}
 
     void setType(char type) {
@@ -1057,6 +1064,15 @@ public:
 		}			
 	}
 
+	Tetromino computeProjection() {
+		Tetromino projection = _tetromino;
+		while (!isInvalid(projection))
+			move(projection, sb::Vector2i(0, -1));
+		move(projection, sb::Vector2i(0, 1));
+		
+		return projection;
+	}
+
 	void update(float ds) {
 		if (!_isDead) {
 			drop(_tetromino, ds);
@@ -1072,8 +1088,12 @@ public:
 		for (size_t i = 0; i < _blocks.size(); i++) 
 			target.draw(_blocks[i], states);
 		
-		if (_hasTetromino)
+		if (_hasTetromino) {
 			target.draw(_tetromino, states);
+			Tetromino projection = computeProjection();
+			projection.setColor(sb::Color(1, 1, 1, 0.25f));
+			target.draw(projection, states);
+		}
 	}
 };
 
@@ -1291,9 +1311,43 @@ void demo21() {
 	}
 }
 
+void input22(sb::Window& window, Board& board) {
+	if (sb::Input::isKeyGoingDown(sb::KeyCode::Left))
+		board.moveTetromino(-1, 0);
+	if (sb::Input::isKeyGoingDown(sb::KeyCode::Right))
+		board.moveTetromino(1, 0);
+	if (sb::Input::isKeyGoingDown(sb::KeyCode::Down))
+		board.moveTetromino(0, -1);
+	if (sb::Input::isKeyGoingDown(sb::KeyCode::Up))
+		board.rotateTetromino();
+	if (isTouchDown(window, board))
+		board.setTetrominoPosition(sb::Input::getTouchPosition(window));
+}
+
+void demo22() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Board board(sb::Vector2i(10, 10));
+
+	adjustCameraToBoard(window.getCamera(), board);
+	board.enableGrid(true);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		board.update(ds);
+		input22(window, board);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(board);
+		window.display();
+	}
+}
+
 void demo() {
-	
-	demo21();
+	demo22();
+
+	//demo21();
 
 	//demo20();
 
