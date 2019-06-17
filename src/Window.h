@@ -25,6 +25,8 @@ namespace sb
 
 		inline bool isOpen() { return m_isOpen; }
 
+		inline const Camera& getCamera() const { return m_camera; }
+
 		inline Camera& getCamera() { return m_camera; }
 
 		void update();

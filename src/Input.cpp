@@ -73,7 +73,8 @@ namespace sb
 	const sb::Vector2f Input::getTouchPosition(const sb::Window& window)
 	{
 		sb::Vector2f pixelPosition = getTouchPixelPosition(window);
-		return sb::Vector2f(pixelPosition.x / window.getResolution().x - 0.5f, 
+		float factor = window.getCamera().getWidth();
+		return factor * sb::Vector2f(pixelPosition.x / window.getResolution().x - 0.5f, 
 			pixelPosition.y * window.getInverseAspect() / window.getResolution().y - 0.5f * window.getInverseAspect());
 	}
 

@@ -59,7 +59,7 @@ void demo0() {
     }
 }
 
-void init1(sb::Mesh& background, sb::Camera& camera) {
+void init1(sb::Mesh& background, const sb::Camera& camera) {
     sb::Vector2f extent(camera.getWidth() * 0.5f, camera.getWidth() * camera.getInverseAspectRatio() * 0.5f);
     sb::Color bottomColor = sb::Color(252.0f / 255.0f, 182.0f / 255.0f, 159.0f / 255.0f, 1);
     sb::Color topColor = sb::Color(255.0f / 255.0f, 236.0f / 255.0f, 210.0f / 255.0f, 1);
@@ -360,6 +360,38 @@ inline int getWindowHeight(int width) {
     return int(width * aspect);
 }
 
+template <class V>
+void computeExtents(std::vector<V> v, V& min, V& max) {
+	min = max = V(v[0].x, v[0].y);
+
+	for (size_t i = 0; i < v.size(); i++) {
+		V& val = v[i];
+		if (val.x < min.x)
+			min.x = val.x;
+		if (val.x > max.x)
+			max.x = val.x;
+		if (val.y < min.y)
+			min.y = val.y;
+		if (val.y > max.y)
+			max.y = val.y;
+	}
+}
+
+sb::FloatRect getTransformedBounds(sb::FloatRect& bounds, const sb::Transform& transform) {
+	std::vector<sb::Vector2f> edges(4);
+	edges[0] = sb::Vector2f(bounds.left, bounds.bottom);
+	edges[1] = sb::Vector2f(bounds.left + bounds.width, bounds.bottom);
+	edges[2] = sb::Vector2f(bounds.left, bounds.bottom + bounds.height);
+	edges[3] = sb::Vector2f(bounds.left + bounds.width, bounds.bottom + bounds.height);
+	for (size_t i = 0; i < edges.size(); i++)
+		edges[i] *= transform;
+
+	sb::Vector2f min, max;
+	computeExtents(edges, min, max);
+	return sb::FloatRect(min.x, min.y, max.x - min.x, max.y - min.y);
+}
+
+
 class Tetromino : public sb::Drawable, public sb::Transformable {
 	char _type;
     std::vector<Block> _blocks;
@@ -370,23 +402,6 @@ protected:
     void clear() {
         _blocks.clear();
         _blockPositions.clear();	
-    }
-
-    template <class V>
-    void computeExtents(std::vector<V> v, V& min, V& max) {
-        min = max = V(v[0].x, v[0].y);
-
-        for (size_t i = 0; i < v.size(); i++) {
-            V& val = v[i];
-            if (val.x < min.x)
-                min.x = val.x;
-            if (val.x > max.x)
-                max.x = val.x;
-            if (val.y < min.y)
-                min.y = val.y;
-            if (val.y > max.y)
-                max.y = val.y;
-        }
     }
 
     void computeBlockBounds() {
@@ -414,20 +429,6 @@ protected:
             _blockPositions = { sb::Vector2i(0, 0)/*, sb::Vector2i(1, 0)*/ };
 
         createBlocks(_blockPositions, type);
-    }
-
-    sb::FloatRect getTransformedBounds(sb::FloatRect& bounds) {
-        std::vector<sb::Vector2f> edges(4);
-        edges[0] = sb::Vector2f(bounds.left, bounds.bottom);
-        edges[1] = sb::Vector2f(bounds.left + bounds.width, bounds.bottom);
-        edges[2] = sb::Vector2f(bounds.left, bounds.bottom + bounds.height);
-        edges[3] = sb::Vector2f(bounds.left + bounds.width, bounds.bottom + bounds.height);
-        for (size_t i = 0; i < edges.size(); i++) 
-            edges[i] *= getTransform();
-
-        sb::Vector2f min, max;
-        computeExtents(edges, min, max);
-        return sb::FloatRect(min.x, min.y, max.x - min.x, max.y - min.y);
     }
 
 public:
@@ -467,7 +468,7 @@ public:
         sb::Vector2f blockSize(1.f, 1.f);
         sb::FloatRect bounds(_blockBounds.left - 0.5f, _blockBounds.bottom - 0.5f, (float)_blockBounds.width, (float)_blockBounds.height);
 
-		return getTransformedBounds(bounds);
+		return getTransformedBounds(bounds, getTransform());
     }
 
     virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
@@ -993,9 +994,25 @@ public:
 		return sb::Vector2f(getScale().x * 1.f, getScale().y * inverseAspect);
 	}
 
+	sb::FloatRect getBounds() {
+		sb::Vector2f size = getSize();
+		sb::FloatRect bounds(-size.x / 2, -size.y / 2, size.x, size.y);
+		
+		return getTransformedBounds(bounds, getTransform());
+	}
+
 	inline void enableGrid(bool enabled) { _isGridEnabled = enabled; }
 
 	inline void setDropInteval(float dropIntervalInSeconds) { _dropIntervalInSeconds = dropIntervalInSeconds; }
+
+	void setHorizontalTetrominoPosition(sb::Vector2f pos) {
+		sb::Vector2f previousPos = _tetromino.getPosition();
+		sb::Vector2f newPos = getTransform() * pos;
+		_tetromino.setPosition(newPos.x, _tetromino.getPosition().y);
+
+		if (isInvalid(_tetromino))
+			_tetromino.setPosition(previousPos);
+	}
 
 	void createBlock(char type, const sb::Vector2i& position) {
 		Block block(type);
@@ -1049,12 +1066,12 @@ public:
 
 		if (_isGridEnabled)
 			target.draw(_grid, states);
+
+		for (size_t i = 0; i < _blocks.size(); i++) 
+			target.draw(_blocks[i], states);
+		
 		if (_hasTetromino)
 			target.draw(_tetromino, states);
-
-		for (size_t i = 0; i < _blocks.size(); i++) {
-			target.draw(_blocks[i], states);
-		}
 	}
 };
 
@@ -1227,14 +1244,49 @@ void demo20() {
 	}
 }
 
-void input21(sb::Window& window, Board& board) {
+void addBlocks(Board& board) {
+	for (int i = 0; i < board.getBoardSize().y; i++)
+		board.createBlock('m', sb::Vector2i(1, i));
+}
+
+bool isTouchDown(sb::Window& window, Board& board) {
+	if (sb::Input::isTouchDown(1)) 
+		return board.getBounds().contains(sb::Input::getTouchPosition(window)); 
+	
+	return false;
+}
+
+void demo21() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Board board(sb::Vector2i(10, 10));
+
+	adjustCameraToBoard(window.getCamera(), board);
+	board.enableGrid(true);
+	addBlocks(board);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		board.update(ds);
+		if (isTouchDown(window, board))
+			board.setHorizontalTetrominoPosition(sb::Input::getTouchPosition(window));
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(board);
+		drawOutline(window, board.getBounds(), 0.02f, sb::Color(0, 1, 0, 1));
+		window.display();
+	}
+}
+
+void input22(sb::Window& window, Board& board) {
 	if (sb::Input::isKeyGoingDown(sb::KeyCode::Left))
 		board.moveTetromino(-1, 0);
 	 if (sb::Input::isKeyGoingDown(sb::KeyCode::Right))
 	 	board.moveTetromino(1, 0);
 }
 
-void demo21() {
+void demo22() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
 	Board board(sb::Vector2i(10, 10));
 
@@ -1247,7 +1299,7 @@ void demo21() {
 		sb::Input::update();
 		window.update();
 		board.update(ds);
-		input21(window, board);
+		input22(window, board);
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(board);
@@ -1256,8 +1308,10 @@ void demo21() {
 }
 
 void demo() {
-	demo21();
+	//demo22();
 	
+	demo21();
+
 	//demo20();
 
 	//demo19();
