@@ -429,7 +429,7 @@ protected:
         else if (type == 'j')
             _blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(-1, 0), sb::Vector2i(0, -1), sb::Vector2i(1, -1) };
         else if (type == 'm')
-            _blockPositions = { sb::Vector2i(0, 0)/*, sb::Vector2i(1, 0)*/ };
+            _blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(1, 0) };
 
         createBlocks(_blockPositions, type);
     }
@@ -983,6 +983,33 @@ protected:
 		}
 	}
 
+	inline bool isValid(Tetromino& tetromino) { return !isInvalid(tetromino); }
+
+	bool isReachable(Tetromino& tetromino, const sb::Vector2f& targetPos, const sb::Vector2i& dir) {
+		sb::Vector2i boardPosTo = worldToBoardPosition(targetPos);
+		Tetromino testTetromino = tetromino;
+
+		while (isValid(testTetromino)) {
+			sb::Vector2i pos = worldToBoardPosition(testTetromino.getPosition());
+			if (pos == boardPosTo)
+				return true;
+			move(testTetromino, dir);
+		}
+
+		return false;
+	}
+
+	bool isReachable(Tetromino& tetromino, const sb::Vector2f& targetPos) {
+		static const std::vector<sb::Vector2i> directions = { sb::Vector2i(-1, 0), sb::Vector2i(1, 0), sb::Vector2i(0, -1) };
+
+		for (size_t i = 0; i < directions.size(); i++) {
+			if (isReachable(tetromino, targetPos, directions[i]))
+				return true;
+		}
+
+		return false;
+	}
+
 public:
 	Board(const sb::Vector2i& boardSize) 
 		: _boardSize(boardSize), _grid(boardSize, 0.01f), _isGridEnabled(false), 
@@ -1011,16 +1038,15 @@ public:
 
 	inline void enableGrid(bool enabled) { _isGridEnabled = enabled; }
 
-	inline void setDropInteval(float dropIntervalInSeconds) { _dropIntervalInSeconds = dropIntervalInSeconds; }
+	inline void setDropInterval(float dropIntervalInSeconds) { _dropIntervalInSeconds = dropIntervalInSeconds; }
 
 	void setTetrominoPosition(sb::Vector2f pos) {
 		sb::Vector2f previousPos = _tetromino.getPosition();
 		sb::Vector2f newPos = getTransform() * pos;
 		newPos.y = std::min(previousPos.y, newPos.y);
-		_tetromino.setPosition(newPos);
 
-		if (isInvalid(_tetromino))
-			_tetromino.setPosition(previousPos);
+		if (isReachable(_tetromino, newPos)) 
+			_tetromino.setPosition(newPos);
 	}
 
 	void createBlock(char type, const sb::Vector2i& position) {
