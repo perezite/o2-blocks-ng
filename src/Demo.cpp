@@ -871,8 +871,8 @@ class Board : public sb::Drawable, public sb::Transformable {
 	Light _light;
 	Tetromino _tetromino;
 	bool _hasTetromino;
-	float _dropIntervalInSeconds;
-	float _secondsSinceLastDrop;
+	float _stepIntervalInSeconds;
+	float _secondsSinceLastStep;
 	bool _isDead;
 
 protected:
@@ -883,6 +883,12 @@ protected:
 		_tetromino = tetromino;
 		_tetromino.setLight(_light);
 		_hasTetromino = true;
+	}
+
+	void death() {
+		std::cout << "You, sir, are a dead man!" << std::endl;
+		_hasTetromino = false;
+		_isDead = true;
 	}
 
 	void createRandomTetromino() {
@@ -947,6 +953,10 @@ protected:
 		return false;
 	}
 
+	inline bool isValid(Tetromino& tetromino) { 
+		return !isInvalid(tetromino); 
+	}
+
 	void freeze(Tetromino& tetromino) {
 		char type = tetromino.getType();
 		const std::vector<sb::Vector2f> blockPositions = tetromino.getBlockPositions();
@@ -957,12 +967,49 @@ protected:
 		}
 	}
 
-	void death() {
-		std::cout << "You, sir, are a dead man!" << std::endl;
-		_isDead = true;
+	bool isLineFull(size_t y) {
+		for (int x = 0; x < _boardSize.x; x++) {
+			if (!isOccupied(sb::Vector2i(x, y)))
+				return false;
+		}
+
+		return true;
 	}
 
-	void dropStep(Tetromino& tetromino) {
+	void removeBlocksFromLine(size_t y) {
+		for (std::vector<Block>::iterator it = _blocks.begin(); it != _blocks.end(); ) {
+			sb::Vector2i boardPos = worldToBoardPosition(it->getPosition());
+			if (boardPos.y == y)
+				it = _blocks.erase(it);
+			else
+				it++;
+		}
+	}
+
+	void dropBlocksAbove(int y) {
+		for (size_t i = 0; i < _blocks.size(); i++) {
+			sb::Vector2i boardPos = worldToBoardPosition(_blocks[i].getPosition());
+			if (boardPos.y > y) {
+				sb::Vector2i newBoardPos = boardPos - sb::Vector2i(0, 1);
+				_blocks[i].setPosition(boardToWorldPosition(newBoardPos));
+			}
+
+		}	
+	}
+
+	void clearLine(size_t y) {
+		while (isLineFull(y)) {
+			removeBlocksFromLine(y);
+			dropBlocksAbove(y);
+		}
+	}
+
+	void clearLines() {
+		for (int y = 0; y < _boardSize.y; y++)
+			clearLine(y);
+	}
+
+	void drop(Tetromino& tetromino) {
 		sb::Vector2f previousPosition = tetromino.getPosition();
 		move(tetromino, sb::Vector2i(0, -1));
 
@@ -970,20 +1017,20 @@ protected:
 			std::cout << "A collision, sir" << std::endl;
 			tetromino.setPosition(previousPosition);
 			freeze(tetromino);
+			clearLines();
 			createRandomTetromino();
 		}
 	}
 
-	void drop(Tetromino& tetromino, float ds) {
-		_secondsSinceLastDrop += ds;
+	void step(Tetromino& tetromino, float ds) {
+		_secondsSinceLastStep += ds;
 
-		while (_secondsSinceLastDrop >= _dropIntervalInSeconds) {
-			dropStep(tetromino);
-			_secondsSinceLastDrop -= _dropIntervalInSeconds;
+		while (_secondsSinceLastStep >= _stepIntervalInSeconds) {
+			drop(tetromino);
+			_secondsSinceLastStep -= _stepIntervalInSeconds;
 		}
 	}
 
-	inline bool isValid(Tetromino& tetromino) { return !isInvalid(tetromino); }
 
 	bool isReachable(Tetromino& tetromino, const sb::Vector2f& targetPos, const sb::Vector2i& dir) {
 		sb::Vector2i boardPosTo = worldToBoardPosition(targetPos);
@@ -1013,9 +1060,8 @@ protected:
 public:
 	Board(const sb::Vector2i& boardSize) 
 		: _boardSize(boardSize), _grid(boardSize, 0.01f), _isGridEnabled(false), 
-		_hasTetromino(false), _dropIntervalInSeconds(0.5f), _secondsSinceLastDrop(0), _isDead(false)
+		_hasTetromino(false), _stepIntervalInSeconds(0.5f), _secondsSinceLastStep(0), _isDead(false)
 	{
-		createRandomTetromino();
 	}
 
 	inline bool hasTetromino() const { return _hasTetromino; }
@@ -1038,7 +1084,7 @@ public:
 
 	inline void enableGrid(bool enabled) { _isGridEnabled = enabled; }
 
-	inline void setDropInterval(float dropIntervalInSeconds) { _dropIntervalInSeconds = dropIntervalInSeconds; }
+	inline void setStepInterval(float dropIntervalInSeconds) { _stepIntervalInSeconds = dropIntervalInSeconds; }
 
 	void setTetrominoPosition(sb::Vector2f pos) {
 		sb::Vector2f previousPos = _tetromino.getPosition();
@@ -1104,8 +1150,11 @@ public:
 	}
 
 	void update(float ds) {
+		if (!_hasTetromino)
+			createRandomTetromino();
+
 		if (!_isDead) {
-			drop(_tetromino, ds);
+			step(_tetromino, ds);
 		}
 	}
 
@@ -1421,8 +1470,36 @@ void demo23() {
 	}
 }
 
+void demo24() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Board board(sb::Vector2i(3, 3));
+
+	adjustCameraToBoard(window.getCamera(), board);
+	board.createBlock('j', sb::Vector2i(0, 0));
+	board.createBlock('j', sb::Vector2i(1, 0));
+	board.createBlock('j', sb::Vector2i(0, 1));
+	board.createBlock('j', sb::Vector2i(1, 1));
+	board.createTetromino('m', sb::Vector2i(2, 2));
+	board.rotateTetromino();
+	board.enableGrid(true);
+	board.setStepInterval(1);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		board.update(ds);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(board);
+		window.display();
+	}
+}
+
 void demo() {
-	demo23();
+	demo24();
+
+	//demo23();
 
 	//demo22();
 

@@ -15,7 +15,7 @@ namespace sb
 	{ }
 
 	Sprite::Sprite(Texture& texture)
-		: m_texture(&texture), m_mesh(Sprite::SpriteMesh)
+		: m_mesh(Sprite::SpriteMesh), m_texture(&texture)
 	{ }
 
 	void initMesh() {
