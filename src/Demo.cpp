@@ -1090,12 +1090,16 @@ public:
 		}			
 	}
 
+	void quickdrop() {
+		_tetromino = computeProjection();
+	}
+
 	Tetromino computeProjection() {
 		Tetromino projection = _tetromino;
 		while (!isInvalid(projection))
 			move(projection, sb::Vector2i(0, -1));
 		move(projection, sb::Vector2i(0, 1));
-		
+
 		return projection;
 	}
 
@@ -1370,8 +1374,57 @@ void demo22() {
 	}
 }
 
+void draw23(sb::DrawTarget& target, Board& board) {
+	Tetromino projection = board.computeProjection();
+	drawOutline(target, projection.getBounds(), 0.01f, sb::Color(0, 1, 0, 1));
+}
+
+void input23(sb::Window& window, Board& board) {
+	bool quickdrop = false;
+
+	if (sb::Input::isTouchDown(1)) {
+		Tetromino projection = board.computeProjection();
+		const sb::Vector2f touch = sb::Input::getTouchPosition(window);
+		if (projection.getBounds().contains(touch)) {
+			board.quickdrop();
+			quickdrop = true;
+		}
+	}
+
+	if (sb::Input::isKeyGoingDown(sb::KeyCode::Space)) {
+		board.quickdrop();
+		quickdrop = true;
+	}
+		
+	if (!quickdrop)
+		input22(window, board);
+}
+
+void demo23() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Board board(sb::Vector2i(10, 10));
+
+	adjustCameraToBoard(window.getCamera(), board);
+	board.enableGrid(true);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		board.update(ds);
+		input23(window, board);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(board);
+		draw23(window, board);
+		window.display();
+	}
+}
+
 void demo() {
-	demo22();
+	demo23();
+
+	//demo22();
 
 	//demo21();
 
