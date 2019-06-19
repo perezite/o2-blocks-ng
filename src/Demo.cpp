@@ -960,6 +960,7 @@ protected:
 	void freeze(Tetromino& tetromino) {
 		char type = tetromino.getType();
 		const std::vector<sb::Vector2f> blockPositions = tetromino.getBlockPositions();
+		_hasTetromino = false;
 
 		for (size_t i = 0; i < blockPositions.size(); i++) {
 			sb::Vector2i boardPosition = worldToBoardPosition(blockPositions[i]);
@@ -998,15 +999,15 @@ protected:
 	}
 
 	void clearLine(size_t y) {
-		while (isLineFull(y)) {
-			removeBlocksFromLine(y);
-			dropBlocksAbove(y);
-		}
+		removeBlocksFromLine(y);
+		dropBlocksAbove(y);
 	}
 
 	void clearLines() {
-		for (int y = 0; y < _boardSize.y; y++)
-			clearLine(y);
+		for (int y = 0; y < _boardSize.y; y++) {
+			while (isLineFull(y))
+				clearLine(y);
+		}
 	}
 
 	void drop(Tetromino& tetromino) {
@@ -1472,14 +1473,18 @@ void demo23() {
 
 void demo24() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
-	Board board(sb::Vector2i(3, 3));
+	Board board(sb::Vector2i(4, 4));
 
 	adjustCameraToBoard(window.getCamera(), board);
-	board.createBlock('j', sb::Vector2i(0, 0));
-	board.createBlock('j', sb::Vector2i(1, 0));
-	board.createBlock('j', sb::Vector2i(0, 1));
-	board.createBlock('j', sb::Vector2i(1, 1));
-	board.createTetromino('m', sb::Vector2i(2, 2));
+	board.createBlock('m', sb::Vector2i(0, 0));
+	board.createBlock('m', sb::Vector2i(1, 0));
+	board.createBlock('m', sb::Vector2i(2, 0));
+	board.createBlock('m', sb::Vector2i(1, 1));
+	board.createBlock('m', sb::Vector2i(0, 2));
+	board.createBlock('m', sb::Vector2i(1, 2));
+	board.createBlock('m', sb::Vector2i(2, 2));
+	board.createBlock('m', sb::Vector2i(1, 3));
+	board.createTetromino('i', sb::Vector2i(3, 2));
 	board.rotateTetromino();
 	board.enableGrid(true);
 	board.setStepInterval(1);
@@ -1496,8 +1501,31 @@ void demo24() {
 	}
 }
 
+void demo25() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Board board(sb::Vector2i(10, 18));
+
+	adjustCameraToBoard(window.getCamera(), board);
+	board.enableGrid(true);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		board.update(ds);
+		input22(window, board);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(board);
+		window.display();
+	}
+}
+
+
 void demo() {
-	demo24();
+	demo25();
+
+	//demo24();
 
 	//demo23();
 
