@@ -874,6 +874,7 @@ class Board : public sb::Drawable, public sb::Transformable {
 	float _stepIntervalInSeconds;
 	float _secondsSinceLastStep;
 	bool _isDead;
+	size_t _linesCleared;
 
 protected:
 
@@ -994,13 +995,13 @@ protected:
 				sb::Vector2i newBoardPos = boardPos - sb::Vector2i(0, 1);
 				_blocks[i].setPosition(boardToWorldPosition(newBoardPos));
 			}
-
 		}	
 	}
 
 	void clearLine(size_t y) {
 		removeBlocksFromLine(y);
 		dropBlocksAbove(y);
+		_linesCleared++;
 	}
 
 	void clearLines() {
@@ -1032,7 +1033,6 @@ protected:
 		}
 	}
 
-
 	bool isReachable(Tetromino& tetromino, const sb::Vector2f& targetPos, const sb::Vector2i& dir) {
 		sb::Vector2i boardPosTo = worldToBoardPosition(targetPos);
 		Tetromino testTetromino = tetromino;
@@ -1061,7 +1061,8 @@ protected:
 public:
 	Board(const sb::Vector2i& boardSize) 
 		: _boardSize(boardSize), _grid(boardSize, 0.01f), _isGridEnabled(false), 
-		_hasTetromino(false), _stepIntervalInSeconds(0.5f), _secondsSinceLastStep(0), _isDead(false)
+		_hasTetromino(false), _stepIntervalInSeconds(0.5f), _secondsSinceLastStep(0), 
+		_isDead(false), _linesCleared(0)
 	{
 	}
 
@@ -1070,6 +1071,8 @@ public:
 	inline Tetromino& getTetromino() { return _tetromino; }
 
 	inline const sb::Vector2i& getBoardSize() const { return _boardSize; }
+
+	inline size_t getLinesCleared() const { return _linesCleared; }
 
 	sb::Vector2f getSize() const {
 		float inverseAspect = _boardSize.y / float(_boardSize.x);
@@ -1521,9 +1524,78 @@ void demo25() {
 	}
 }
 
+namespace {
+	class Game : public sb::Drawable {
+		Board _board;
+		size_t _linesCleared;
+		size_t _score;
+
+	protected:
+		void updateScore() {
+			size_t previousLinesCleared = _linesCleared;
+			_linesCleared = _board.getLinesCleared();
+
+			size_t newLinesCleared = _linesCleared - previousLinesCleared;
+			if (newLinesCleared > 0) {
+				_score += (size_t)pow(10, newLinesCleared);
+				SB_MESSAGE("Score: " << _score);
+			}
+		}
+
+		void updateStepInterval() {
+			size_t steps = _board.getLinesCleared() / 10;
+			float stepInterval = std::max(0.5f - 0.1f * steps, 0.1f);
+			_board.setStepInterval(stepInterval);
+		}
+
+	public:
+		Game(const sb::Vector2i& boardSize) : _board(boardSize), _linesCleared(0), _score(0)
+		{ }
+
+		inline Board& getBoard() { return _board; }
+
+		void input(sb::Window& window) {
+			input22(window, _board);
+		}
+
+		void update(float ds) {
+			_board.update(ds);
+
+			updateScore();
+			updateStepInterval();
+		}
+
+		virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
+			target.draw(_board, states);
+		}
+	};
+}
+
+void demo26() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Game game(sb::Vector2i(10, 10));
+
+	adjustCameraToBoard(window.getCamera(), game.getBoard());
+	game.getBoard().enableGrid(true);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		game.update(ds);
+		game.input(window);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(game);
+		window.display();
+	}
+}
+
 
 void demo() {
-	demo25();
+	demo26();
+	
+	//demo25();
 
 	//demo24();
 
