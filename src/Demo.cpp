@@ -1095,8 +1095,11 @@ public:
 		sb::Vector2f newPos = getTransform() * pos;
 		newPos.y = std::min(previousPos.y, newPos.y);
 
-		if (isReachable(_tetromino, newPos)) 
-			_tetromino.setPosition(newPos);
+		if (isReachable(_tetromino, newPos)) {
+			sb::Vector2i boardPos = worldToBoardPosition(newPos);
+			sb::Vector2f worldPos = boardToWorldPosition(boardPos);
+			_tetromino.setPosition(worldPos);
+		}
 	}
 
 	void createBlock(char type, const sb::Vector2i& position) {
@@ -1524,11 +1527,47 @@ void demo25() {
 	}
 }
 
+bool isProjectionTouchGoingDown(sb::Window& window, Board& board) {
+	if (sb::Input::isTouchGoingDown(1)) {
+		Tetromino projection = board.computeProjection();
+		const sb::Vector2f touch = sb::Input::getTouchPosition(window);
+		return projection.getBounds().contains(touch);
+	}
+
+	return false;
+}
+
+sb::Vector2f getSwipe(sb::Window& window, float ds) {
+	static sb::Vector2f start;
+	static float secondsSinceStart;
+	static bool swiping = false;
+	const float maxSwipeSeconds = 0.75f;
+
+	bool swipeStarting = sb::Input::isTouchGoingDown(1);
+	bool swipeEnding = swiping && !sb::Input::isTouchGoingDown(1) && !sb::Input::isTouchDown(1);
+
+	if (swipeStarting) {
+		start = sb::Input::getTouchPosition(window);
+		swiping = true;
+		secondsSinceStart = 0;
+		return sb::Vector2f(0, 0);
+	}
+	else if (swipeEnding) {
+		swiping = false;
+		if (secondsSinceStart <= maxSwipeSeconds)
+			return sb::Input::getTouchPosition(window) - start;
+	}
+
+	secondsSinceStart += ds;
+	return sb::Vector2f(0, 0);
+}
+
 namespace {
 	class Game : public sb::Drawable {
 		Board _board;
 		size_t _linesCleared;
 		size_t _score;
+		sb::Vector2f touchOffset;
 
 	protected:
 		void updateScore() {
@@ -1550,12 +1589,35 @@ namespace {
 
 	public:
 		Game(const sb::Vector2i& boardSize) : _board(boardSize), _linesCleared(0), _score(0)
-		{ }
+		{ 
+			_board.createTetromino('j');
+		}
 
 		inline Board& getBoard() { return _board; }
 
-		void input(sb::Window& window) {
-			input22(window, _board);
+		void input(sb::Window& window, float ds) {
+			auto test = 0.1f * window.getInverseAspect();
+			std::cout << test << std::endl;
+
+			if (sb::Input::isTouchGoingDown(1))
+				touchOffset = _board.getTetromino().getPosition() - sb::Input::getTouchPosition(window);
+			if (sb::Input::isTouchDown(1))
+				_board.setTetrominoPosition(sb::Input::getTouchPosition(window) + touchOffset);
+			if (getSwipe(window, ds).y > 0.05f * window.getInverseAspect())
+				_board.rotateTetromino();
+			if (isProjectionTouchGoingDown(window, _board))
+				_board.quickdrop();
+
+			if (sb::Input::isKeyGoingDown(sb::KeyCode::Left))
+				_board.moveTetromino(-1, 0);
+			if (sb::Input::isKeyGoingDown(sb::KeyCode::Right))
+				_board.moveTetromino(1, 0);
+			if (sb::Input::isKeyGoingDown(sb::KeyCode::Down))
+				_board.moveTetromino(0, -1);
+			if (sb::Input::isKeyGoingDown(sb::KeyCode::Up))
+				_board.rotateTetromino();
+			if (sb::Input::isKeyGoingDown(sb::KeyCode::Space))
+				_board.quickdrop();
 		}
 
 		void update(float ds) {
@@ -1573,7 +1635,7 @@ namespace {
 
 void demo26() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
-	Game game(sb::Vector2i(10, 10));
+	Game game(sb::Vector2i(10, 18));
 
 	adjustCameraToBoard(window.getCamera(), game.getBoard());
 	game.getBoard().enableGrid(true);
@@ -1583,7 +1645,7 @@ void demo26() {
 		sb::Input::update();
 		window.update();
 		game.update(ds);
-		game.input(window);
+		game.input(window, ds);
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(game);
