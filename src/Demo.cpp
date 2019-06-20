@@ -269,18 +269,28 @@ protected:
         return texture;
     }
 
-    inline const sb::IntRect getTextureArea(std::size_t row, std::size_t col) {
+    inline const sb::IntRect getTextureArea(std::size_t x, std::size_t y) {
         static sb::Vector2i blockSize(128, 128);
-        return sb::IntRect(col * blockSize.x, row * blockSize.y, blockSize.x, blockSize.y);
+        return sb::IntRect(x * blockSize.x, y * blockSize.y, blockSize.x, blockSize.y);
     }
 
     void setTexture(char type) {
         if (type == 'i')
-            _sprite.setTexture(getSheet(), getTextureArea(2, 1));
+            _sprite.setTexture(getSheet(), getTextureArea(1, 2));
         else if (type == 'j')
             _sprite.setTexture(getSheet(), getTextureArea(2, 2));
+		else if (type == 'l')
+			_sprite.setTexture(getSheet(), getTextureArea(1, 1));
+		else if (type == 'o')
+			_sprite.setTexture(getSheet(), getTextureArea(0, 2));
+		else if (type == 's')
+			_sprite.setTexture(getSheet(), getTextureArea(0, 1));
+		else if (type == 't')
+			_sprite.setTexture(getSheet(), getTextureArea(0, 0));
+		else if (type == 'z')
+			_sprite.setTexture(getSheet(), getTextureArea(2, 1));
         else if (type == 'm')
-            _sprite.setTexture(getSheet(), getTextureArea(2, 1));
+            _sprite.setTexture(getSheet(), getTextureArea(1, 2));
         else
             SB_ERROR("Invalid Tetromino type " << type);
     }
@@ -424,9 +434,19 @@ protected:
     }
 
     void createBlocks(char type) {
-        if (type == 'i')
-            _blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(-1, 0), sb::Vector2i(1, 0), sb::Vector2i(2, 0) };
-        else if (type == 'j')
+		if (type == 'i')
+			_blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(-1, 0), sb::Vector2i(1, 0), sb::Vector2i(2, 0) };
+		else if (type == 'j')
+			_blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(-1, 0), sb::Vector2i(1, 0), sb::Vector2i(1, -1) };
+		else if (type == 'l')
+			_blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(-1, 0), sb::Vector2i(1, 0), sb::Vector2i(-1, -1) };
+		else if (type == 'o')
+			_blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(1, 0), sb::Vector2i(0, 1), sb::Vector2i(1, 1) };
+		else if (type == 's')
+			_blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(1, 0), sb::Vector2i(0, -1), sb::Vector2i(-1, -1) };
+		else if (type == 't')
+			_blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(-1, 0), sb::Vector2i(1, 0), sb::Vector2i(0, -1) };
+        else if (type == 'z')
             _blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(-1, 0), sb::Vector2i(0, -1), sb::Vector2i(1, -1) };
         else if (type == 'm')
             _blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(1, 0) };
@@ -442,7 +462,7 @@ public:
 	inline char getType() const { return _type; }
 
 	inline static const std::vector<char> getTypes() {
-		return{ 'i', 'j' };
+		return{ 'i', 'j', 'l', 'o', 's', 't', 'z' };
 	}
 
 	const std::vector<sb::Vector2f> getBlockPositions() {
@@ -864,6 +884,7 @@ void demo13() {
 }
 
 class Board : public sb::Drawable, public sb::Transformable {
+	sb::DrawBatch _batch;
 	sb::Vector2i _boardSize;
 	Grid _grid;
 	bool _isGridEnabled;
@@ -1016,7 +1037,7 @@ protected:
 		move(tetromino, sb::Vector2i(0, -1));
 
 		if (isInvalid(tetromino)) {
-			std::cout << "A collision, sir" << std::endl;
+			//std::cout << "A collision, sir" << std::endl;
 			tetromino.setPosition(previousPosition);
 			freeze(tetromino);
 			clearLines();
@@ -1060,11 +1081,10 @@ protected:
 
 public:
 	Board(const sb::Vector2i& boardSize) 
-		: _boardSize(boardSize), _grid(boardSize, 0.01f), _isGridEnabled(false), 
-		_hasTetromino(false), _stepIntervalInSeconds(0.5f), _secondsSinceLastStep(0), 
-		_isDead(false), _linesCleared(0)
-	{
-	}
+		: _batch(1024), _boardSize(boardSize), _grid(boardSize, 0.01f), 
+		_isGridEnabled(false), _hasTetromino(false), _stepIntervalInSeconds(0.5f), 
+		_secondsSinceLastStep(0), _isDead(false), _linesCleared(0)
+	{ }
 
 	inline bool hasTetromino() const { return _hasTetromino; }
 
@@ -1127,7 +1147,7 @@ public:
 		_tetromino.translate(worldTranslation);
 
 		if (isInvalid(_tetromino)) {
-			std::cout << "Sorry man, no can do!" << std::endl;
+			//std::cout << "Sorry man, no can do!" << std::endl;
 			_tetromino.translate(-worldTranslation);
 		}
 	}
@@ -1138,13 +1158,15 @@ public:
 		_tetromino.rotate(-90 * sb::ToRadian);
 
 		if (isInvalid(_tetromino)) {
-			std::cout << "Sorry, no can do!" << std::endl;
+			//std::cout << "Sorry, no can do!" << std::endl;
 			_tetromino.rotate(90 * sb::ToRadian);
 		}			
 	}
 
 	void quickdrop() {
 		_tetromino = computeProjection();
+		freeze(_tetromino);
+		clearLines();
 	}
 
 	Tetromino computeProjection() {
@@ -1172,13 +1194,15 @@ public:
 			target.draw(_grid, states);
 
 		for (size_t i = 0; i < _blocks.size(); i++) 
-			target.draw(_blocks[i], states);
+			_batch.draw(_blocks[i], states);
+		target.draw(_batch);
 		
 		if (_hasTetromino) {
-			target.draw(_tetromino, states);
+			_batch.draw(_tetromino, states);
 			Tetromino projection = computeProjection();
 			projection.setColor(sb::Color(1, 1, 1, 0.25f));
-			target.draw(projection, states);
+			_batch.draw(projection, states);
+			target.draw(_batch);
 		}
 	}
 };
@@ -1589,16 +1613,11 @@ namespace {
 
 	public:
 		Game(const sb::Vector2i& boardSize) : _board(boardSize), _linesCleared(0), _score(0)
-		{ 
-			_board.createTetromino('j');
-		}
+		{ }
 
 		inline Board& getBoard() { return _board; }
 
 		void input(sb::Window& window, float ds) {
-			auto test = 0.1f * window.getInverseAspect();
-			std::cout << test << std::endl;
-
 			if (sb::Input::isTouchGoingDown(1))
 				touchOffset = _board.getTetromino().getPosition() - sb::Input::getTouchPosition(window);
 			if (sb::Input::isTouchDown(1))
@@ -1653,9 +1672,30 @@ void demo26() {
 	}
 }
 
+void demo27() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Game game(sb::Vector2i(10, 18));
+
+	adjustCameraToBoard(window.getCamera(), game.getBoard());
+	game.getBoard().enableGrid(true);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		game.update(ds);
+		game.input(window, ds);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(game);
+		window.display();
+	}
+}
 
 void demo() {
-	demo26();
+	demo27();
+
+	//demo26();
 	
 	//demo25();
 
