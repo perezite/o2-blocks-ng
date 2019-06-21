@@ -1807,31 +1807,28 @@ void demo29() {
 
 class TransformEffects {
 	sb::Transformable& _target;
-	Animationf _bounce;
 	Animation2f _drift;
 	Animationf _spin;
+	Animationf _wobble;
 
 public:
 	TransformEffects(sb::Transformable& target) : _target(target) { }
 
-	inline Animationf& getBounce() { return _bounce; }
+	inline bool isMoving() { return _drift.isPlaying(); }
 
-	inline Animation2f& getDrift() { return _drift; }
+	inline bool isRotating() { return _spin.isPlaying(); }
 
-	inline Animationf& getSpin() { return _spin; }
+	inline bool isScaling() { return _wobble.isPlaying(); }
 
-	void bounce() {
-		if (!_bounce.isPlaying()) {
-			float scale = _target.getScale().x;
-			_bounce.tween = sb::Tweenf().quintInOut(scale, 1.4f * scale, 0.2f)
-				.expoOut(1.4f * scale, scale, 0.4f);
-			_bounce.start();
-		}
-	}
+	inline sb::Vector2f getTargetPosition() { return _drift.targetValue(); }
+
+	inline float getTargetRotation() { return _spin.targetValue(); }
+
+	inline float getTargetScale() { return _wobble.targetValue(); }
 
 	void drift(const sb::Vector2f& target) {
 		const sb::Vector2f& pos = _target.getPosition();
-		_drift.tween = sb::Tween2f().sineOut(pos, target, 0.2f);
+		_drift.tween = sb::Tween2f().sineOut(pos, target, 0.15f);
 		_drift.start();
 	}
 
@@ -1840,18 +1837,34 @@ public:
 		_spin.start();
 	}
 
+	void pop() {
+		if (!_wobble.isPlaying()) {
+			float scale = _target.getScale().x;
+			_wobble.tween = sb::Tweenf().quintInOut(scale, 1.4f * scale, 0.2f)
+				.expoOut(1.4f * scale, scale, 0.4f);
+			_wobble.start();
+		}
+	}
+	
+	void die(float duration = 0.8f) {
+		_wobble.tween = sb::Tweenf().bounceInOut(_target.getScale().x, 0, duration);
+		float angle = _target.getRotation();
+		_spin.tween = sb::Tweenf().backInOut(angle, angle + sb::random(-90, 90) * sb::ToRadian, 0.3f * duration);
+		_wobble.start();
+		_spin.start();
+	}
+
 	void update(float ds) {
-		_bounce.update(ds);
 		_drift.update(ds);
+		_wobble.update(ds);
 		_spin.update(ds);
 
-		if (_bounce.isPlaying())
-			_target.setScale(_bounce.value());
+		if (_wobble.isPlaying())
+			_target.setScale(_wobble.value());
 		if (_drift.isPlaying())
 			_target.setPosition(_drift.value());
 		if (_spin.isPlaying())
 			_target.setRotation(_spin.value());
-
 	}
 };
 
@@ -1887,7 +1900,7 @@ void demo30() {
 		window.update();
 		quad.update(ds);
 		if (sb::Input::isTouchGoingDown(1)) {
-			quad.getEffects().bounce();
+			quad.getEffects().pop();
 		}
 
 		window.clear(sb::Color(1, 1, 1, 1));
@@ -1919,15 +1932,14 @@ void demo31() {
 }
 
 void print32(TransformEffects& effects) {
-	if (effects.getBounce().isPlaying())
-		std::cout << "bounce: " << effects.getBounce().targetValue() << std::endl;
+	if (effects.isMoving())
+		std::cout << "drift: " << effects.getTargetPosition().x << " " << effects.getTargetPosition().y << std::endl;
 
-	if (effects.getDrift().isPlaying())
-		std::cout << "drift: " << effects.getDrift().targetValue().x << " " << effects.getDrift().targetValue().y << std::endl;
+	if (effects.isRotating())
+	std::cout << "spin: " << effects.getTargetRotation() * sb::ToDegrees << std::endl;
 
-	if (effects.getSpin().isPlaying())
-		std::cout << "spin: " << effects.getSpin().targetValue() * sb::ToDegrees << std::endl;
-
+	if (effects.isScaling())
+		std::cout << "pop: " << effects.getTargetScale() << std::endl;
 }
 
 sb::Vector2f discretize(const sb::Vector2f& v, const sb::Vector2f& discretization) {
@@ -1958,11 +1970,11 @@ void demo32() {
 			effects.drift(discretize(touch, sb::Vector2f(0.1f, 0.1f)));
 		}
 		if (sb::Input::isKeyGoingDown(sb::KeyCode::Up)) {
-			float angle = effects.getSpin().targetValue();
+			float angle = effects.getTargetRotation();
 			effects.spin(angle - 90 * sb::ToRadian);
 		}
 		if (sb::Input::isTouchGoingDown(1)) 
-			effects.bounce();
+			effects.pop();
 
 		print32(effects);
 
@@ -1977,6 +1989,8 @@ void demo33() {
 	Light light;
 	Block block('z');
 	TransformEffects effects(block);
+	
+	srand(1234567891);
 
 	block.setScale(0.1f);
 	block.setLight(light);
@@ -1986,17 +2000,13 @@ void demo33() {
 		sb::Input::update();
 		window.update();
 		effects.update(ds);
-		if (sb::Input::isTouchGoingDown(1)) {
-			sb::Vector2f touch = sb::Input::getTouchPosition(window);
-			effects.bounce();
-			effects.drift(touch);
-		}
-		if (sb::Input::isKeyGoingDown(sb::KeyCode::Up)) {
-			float angle = effects.getSpin().targetValue();
-			effects.spin(angle + 90 * sb::ToRadian);
-		}
-
-		print32(effects);
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::d))
+			effects.die(1.1f);
+		//if (sb::Input::isKeyDown(sb::KeyCode::b)) {
+		//	sb::vector2f discretization(0.1f, 0.1f);
+		//  sb::Vector2f discretized = discretize(block.getPosition());
+		//	effects.bounce(discretized - sb::Vector2f(0, -discretization.y));
+		// }
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(block);
@@ -2005,9 +2015,9 @@ void demo33() {
 }
 
 void demo() {
-	//demo33();
+	demo33();
 
-	demo32();
+	//demo32();
 
 	//demo31();
 

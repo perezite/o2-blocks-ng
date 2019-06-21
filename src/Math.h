@@ -15,8 +15,13 @@ namespace sb
 		return float(rand()) / float(RAND_MAX);
 	}
 
+	template <class T>
+	inline T lerp(float t, const T& start, const T& end) {
+		return (1 - t) * start + t * end;
+	}
+
 	inline float random(float min, float max) {
-		return min + (max - min) * random();
+		return lerp(random(), min, max);
 	}
 
 	inline float random(float max) {
@@ -55,10 +60,5 @@ namespace sb
 
 	inline float clamp(float t, float min, float max) {
 		return t > max ? max : t < min ? min : t;
-	}
-
-	template <class T>
-	inline T lerp(float t, const T& start, const T& end) {
-		return (1 - t) * start + t * end;
 	}
 }
