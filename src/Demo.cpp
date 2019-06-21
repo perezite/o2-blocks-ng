@@ -405,7 +405,6 @@ sb::FloatRect getTransformedBounds(sb::FloatRect& bounds, const sb::Transform& t
 	return sb::FloatRect(min.x, min.y, max.x - min.x, max.y - min.y);
 }
 
-
 class Tetromino : public sb::Drawable, public sb::Transformable {
 	char _type;
     std::vector<Block> _blocks;
@@ -1803,67 +1802,60 @@ void demo29() {
 }
 
 
-class MyQuad;
-
-class QuadEffects {
-	MyQuad& _quad;
+class TransformEffects {
+	sb::Transformable& _target;
 	Animationf _bounce;
 	Animation2f _boost;
 
 public:
-	QuadEffects(MyQuad& quad) : _quad(quad) { }
-	void bounce();
-	void boost(const sb::Vector2f& target);
-	void update(float ds);
-};
+	TransformEffects(sb::Transformable& target) : _target(target) { }
 
-class MyQuad : public sb::Drawable, public sb::Transformable {
-	sb::Quad _quad;
-	QuadEffects _effects;
-
-public:
-	MyQuad::MyQuad() : _effects(*this) 
-	{ }
-
-	void MyQuad::update(float ds) {
-		_effects.update(ds);
-	}
-
-	inline QuadEffects& MyQuad::getEffects() { return _effects; }
-
-	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
-		states.transform *= getTransform();
-		target.draw(_quad, states);
-	}
-};
-
-// class QuadEffects
-	void QuadEffects::bounce() {
+	void bounce() {
 		if (!_bounce.isPlaying()) {
-			float scale = _quad.getScale().x;
+			float scale = _target.getScale().x;
 			_bounce.tween = sb::Tweenf().quintInOut(scale, 2 * scale, 0.2f)
 				.sineInOut(2 * scale, scale, 0.7f);
 			_bounce.start();
 		}
 	}
 
-	void QuadEffects::boost( const sb::Vector2f& target) {
-		const sb::Vector2f& pos = _quad.getPosition();
+	void boost(const sb::Vector2f& target) {
+		const sb::Vector2f& pos = _target.getPosition();
 		_boost.tween = sb::Tween2f().bounceOut(pos, target, 1);
 		_boost.start();
 	}
 
-	void QuadEffects::update(float ds) {
+	void update(float ds) {
 		_bounce.update(ds);
 		_boost.update(ds);
 
 		if (_bounce.isPlaying())
-			_quad.setScale(_bounce.value());
+			_target.setScale(_bounce.value());
 		if (_boost.isPlaying())
-			_quad.setPosition(_boost.value());
-	
+			_target.setPosition(_boost.value());
+
 	}
-// 
+};
+
+class MyQuad : public sb::Drawable, public sb::Transformable {
+	sb::Quad _quad;
+	TransformEffects _effects;
+
+public:
+	MyQuad() : _effects(*this)
+	{ }
+
+	void update(float ds) {
+		_effects.update(ds);
+	}
+
+	inline TransformEffects& getEffects() { return _effects; }
+
+	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
+		states.transform *= getTransform();
+		target.draw(_quad, states);
+	}
+};
 
 void demo30() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
@@ -1908,8 +1900,34 @@ void demo31() {
 	}
 }
 
+void demo32() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Tetromino tetromino;
+	TransformEffects effects(tetromino);
+
+	tetromino.setScale(0.1f);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		effects.update(ds);
+		if (sb::Input::isTouchGoingDown(1)) {
+			sb::Vector2f touch = sb::Input::getTouchPosition(window);
+			effects.bounce();
+			effects.boost(touch);
+		}
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(tetromino);
+		window.display();
+	}
+}
+
 void demo() {
-	demo31();
+	demo32();
+
+	//demo31();
 
 	//demo30();
 
