@@ -1802,23 +1802,19 @@ void demo29() {
 	}
 }
 
-class QuadEffects : public sb::Transformable {
+
+class MyQuad;
+
+class QuadEffects {
+	MyQuad& _quad;
 	Animationf _bounce;
+	Animation2f _boost;
 
 public:
-	QuadEffects() {
-		_bounce.tween = sb::Tweenf().quintInOut(1, 2, 0.2f).sineInOut(2, 1, 0.7f);
-	}
-
-	void bounce() {
-		if (!_bounce.isPlaying())
-			_bounce.start();
-	}
-
-	void update(float ds) {
-		_bounce.update(ds);
-		setScale(_bounce.value());
-	}
+	QuadEffects(MyQuad& quad) : _quad(quad) { }
+	void bounce();
+	void boost(const sb::Vector2f& current, const sb::Vector2f& target);
+	void update(float ds);
 };
 
 class MyQuad : public sb::Drawable, public sb::Transformable {
@@ -1826,22 +1822,45 @@ class MyQuad : public sb::Drawable, public sb::Transformable {
 	QuadEffects _effects;
 
 public:
-	void update(float ds) {
+	MyQuad::MyQuad() : _effects(*this) 
+	{ }
+
+	void MyQuad::update(float ds) {
 		_effects.update(ds);
 	}
 
-	inline QuadEffects& getEffects() { return _effects; }
-
-	inline void drawWithEffects(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
-		states.transform = _effects.getTransform() * states.transform;
-		draw(target, states);
-	}
+	inline QuadEffects& MyQuad::getEffects() { return _effects; }
 
 	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
 		states.transform *= getTransform();
 		target.draw(_quad, states);
 	}
 };
+
+// class QuadEffects
+	void QuadEffects::bounce() {
+		if (!_bounce.isPlaying()) {
+			float scale = _quad.getScale().x;
+			_bounce.tween = sb::Tweenf().quintInOut(scale, 2 * scale, 0.2f)
+				.sineInOut(2 * scale, scale, 0.7f);
+			_bounce.start();
+		}
+	}
+
+	void QuadEffects::boost(const sb::Vector2f& current, const sb::Vector2f& target) {
+		if (!_boost.isPlaying()) {
+			_boost.tween = sb::Tween2f().bounceOut(current - target, sb::Vector2f(0, 0), 1);
+			_boost.start();
+		}
+	}
+
+	void QuadEffects::update(float ds) {
+		if (_bounce.isPlaying()) {
+			_bounce.update(ds);
+			_quad.setScale(_bounce.value());
+		}
+	}
+// 
 
 void demo30() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
@@ -1854,16 +1873,39 @@ void demo30() {
 		sb::Input::update();
 		window.update();
 		quad.update(ds);
-		if (sb::Input::isTouchGoingDown(1))
+		if (sb::Input::isTouchGoingDown(1)) {
 			quad.getEffects().bounce();
+		}
 
 		window.clear(sb::Color(1, 1, 1, 1));
-		quad.drawWithEffects(window);
+		window.draw(quad);
+		window.display();
+	}
+}
+
+void demo31() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	MyQuad quad;
+
+	quad.setScale(0.1f);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		quad.update(ds);
+		//if (sb::Input::isTouchGoingDown(1))
+			// quad.tweenTowards(sb::Vector2f(0.4f, 0.4f));
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(quad);
 		window.display();
 	}
 }
 
 void demo() {
+	//demo31();
+
 	demo30();
 
 	//demo29();
