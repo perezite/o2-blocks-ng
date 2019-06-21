@@ -1714,45 +1714,72 @@ bool isTouchGoingDown(sb::Window& window, sb::Quad& quad) {
 }
 
 template <class T>
-struct Animation {
-	sb::Tween tween;
-	float duration;
-	T start;
-	T end;
+struct Animation2 {
+	sb::Tween _tween;
+	float _duration;
+	T _start;
+	T _end;
+
+	void init(const T& start, const T& end, float duration, const sb::Tween& normalizedTween) {
+		_tween = normalizedTween;
+		_duration = duration;
+		_start = start;
+		_end = end;
+	}
 
 	inline T value(float t) {
-		return sb::lerp(tween.value(t / duration), start, end);
+		_duration = std::max(_duration, 0.0001f);
+		return sb::lerp(_tween.value(t / _duration), _start, _end);
 	}
 };
 
 class Animator {
 	sb::Transformable* _transformable;
-	bool _hasTransformable;
 
-	Animation<sb::Vector2f> _positionAnimation;
+	Animation2<sb::Vector2f> _positionAnimation;
 	bool _hasPositionAnimation;
 	float _positionAnimationSecondsElapsed;
 
+	Animation2<sb::Vector2f> _scaleAnimation;
+	bool _hasScaleAnimation;
+	float _scaleAnimationSecondsElapsed;
+
 public:
-	Animator() : _hasTransformable(false), _hasPositionAnimation(false), _positionAnimationSecondsElapsed(0)
+	Animator() : _transformable(NULL), _hasPositionAnimation(false), _positionAnimationSecondsElapsed(0),
+		_hasScaleAnimation(false), _scaleAnimationSecondsElapsed(0)
 	{ }
 
 	inline void setTransformable(sb::Transformable& transformable) { _transformable = &transformable; }
 
-	inline void tweenToPosition(const sb::Vector2f& positionEnd, float velocity, const sb::Tween& normalizedTween) {
+	void tweenToPosition(const sb::Vector2f& end, float velocity, const sb::Tween& normalizedTween) {
+		const sb::Vector2f& start = _transformable->getPosition();
+		float duration = (end - start).getLength() / velocity;
+		_positionAnimation.init(start, end, duration, normalizedTween);
 		_hasPositionAnimation = true;
 		_positionAnimationSecondsElapsed = 0;
-		_positionAnimation.start = _transformable->getPosition();
-		_positionAnimation.end = positionEnd;
-		sb::Vector2f distance = _positionAnimation.end - _positionAnimation.start;
-		_positionAnimation.duration = distance.getLength() / velocity;
-		_positionAnimation.tween = normalizedTween;
+	}
+
+	void tweenToScale(const sb::Vector2f& end, float velocity, const sb::Tween& normalizedTween) {
+		const sb::Vector2f& start = _transformable->getScale();
+		float duration = (end - start).getLength() / velocity;
+		_scaleAnimation.init(start, end, duration, normalizedTween);
+		_hasScaleAnimation = true;
+		_scaleAnimationSecondsElapsed = 0;
+	}
+
+	inline void tweenToScale(float scale, float velocity, const sb::Tween& normalizedTween) {
+		tweenToScale(sb::Vector2f(scale, scale), velocity, normalizedTween);
 	}
 
 	void animate(float ds) {
 		if (_hasPositionAnimation) {
 			_positionAnimationSecondsElapsed += ds;
 			_transformable->setPosition(_positionAnimation.value(_positionAnimationSecondsElapsed));
+		}
+
+		if (_hasScaleAnimation) {
+			_scaleAnimationSecondsElapsed += ds;
+			_transformable->setScale(_scaleAnimation.value(_scaleAnimationSecondsElapsed));
 		}
 	
 	}
@@ -1768,14 +1795,14 @@ void demo28() {
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
-		float t = getSeconds();
 		sb::Input::update();
 		window.update();
-		if (sb::Input::isTouchGoingDown(1)) {
-			animator.tweenToPosition(sb::Input::getTouchPosition(window), 0.5f,
-				sb::Tween().quartOut(0, 1, 1));
+		//if (sb::Input::isTouchGoingDown(1)) {
+			//animator.tweenToPosition(sb::Input::getTouchPosition(window), 0.5f,
+				//sb::Tween().quartOut(0, 1, 1));
 		}
-		animator.animate(ds);
+
+		//animator.animate(ds);
 		
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(quad);
@@ -1783,8 +1810,123 @@ void demo28() {
 	}
 }
 
+
+void demo29() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	sb::Quad quad;
+	Animator animator;
+
+	quad.setScale(0.1f);
+	animator.setTransformable(quad);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		//if (isTouchGoingDown(window, quad)) 
+			//animator.tweenToScale(0.2f, 0.1f, sb::Tween().backInOut(0, 1, 0.2f).sineOut(1, 0, 0.8f));
+		animator.animate(ds);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(quad);
+		window.display();
+	}
+}
+
+//template <class T>
+//class Animation2 {
+//	sb::Tween _tween;
+//
+//public:
+//	Animation2(const T& start, const T& end, float duration, sb::Tween& tween)
+//	{
+//
+//	}
+//};
+
+class QuadEffects : public sb::Transformable {
+	bool _isBouncing;
+	sb::Tween _bounceTween;
+	float _bounceSecondsElapsed;
+	// Animation _bounce;
+
+protected:
+	void initBounce() {
+		_isBouncing = true;
+		_bounceSecondsElapsed = 0;
+	}
+
+public:
+	QuadEffects() : _isBouncing(false)
+	{
+		// _bounce.init(1, )
+		// _bounceTween = sb::Tween().quintInOut(1, 1.5f, 0.2f).sineOut(1.5f, 1, 0.8f);
+	}
+
+	void bounce() {
+		if (!_isBouncing)
+			initBounce();
+	}
+
+	void update(float ds) {
+		if (_isBouncing) {
+			_bounceSecondsElapsed += ds;
+			setScale(_bounceTween.value(_bounceSecondsElapsed));
+			if (_bounceSecondsElapsed > 1)
+				_isBouncing = false;
+		}
+	}
+};
+
+class MyQuad : public sb::Drawable, public sb::Transformable {
+	sb::Quad _quad;
+	QuadEffects _effects;
+
+public:
+	void update(float ds) {
+		_effects.update(ds);
+	}
+
+	inline QuadEffects& getEffects() { return _effects; }
+
+	inline void drawWithEffects(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
+		states.transform = _effects.getTransform() * states.transform;
+		draw(target, states);
+	}
+
+	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
+		states.transform *= getTransform();
+
+		target.draw(_quad, states);
+	}
+};
+
+void demo30() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	MyQuad quad;
+
+	quad.setScale(0.1f);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		quad.update(ds);
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::Return))
+			quad.getEffects().bounce();
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		quad.drawWithEffects(window);
+		window.display();
+	}
+}
+
 void demo() {
-	demo28();
+	demo30();
+
+	//demo29();
+
+	//demo28();
 
 	//demo27();
 
