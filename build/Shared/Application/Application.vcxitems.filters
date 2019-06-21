@@ -218,9 +218,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Triangle.cpp">
       <Filter>_Orbis2D</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Tween.cpp">
-      <Filter>_Orbis2D</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Main.cpp">
       <Filter>Blocks</Filter>
     </ClCompile>
