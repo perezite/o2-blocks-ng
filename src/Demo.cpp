@@ -1767,51 +1767,59 @@ void demo28() {
 	}
 }
 
+
+
 void demo29() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
 	sb::Quad quad;
-	sb::Tween2f tween;
+	std::vector<sb::Tween2f> tweens(32);
+	size_t currentTween = 0;
+	float time = 0;
 
 	quad.setScale(0.1f);
-	//tween = sb::Tween2f().linear(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().sineIn(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().sineOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().sineInOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().quadIn(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().quadOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().quadInOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().cubicIn(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().cubicOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().cubicInOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().quartIn(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().quartOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().quartInOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().quintIn(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().quintOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().quintInOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().expoIn(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().expoOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().expoInOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().circIn(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().circOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().circInOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().backIn(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().backOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().backInOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().elasticIn(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().elasticOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().elasticInOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().bounceIn(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().bounceOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
-	//tween = sb::Tween2f().bounceInOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
 
-	tween = sb::Tween2f().bounceIn(sb::Vector2f(-0.4f), sb::Vector2f(0), 0.3f).wait(0.5f).circInOut(sb::Vector2f(0), sb::Vector2f(-0.3f, 0.5f), 0.2f);
+	tweens[0] = sb::Tween2f().bounceIn(sb::Vector2f(-0.4f), sb::Vector2f(0), 0.3f).wait(0.5f).circInOut(sb::Vector2f(0), sb::Vector2f(-0.3f, 0.5f), 0.2f);
+	tweens[1] = sb::Tween2f().linear(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[2] = sb::Tween2f().sineIn(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[3] = sb::Tween2f().sineOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[4] = sb::Tween2f().sineInOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[5] = sb::Tween2f().quadIn(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[6] = sb::Tween2f().quadOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[7] = sb::Tween2f().quadInOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[8] = sb::Tween2f().cubicIn(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[9] = sb::Tween2f().cubicOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[10] = sb::Tween2f().cubicInOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[11] = sb::Tween2f().quartIn(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[12] = sb::Tween2f().quartOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[13] = sb::Tween2f().quartInOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[14] = sb::Tween2f().quintIn(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[15] = sb::Tween2f().quintOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[16] = sb::Tween2f().quintInOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[17] = sb::Tween2f().expoIn(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[18] = sb::Tween2f().expoOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[19] = sb::Tween2f().expoInOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[20] = sb::Tween2f().circIn(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[21] = sb::Tween2f().circOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[22] = sb::Tween2f().circInOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[23] = sb::Tween2f().backIn(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[24] = sb::Tween2f().backOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[25] = sb::Tween2f().backInOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[26] = sb::Tween2f().elasticIn(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[27] = sb::Tween2f().elasticOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[28] = sb::Tween2f().elasticInOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[29] = sb::Tween2f().bounceIn(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[30] = sb::Tween2f().bounceOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+	tweens[31] = sb::Tween2f().bounceInOut(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
 
 	while (window.isOpen()) {
-		float t = getSeconds();
+		time += getDeltaSeconds();
 		sb::Input::update();
 		window.update();
-		quad.setPosition(tween.value(t));
+		quad.setPosition(tweens[currentTween].value(time));
+		if (sb::Input::isTouchGoingDown(1)) {
+			currentTween = (currentTween + 1) % tweens.size();
+			time = 0;
+		}
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(quad);
