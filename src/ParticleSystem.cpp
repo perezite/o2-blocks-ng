@@ -39,7 +39,7 @@ namespace sb
 		std::fill(_particleVertexColors.begin(), _particleVertexColors.end(), color);
 	}
 
-	void ParticleSystem::setParticleColorChannelOverLifetime(std::size_t channelIndex, const Tween& particleColorChannelOverLifetime) 
+	void ParticleSystem::setParticleColorChannelOverLifetime(std::size_t channelIndex, const Tweenf& particleColorChannelOverLifetime) 
 	{
 		SB_ERROR_IF(channelIndex > 4, "Color channel index out of range");
 		SB_ERROR_IF(particleColorChannelOverLifetime.getDuration() > 1, "Tween duration out of range");
@@ -47,7 +47,7 @@ namespace sb
 		_hasParticleColorChannelsOverLifetime[channelIndex] = true;
 	}
 
-	void ParticleSystem::setParticleScaleOverLifetime(const Tween& particleScaleOverLifetime) 
+	void ParticleSystem::setParticleScaleOverLifetime(const Tweenf& particleScaleOverLifetime) 
 	{
 		SB_ERROR_IF(particleScaleOverLifetime.getDuration() > 1, "Tween duration out of range");
 		_particleScaleOverLifetime = particleScaleOverLifetime;

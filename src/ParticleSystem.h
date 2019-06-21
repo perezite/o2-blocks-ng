@@ -136,9 +136,9 @@ namespace sb
 
 		void setParticleColor(const Color& color);
 
-		void setParticleColorChannelOverLifetime(std::size_t channelIndex, const Tween& particleColorChannelOverLifetime);
+		void setParticleColorChannelOverLifetime(std::size_t channelIndex, const Tweenf& particleColorChannelOverLifetime);
 
-		void setParticleScaleOverLifetime(const Tween& particleScaleOverLifetime);
+		void setParticleScaleOverLifetime(const Tweenf& particleScaleOverLifetime);
 
 		void setLifetime(float lifetime);
 
@@ -237,9 +237,9 @@ namespace sb
 		Vector2f _particleAngularVelocityRange;
 		std::vector<Color> _particleVertexColors;
 		std::vector<bool> _hasParticleColorChannelsOverLifetime;
-		std::vector<Tween> _particleColorChannelsOverLifetime;
+		std::vector<Tweenf> _particleColorChannelsOverLifetime;
 		bool _hasParticleScaleOverLifetime;
-		Tween _particleScaleOverLifetime;
+		Tweenf _particleScaleOverLifetime;
 		Shape* _emissionShape;
 		bool _hasRandomEmissionDirection;
 

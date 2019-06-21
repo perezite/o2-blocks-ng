@@ -1693,162 +1693,10 @@ void demo27() {
 	}
 }
 
-bool isTouchGoingDown(sb::Window& window, const sb::FloatRect& bounds) {
-	if (sb::Input::isTouchGoingDown(1)) {
-		sb::Vector2f touch = sb::Input::getTouchPosition(window);
-		return bounds.contains(touch);
-	}
-
-	return false;
-}
-
-bool isTouchGoingDown(sb::Window& window, sb::Quad& quad) {
-	if (sb::Input::isTouchGoingDown(1)) {
-		sb::Vector2f touch = sb::Input::getTouchPosition(window);
-		sb::FloatRect bounds(quad.getPosition().x - 0.5f * quad.getScale().x, 
-			quad.getPosition().y - 0.5f * quad.getScale().y, quad.getScale().x, quad.getScale().y);
-		return bounds.contains(touch);
-	}
-
-	return false;
-}
-
-template <class T>
-struct Animation2 {
-	sb::Tween _tween;
-	float _duration;
-	T _start;
-	T _end;
-
-	void init(const T& start, const T& end, float duration, const sb::Tween& normalizedTween) {
-		_tween = normalizedTween;
-		_duration = duration;
-		_start = start;
-		_end = end;
-	}
-
-	inline T value(float t) {
-		_duration = std::max(_duration, 0.0001f);
-		return sb::lerp(_tween.value(t / _duration), _start, _end);
-	}
-};
-
-class Animator {
-	sb::Transformable* _transformable;
-
-	Animation2<sb::Vector2f> _positionAnimation;
-	bool _hasPositionAnimation;
-	float _positionAnimationSecondsElapsed;
-
-	Animation2<sb::Vector2f> _scaleAnimation;
-	bool _hasScaleAnimation;
-	float _scaleAnimationSecondsElapsed;
-
-public:
-	Animator() : _transformable(NULL), _hasPositionAnimation(false), _positionAnimationSecondsElapsed(0),
-		_hasScaleAnimation(false), _scaleAnimationSecondsElapsed(0)
-	{ }
-
-	inline void setTransformable(sb::Transformable& transformable) { _transformable = &transformable; }
-
-	void tweenToPosition(const sb::Vector2f& end, float velocity, const sb::Tween& normalizedTween) {
-		const sb::Vector2f& start = _transformable->getPosition();
-		float duration = (end - start).getLength() / velocity;
-		_positionAnimation.init(start, end, duration, normalizedTween);
-		_hasPositionAnimation = true;
-		_positionAnimationSecondsElapsed = 0;
-	}
-
-	void tweenToScale(const sb::Vector2f& end, float velocity, const sb::Tween& normalizedTween) {
-		const sb::Vector2f& start = _transformable->getScale();
-		float duration = (end - start).getLength() / velocity;
-		_scaleAnimation.init(start, end, duration, normalizedTween);
-		_hasScaleAnimation = true;
-		_scaleAnimationSecondsElapsed = 0;
-	}
-
-	inline void tweenToScale(float scale, float velocity, const sb::Tween& normalizedTween) {
-		tweenToScale(sb::Vector2f(scale, scale), velocity, normalizedTween);
-	}
-
-	void animate(float ds) {
-		if (_hasPositionAnimation) {
-			_positionAnimationSecondsElapsed += ds;
-			_transformable->setPosition(_positionAnimation.value(_positionAnimationSecondsElapsed));
-		}
-
-		if (_hasScaleAnimation) {
-			_scaleAnimationSecondsElapsed += ds;
-			_transformable->setScale(_scaleAnimation.value(_scaleAnimationSecondsElapsed));
-		}
-	
-	}
-};
-
-void demo28() {
-	sb::Window window(getWindowSize(400, 3.f / 2.f));
-	sb::Quad quad;
-	Animator animator;
-
-	quad.setScale(0.1f);
-	animator.setTransformable(quad); 
-
-	while (window.isOpen()) {
-		float ds = getDeltaSeconds();
-		sb::Input::update();
-		window.update();
-		//if (sb::Input::isTouchGoingDown(1)) {
-			//animator.tweenToPosition(sb::Input::getTouchPosition(window), 0.5f,
-				//sb::Tween().quartOut(0, 1, 1));
-		}
-
-		//animator.animate(ds);
-		
-		window.clear(sb::Color(1, 1, 1, 1));
-		window.draw(quad);
-		window.display();
-	}
-}
-
-
-void demo29() {
-	sb::Window window(getWindowSize(400, 3.f / 2.f));
-	sb::Quad quad;
-	Animator animator;
-
-	quad.setScale(0.1f);
-	animator.setTransformable(quad);
-
-	while (window.isOpen()) {
-		float ds = getDeltaSeconds();
-		sb::Input::update();
-		window.update();
-		//if (isTouchGoingDown(window, quad)) 
-			//animator.tweenToScale(0.2f, 0.1f, sb::Tween().backInOut(0, 1, 0.2f).sineOut(1, 0, 0.8f));
-		animator.animate(ds);
-
-		window.clear(sb::Color(1, 1, 1, 1));
-		window.draw(quad);
-		window.display();
-	}
-}
-
-//template <class T>
-//class Animation2 {
-//	sb::Tween _tween;
-//
-//public:
-//	Animation2(const T& start, const T& end, float duration, sb::Tween& tween)
-//	{
-//
-//	}
-//};
-
 class QuadEffects : public sb::Transformable {
 	bool _isBouncing;
-	sb::Tween _bounceTween;
+	sb::Tweenf _bounceTween;
 	float _bounceSecondsElapsed;
-	// Animation _bounce;
 
 protected:
 	void initBounce() {
@@ -1859,8 +1707,6 @@ protected:
 public:
 	QuadEffects() : _isBouncing(false)
 	{
-		// _bounce.init(1, )
-		// _bounceTween = sb::Tween().quintInOut(1, 1.5f, 0.2f).sineOut(1.5f, 1, 0.8f);
 	}
 
 	void bounce() {
@@ -1901,7 +1747,7 @@ public:
 	}
 };
 
-void demo30() {
+void demo28() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
 	MyQuad quad;
 
@@ -1921,10 +1767,32 @@ void demo30() {
 	}
 }
 
-void demo() {
-	demo30();
+void demo29() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	sb::Quad quad;
+	//sb::Tween tween;
+	 sb::Tween2f tween;
 
-	//demo29();
+	quad.setScale(0.1f);
+	//tween = sb::Tween().linear(0, 1, 1);
+	tween = sb::Tween2f().linear(sb::Vector2f(-0.4f), sb::Vector2f(0.4f), 1);
+
+	while (window.isOpen()) {
+		float t = getSeconds();
+		sb::Input::update();
+		window.update();
+		//quad.setScale(tween.value(t));
+		 quad.setPosition(tween.value(t));
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(quad);
+
+		window.display();
+	}
+}
+
+void demo() {
+	demo29();
 
 	//demo28();
 

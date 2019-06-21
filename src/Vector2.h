@@ -81,6 +81,18 @@ namespace sb
 		return Vector2<T>(scalar * vector.x, scalar * vector.y);
 	}
 
+	template <class T>
+	inline Vector2<T> operator*(const Vector2<T>& vector, T scalar)
+	{
+		return Vector2<T>(scalar * vector.x, scalar * vector.y);
+	}
+
+	template <class T>
+	inline Vector2<T> operator/(T scalar, const Vector2<T>& vector)
+	{
+		return Vector2<T>(vector.x / scalar, vector.y / scalar);
+	}
+
 	typedef Vector2<float>	Vector2f;
 	typedef Vector2<int>	Vector2i;
 }
