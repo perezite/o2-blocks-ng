@@ -1767,8 +1767,6 @@ void demo28() {
 	}
 }
 
-
-
 void demo29() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
 	sb::Quad quad;
@@ -1828,8 +1826,60 @@ void demo29() {
 	}
 }
 
+template <class T>
+struct Animation {
+	sb::Tween<T> tween;
+	bool running = false;
+	float t = 0;
+
+	void start() {
+		t = 0;
+		running = true; 
+	}
+
+	void update(float ds) {
+		if (isRunning())
+			t += ds;
+	}
+
+	inline T value() { return tween.value(t); }
+
+	bool isRunning() { return running && t < tween.getDuration(); }
+};
+
+typedef Animation<float> Animationf;
+typedef Animation<sb::Vector2f> Animation2f;
+
+void demo30() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	sb::Quad quad;
+	Animation2f animation;
+
+	quad.setScale(0.1f);
+	animation.tween = sb::Tween2f().bounceIn(sb::Vector2f(-0.4f), sb::Vector2f(0), 0.3f).wait(0.5f).circInOut(sb::Vector2f(0), sb::Vector2f(-0.3f, 0.5f), 0.2f);	
+	
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		if (sb::Input::isTouchGoingDown(1) && !animation.isRunning())
+			animation.start();
+		std::cout << (animation.isRunning() ? "running" : "not running") << std::endl;
+
+		animation.update(ds);
+		quad.setPosition(animation.value());
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(quad);
+
+		window.display();
+	}
+}
+
 void demo() {
-	demo29();
+	demo30();
+
+	//demo29();
 
 	//demo28();
 
