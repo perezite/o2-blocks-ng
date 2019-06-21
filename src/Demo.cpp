@@ -1813,7 +1813,7 @@ class QuadEffects {
 public:
 	QuadEffects(MyQuad& quad) : _quad(quad) { }
 	void bounce();
-	void boost(const sb::Vector2f& current, const sb::Vector2f& target);
+	void boost(const sb::Vector2f& target);
 	void update(float ds);
 };
 
@@ -1847,18 +1847,21 @@ public:
 		}
 	}
 
-	void QuadEffects::boost(const sb::Vector2f& current, const sb::Vector2f& target) {
-		if (!_boost.isPlaying()) {
-			_boost.tween = sb::Tween2f().bounceOut(current - target, sb::Vector2f(0, 0), 1);
-			_boost.start();
-		}
+	void QuadEffects::boost( const sb::Vector2f& target) {
+		const sb::Vector2f& pos = _quad.getPosition();
+		_boost.tween = sb::Tween2f().bounceOut(pos, target, 1);
+		_boost.start();
 	}
 
 	void QuadEffects::update(float ds) {
-		if (_bounce.isPlaying()) {
-			_bounce.update(ds);
+		_bounce.update(ds);
+		_boost.update(ds);
+
+		if (_bounce.isPlaying())
 			_quad.setScale(_bounce.value());
-		}
+		if (_boost.isPlaying())
+			_quad.setPosition(_boost.value());
+	
 	}
 // 
 
@@ -1894,8 +1897,10 @@ void demo31() {
 		sb::Input::update();
 		window.update();
 		quad.update(ds);
-		//if (sb::Input::isTouchGoingDown(1))
-			// quad.tweenTowards(sb::Vector2f(0.4f, 0.4f));
+		if (sb::Input::isTouchGoingDown(1)) {
+			sb::Vector2f touch = sb::Input::getTouchPosition(window);
+			quad.getEffects().boost(touch);
+		}
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(quad);
@@ -1904,9 +1909,9 @@ void demo31() {
 }
 
 void demo() {
-	//demo31();
+	demo31();
 
-	demo30();
+	//demo30();
 
 	//demo29();
 
