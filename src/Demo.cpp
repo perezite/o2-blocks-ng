@@ -7,6 +7,7 @@
 #include "TextureSheet.h"
 #include "Sprite.h"
 #include "Math.h"
+#include "Tween.h"
 #include <cstddef>
 #include <vector>
 #include <map>
@@ -1692,8 +1693,100 @@ void demo27() {
 	}
 }
 
+bool isTouchGoingDown(sb::Window& window, const sb::FloatRect& bounds) {
+	if (sb::Input::isTouchGoingDown(1)) {
+		sb::Vector2f touch = sb::Input::getTouchPosition(window);
+		return bounds.contains(touch);
+	}
+
+	return false;
+}
+
+bool isTouchGoingDown(sb::Window& window, sb::Quad& quad) {
+	if (sb::Input::isTouchGoingDown(1)) {
+		sb::Vector2f touch = sb::Input::getTouchPosition(window);
+		sb::FloatRect bounds(quad.getPosition().x - 0.5f * quad.getScale().x, 
+			quad.getPosition().y - 0.5f * quad.getScale().y, quad.getScale().x, quad.getScale().y);
+		return bounds.contains(touch);
+	}
+
+	return false;
+}
+
+template <class T>
+struct Animation {
+	sb::Tween tween;
+	float duration;
+	T start;
+	T end;
+
+	inline T value(float t) {
+		return sb::lerp(tween.value(t / duration), start, end);
+	}
+};
+
+class Animator {
+	sb::Transformable* _transformable;
+	bool _hasTransformable;
+
+	Animation<sb::Vector2f> _positionAnimation;
+	bool _hasPositionAnimation;
+	float _positionAnimationSecondsElapsed;
+
+public:
+	Animator() : _hasTransformable(false), _hasPositionAnimation(false), _positionAnimationSecondsElapsed(0)
+	{ }
+
+	inline void setTransformable(sb::Transformable& transformable) { _transformable = &transformable; }
+
+	inline void tweenToPosition(const sb::Vector2f& positionEnd, float velocity, const sb::Tween& normalizedTween) {
+		_hasPositionAnimation = true;
+		_positionAnimationSecondsElapsed = 0;
+		_positionAnimation.start = _transformable->getPosition();
+		_positionAnimation.end = positionEnd;
+		sb::Vector2f distance = _positionAnimation.end - _positionAnimation.start;
+		_positionAnimation.duration = distance.getLength() / velocity;
+		_positionAnimation.tween = normalizedTween;
+	}
+
+	void animate(float ds) {
+		if (_hasPositionAnimation) {
+			_positionAnimationSecondsElapsed += ds;
+			_transformable->setPosition(_positionAnimation.value(_positionAnimationSecondsElapsed));
+		}
+	
+	}
+};
+
+void demo28() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	sb::Quad quad;
+	Animator animator;
+
+	quad.setScale(0.1f);
+	animator.setTransformable(quad); 
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		float t = getSeconds();
+		sb::Input::update();
+		window.update();
+		if (sb::Input::isTouchGoingDown(1)) {
+			animator.tweenToPosition(sb::Input::getTouchPosition(window), 0.5f,
+				sb::Tween().quartOut(0, 1, 1));
+		}
+		animator.animate(ds);
+		
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(quad);
+		window.display();
+	}
+}
+
 void demo() {
-	demo27();
+	demo28();
+
+	//demo27();
 
 	//demo26();
 	

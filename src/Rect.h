@@ -21,7 +21,7 @@ namespace sb
 		
 		inline T top() const { return bottom + height; }
 
-		inline bool contains(sb::Vector2<T> pos) {
+		inline bool contains(sb::Vector2<T> pos) const {
 			return pos.x >= left && pos.x <= right() && pos.y >= bottom && pos.y <= top();
 		}
 
