@@ -13,15 +13,15 @@ namespace sb
 		}
 
 		static inline T computeSineIn(float t, const T& b, const T& c, float d) {
-			return -c * cos(t / d * (sb::Pi / 2)) + c + b;
+			return -c * cosf(t / d * (sb::Pi / 2)) + c + b;
 		}
 
 		static inline T computeSineOut(float t, const T& b, const T& c, float d) {
-			return c * sin(t / d * (sb::Pi / 2)) + b;
+			return c * sinf(t / d * (sb::Pi / 2)) + b;
 		}
 
 		static inline T computeSineInOut(float t, const T& b, const T& c, float d) {
-			return -c / 2.f * (cos(sb::Pi * t / d) - 1) + b;
+			return -c / 2.f * (cosf(sb::Pi * t / d) - 1) + b;
 		}
 
 		static inline T computeQuadIn(float t, const T& b, const T& c, float d) {
@@ -93,18 +93,18 @@ namespace sb
 		}
 
 		static inline T computeExpoIn(float t, const T& b, const T& c, float d) {
-			return (t == 0) ? b : c * pow(2.0f, 10 * (t / d - 1)) + b;
+			return (t == 0) ? b : c * powf(2.0f, 10 * (t / d - 1)) + b;
 		}
 
 		static inline T computeExpoOut(float t, const T& b, const T& c, float d) {
-			return (t == d) ? b + c : c * (-pow(2.0f, -10 * t / d) + 1) + b;
+			return (t == d) ? b + c : c * (-powf(2.0f, -10 * t / d) + 1) + b;
 		}
 
 		static inline T computeExpoInOut(float t, const T& b, const T& c, float d) {
 			if (t == 0) return b;
 			if (t == d) return b + c;
-			if ((t /= d / 2) < 1) return c / 2.f * pow(2.0f, 10 * (t - 1)) + b;
-			return c / 2.f * (-pow(2.0f, -10 * --t) + 2) + b;
+			if ((t /= d / 2) < 1) return c / 2.f * powf(2.0f, 10 * (t - 1)) + b;
+			return c / 2.f * (-powf(2.0f, -10 * --t) + 2) + b;
 		}
 
 		static inline T computeCircIn(float t, const T& b, const T& c, float d) {
@@ -150,8 +150,8 @@ namespace sb
 			float p = d*.3f;
 			T a = c;
 			float s = p / 4;
-			T postFix = a*pow(2.0f, 10 * (t -= 1)); 
-			return -(postFix * sin((t*d - s)*(2 * Pi) / p)) + b;
+			T postFix = a*powf(2.0f, 10 * (t -= 1)); 
+			return -(postFix * sinf((t*d - s)*(2 * Pi) / p)) + b;
 		}
 
 		static inline T computeElasticOut(float t, const T& b, const T& c, float d) {
@@ -159,7 +159,7 @@ namespace sb
 			float p = d*.3f;
 			T a = c;
 			float s = p / 4;
-			return (a*pow(2.0f, -10 * t) * sin((t*d - s)*(2 * Pi) / p) + c + b);
+			return (a*powf(2.0f, -10 * t) * sinf((t*d - s)*(2 * Pi) / p) + c + b);
 		}
 
 		static inline T computeElasticInOut(float t, const T& b, const T& c, float d) {
@@ -169,11 +169,11 @@ namespace sb
 			float s = p / 4;
 
 			if (t < 1) {
-				T postFix = a*pow(2.0f, 10 * (t -= 1)); 
-				return -.5f*(postFix* sin((t*d - s)*(2 * Pi) / p)) + b;
+				T postFix = a*powf(2.0f, 10 * (t -= 1)); 
+				return -.5f*(postFix* sinf((t*d - s)*(2 * Pi) / p)) + b;
 			}
-			T postFix = a*pow(2.0f, -10 * (t -= 1)); 
-			return postFix * sin((t*d - s)*(2 * Pi) / p)*.5f + c + b;
+			T postFix = a*powf(2.0f, -10 * (t -= 1)); 
+			return postFix * sinf((t*d - s)*(2 * Pi) / p)*.5f + c + b;
 		}
 
 		static inline T computeBounceIn(float t, const T& b, const T& c, float d) {
