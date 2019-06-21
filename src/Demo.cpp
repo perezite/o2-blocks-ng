@@ -1759,7 +1759,7 @@ struct Animation {
 
 	void start() {
 		t = 0;
-		playing = true; 
+		playing = true;
 	}
 
 	void update(float ds) {
@@ -1769,7 +1769,10 @@ struct Animation {
 
 	inline T value() { return tween.value(t); }
 
+	T targetValue() const { return tween.targetValue(); }
+
 	bool isPlaying() { return playing && t < tween.getDuration(); }
+
 };
 
 typedef Animation<float> Animationf;
@@ -1805,34 +1808,49 @@ void demo29() {
 class TransformEffects {
 	sb::Transformable& _target;
 	Animationf _bounce;
-	Animation2f _boost;
+	Animation2f _drift;
+	Animationf _spin;
 
 public:
 	TransformEffects(sb::Transformable& target) : _target(target) { }
 
+	inline Animationf& getBounce() { return _bounce; }
+
+	inline Animation2f& getDrift() { return _drift; }
+
+	inline Animationf& getSpin() { return _spin; }
+
 	void bounce() {
 		if (!_bounce.isPlaying()) {
 			float scale = _target.getScale().x;
-			_bounce.tween = sb::Tweenf().quintInOut(scale, 2 * scale, 0.2f)
-				.sineInOut(2 * scale, scale, 0.7f);
+			_bounce.tween = sb::Tweenf().quintInOut(scale, 1.4f * scale, 0.2f)
+				.expoOut(1.4f * scale, scale, 0.4f);
 			_bounce.start();
 		}
 	}
 
-	void boost(const sb::Vector2f& target) {
+	void drift(const sb::Vector2f& target) {
 		const sb::Vector2f& pos = _target.getPosition();
-		_boost.tween = sb::Tween2f().bounceOut(pos, target, 1);
-		_boost.start();
+		_drift.tween = sb::Tween2f().sineOut(pos, target, 0.2f);
+		_drift.start();
+	}
+
+	void spin(float radians) {
+		_spin.tween = sb::Tweenf().bounceOut(_target.getRotation(), radians, 0.5f);
+		_spin.start();
 	}
 
 	void update(float ds) {
 		_bounce.update(ds);
-		_boost.update(ds);
+		_drift.update(ds);
+		_spin.update(ds);
 
 		if (_bounce.isPlaying())
 			_target.setScale(_bounce.value());
-		if (_boost.isPlaying())
-			_target.setPosition(_boost.value());
+		if (_drift.isPlaying())
+			_target.setPosition(_drift.value());
+		if (_spin.isPlaying())
+			_target.setRotation(_spin.value());
 
 	}
 };
@@ -1891,7 +1909,7 @@ void demo31() {
 		quad.update(ds);
 		if (sb::Input::isTouchGoingDown(1)) {
 			sb::Vector2f touch = sb::Input::getTouchPosition(window);
-			quad.getEffects().boost(touch);
+			quad.getEffects().drift(touch);
 		}
 
 		window.clear(sb::Color(1, 1, 1, 1));
@@ -1900,12 +1918,68 @@ void demo31() {
 	}
 }
 
+void print32(TransformEffects& effects) {
+	if (effects.getBounce().isPlaying())
+		std::cout << "bounce: " << effects.getBounce().targetValue() << std::endl;
+
+	if (effects.getDrift().isPlaying())
+		std::cout << "drift: " << effects.getDrift().targetValue().x << " " << effects.getDrift().targetValue().y << std::endl;
+
+	if (effects.getSpin().isPlaying())
+		std::cout << "spin: " << effects.getSpin().targetValue() * sb::ToDegrees << std::endl;
+
+}
+
+sb::Vector2f discretize(const sb::Vector2f& v, const sb::Vector2f& discretization) {
+	float x = floor(v.x / discretization.x);
+	float y = floor(v.y / discretization.y);
+	return sb::Vector2f(x * discretization.x, y * discretization.y) + 0.5f * discretization;
+}
+
 void demo32() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
-	Tetromino tetromino;
+	Light light;
+	Tetromino tetromino('z');
 	TransformEffects effects(tetromino);
 
+	auto test = discretize(sb::Vector2f(0.15f, 0), sb::Vector2f(0.1f, 1));
+
 	tetromino.setScale(0.1f);
+	tetromino.setLight(light);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		effects.update(ds);
+
+		if (sb::Input::isTouchDown(1)) {
+			sb::Vector2f touch = sb::Input::getTouchPosition(window);
+			effects.drift(discretize(touch, sb::Vector2f(0.1f, 0.1f)));
+		}
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::Up)) {
+			float angle = effects.getSpin().targetValue();
+			effects.spin(angle - 90 * sb::ToRadian);
+		}
+		if (sb::Input::isTouchGoingDown(1)) 
+			effects.bounce();
+
+		print32(effects);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(tetromino);
+		window.display();
+	}
+}
+
+void demo33() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Light light;
+	Block block('z');
+	TransformEffects effects(block);
+
+	block.setScale(0.1f);
+	block.setLight(light);
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -1915,16 +1989,24 @@ void demo32() {
 		if (sb::Input::isTouchGoingDown(1)) {
 			sb::Vector2f touch = sb::Input::getTouchPosition(window);
 			effects.bounce();
-			effects.boost(touch);
+			effects.drift(touch);
+		}
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::Up)) {
+			float angle = effects.getSpin().targetValue();
+			effects.spin(angle + 90 * sb::ToRadian);
 		}
 
+		print32(effects);
+
 		window.clear(sb::Color(1, 1, 1, 1));
-		window.draw(tetromino);
+		window.draw(block);
 		window.display();
 	}
 }
 
 void demo() {
+	//demo33();
+
 	demo32();
 
 	//demo31();

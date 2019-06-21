@@ -62,6 +62,13 @@ namespace sb
 			return easingCommand.easing(t, easingCommand.t0, easingCommand.t1, easingCommand.from, easingCommand.to);
 		}
 
+		inline T targetValue() const {
+			if (_easingCommands.empty())
+				return 0;
+
+			return _easingCommands[_easingCommands.size() - 1].to;
+		}
+
 		inline float getDuration() const {
 			return _easingCommands.empty() ? 0 : _easingCommands[_easingCommands.size() - 1].t1;
 		}
