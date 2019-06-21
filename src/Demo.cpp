@@ -1693,81 +1693,7 @@ void demo27() {
 	}
 }
 
-class QuadEffects : public sb::Transformable {
-	bool _isBouncing;
-	sb::Tweenf _bounceTween;
-	float _bounceSecondsElapsed;
-
-protected:
-	void initBounce() {
-		_isBouncing = true;
-		_bounceSecondsElapsed = 0;
-	}
-
-public:
-	QuadEffects() : _isBouncing(false)
-	{
-	}
-
-	void bounce() {
-		if (!_isBouncing)
-			initBounce();
-	}
-
-	void update(float ds) {
-		if (_isBouncing) {
-			_bounceSecondsElapsed += ds;
-			setScale(_bounceTween.value(_bounceSecondsElapsed));
-			if (_bounceSecondsElapsed > 1)
-				_isBouncing = false;
-		}
-	}
-};
-
-class MyQuad : public sb::Drawable, public sb::Transformable {
-	sb::Quad _quad;
-	QuadEffects _effects;
-
-public:
-	void update(float ds) {
-		_effects.update(ds);
-	}
-
-	inline QuadEffects& getEffects() { return _effects; }
-
-	inline void drawWithEffects(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
-		states.transform = _effects.getTransform() * states.transform;
-		draw(target, states);
-	}
-
-	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
-		states.transform *= getTransform();
-
-		target.draw(_quad, states);
-	}
-};
-
 void demo28() {
-	sb::Window window(getWindowSize(400, 3.f / 2.f));
-	MyQuad quad;
-
-	quad.setScale(0.1f);
-
-	while (window.isOpen()) {
-		float ds = getDeltaSeconds();
-		sb::Input::update();
-		window.update();
-		quad.update(ds);
-		if (sb::Input::isKeyGoingDown(sb::KeyCode::Return))
-			quad.getEffects().bounce();
-
-		window.clear(sb::Color(1, 1, 1, 1));
-		quad.drawWithEffects(window);
-		window.display();
-	}
-}
-
-void demo29() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
 	sb::Quad quad;
 	std::vector<sb::Tween2f> tweens(32);
@@ -1829,28 +1755,28 @@ void demo29() {
 template <class T>
 struct Animation {
 	sb::Tween<T> tween;
-	bool running = false;
+	bool playing = false;
 	float t = 0;
 
 	void start() {
 		t = 0;
-		running = true; 
+		playing = true; 
 	}
 
 	void update(float ds) {
-		if (isRunning())
+		if (isPlaying())
 			t += ds;
 	}
 
 	inline T value() { return tween.value(t); }
 
-	bool isRunning() { return running && t < tween.getDuration(); }
+	bool isPlaying() { return playing && t < tween.getDuration(); }
 };
 
 typedef Animation<float> Animationf;
 typedef Animation<sb::Vector2f> Animation2f;
 
-void demo30() {
+void demo29() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
 	sb::Quad quad;
 	Animation2f animation;
@@ -1862,9 +1788,9 @@ void demo30() {
 		float ds = getDeltaSeconds();
 		sb::Input::update();
 		window.update();
-		if (sb::Input::isTouchGoingDown(1) && !animation.isRunning())
+		if (sb::Input::isTouchGoingDown(1) && !animation.isPlaying())
 			animation.start();
-		std::cout << (animation.isRunning() ? "running" : "not running") << std::endl;
+		std::cout << (animation.isPlaying() ? "playing" : "not playing") << std::endl;
 
 		animation.update(ds);
 		quad.setPosition(animation.value());
@@ -1872,6 +1798,67 @@ void demo30() {
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(quad);
 
+		window.display();
+	}
+}
+
+class QuadEffects : public sb::Transformable {
+	Animationf _bounce;
+
+public:
+	QuadEffects() {
+		_bounce.tween = sb::Tweenf().quintInOut(1, 2, 0.2f).sineInOut(2, 1, 0.7f);
+	}
+
+	void bounce() {
+		if (!_bounce.isPlaying())
+			_bounce.start();
+	}
+
+	void update(float ds) {
+		_bounce.update(ds);
+		setScale(_bounce.value());
+	}
+};
+
+class MyQuad : public sb::Drawable, public sb::Transformable {
+	sb::Quad _quad;
+	QuadEffects _effects;
+
+public:
+	void update(float ds) {
+		_effects.update(ds);
+	}
+
+	inline QuadEffects& getEffects() { return _effects; }
+
+	inline void drawWithEffects(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
+		states.transform = _effects.getTransform() * states.transform;
+		draw(target, states);
+	}
+
+	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
+		states.transform *= getTransform();
+		target.draw(_quad, states);
+	}
+};
+
+void demo30() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	MyQuad quad;
+
+	quad.setScale(0.1f);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		quad.update(ds);
+		if (sb::Input::isTouchGoingDown(1))
+			quad.getEffects().bounce();
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		quad.drawWithEffects(window);
 		window.display();
 	}
 }
