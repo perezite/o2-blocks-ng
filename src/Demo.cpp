@@ -1832,6 +1832,12 @@ public:
 		_drift.start();
 	}
 
+	void bounce(const sb::Vector2f& target, float duration = 0.15f) {
+		const sb::Vector2f& pos = _target.getPosition();
+		_drift.tween = sb::Tween2f().bounceOut(pos, target, duration);
+		_drift.start();
+	}
+
 	void spin(float radians) {
 		_spin.tween = sb::Tweenf().bounceOut(_target.getRotation(), radians, 0.5f);
 		_spin.start();
@@ -1847,7 +1853,7 @@ public:
 	}
 	
 	void die(float duration = 0.8f) {
-		_wobble.tween = sb::Tweenf().bounceInOut(_target.getScale().x, 0, duration);
+		_wobble.tween = sb::Tweenf().backInOut(_target.getScale().x, 0, duration);
 		float angle = _target.getRotation();
 		_spin.tween = sb::Tweenf().backInOut(angle, angle + sb::random(-90, 90) * sb::ToRadian, 0.3f * duration);
 		_wobble.start();
@@ -2002,11 +2008,11 @@ void demo33() {
 		effects.update(ds);
 		if (sb::Input::isKeyGoingDown(sb::KeyCode::d))
 			effects.die(1.1f);
-		//if (sb::Input::isKeyDown(sb::KeyCode::b)) {
-		//	sb::vector2f discretization(0.1f, 0.1f);
-		//  sb::Vector2f discretized = discretize(block.getPosition());
-		//	effects.bounce(discretized - sb::Vector2f(0, -discretization.y));
-		// }
+		if (sb::Input::isKeyDown(sb::KeyCode::b)) {
+			sb::Vector2f discretization(0.1f, 0.1f);
+			sb::Vector2f discretized = discretize(block.getPosition(), discretization);
+			effects.bounce(discretized - sb::Vector2f(0, discretization.y), 0.5f);
+		}
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(block);
