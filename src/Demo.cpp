@@ -1954,6 +1954,30 @@ sb::Vector2f discretize(const sb::Vector2f& v, const sb::Vector2f& discretizatio
 	return sb::Vector2f(x * discretization.x, y * discretization.y) + 0.5f * discretization;
 }
 
+void input32(sb::Window& window, TransformEffects& effects) {
+	const sb::Vector2f cellSize = sb::Vector2f(0.1f, 0.1f);
+
+	if (sb::Input::isTouchDown(1)) {
+		sb::Vector2f touch = sb::Input::getTouchPosition(window);
+		effects.drift(discretize(touch, cellSize));
+	}
+	if (sb::Input::isTouchGoingDown(1))
+		effects.pop();
+
+	if (sb::Input::isKeyGoingDown(sb::KeyCode::Left)) {
+		sb::Vector2f pos = effects.getTargetPosition();
+		effects.drift(discretize(pos - sb::Vector2f(cellSize.x, 0), cellSize));
+	}
+	if (sb::Input::isKeyGoingDown(sb::KeyCode::Right)) {
+		sb::Vector2f pos = effects.getTargetPosition();
+		effects.drift(discretize(pos + sb::Vector2f(cellSize.x, 0), cellSize));
+	}
+	if (sb::Input::isKeyGoingDown(sb::KeyCode::Up)) {
+		float angle = effects.getTargetRotation();
+		effects.spin(angle - 90 * sb::ToRadian);
+	}
+}
+
 void demo32() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
 	Light light;
@@ -1970,18 +1994,7 @@ void demo32() {
 		sb::Input::update();
 		window.update();
 		effects.update(ds);
-
-		if (sb::Input::isTouchDown(1)) {
-			sb::Vector2f touch = sb::Input::getTouchPosition(window);
-			effects.drift(discretize(touch, sb::Vector2f(0.1f, 0.1f)));
-		}
-		if (sb::Input::isKeyGoingDown(sb::KeyCode::Up)) {
-			float angle = effects.getTargetRotation();
-			effects.spin(angle - 90 * sb::ToRadian);
-		}
-		if (sb::Input::isTouchGoingDown(1)) 
-			effects.pop();
-
+		input32(window, effects);
 		print32(effects);
 
 		window.clear(sb::Color(1, 1, 1, 1));
@@ -2021,9 +2034,9 @@ void demo33() {
 }
 
 void demo() {
-	demo33();
+	//demo33();
 
-	//demo32();
+	demo32();
 
 	//demo31();
 
