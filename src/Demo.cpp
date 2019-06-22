@@ -303,11 +303,17 @@ public:
 
 	inline bool isScaling() { return _wobble.isPlaying(); }
 
-	inline sb::Vector2f getTargetPosition() { return _drift.targetValue(); }
+	sb::Vector2f getTargetPosition() { 
+		return _drift.isPlaying() ? _drift.targetValue() : parent.getPosition(); 
+	}
 
-	inline float getTargetRotation() { return _spin.targetValue(); }
+	float getTargetRotation() { 
+		return _spin.isPlaying() ? _spin.targetValue() : parent.getRotation(); 
+	}
 
-	inline float getTargetScale() { return _wobble.targetValue(); }
+	sb::Vector2f getTargetScale() { 
+		return _wobble.isPlaying() ? sb::Vector2f(_wobble.targetValue()) : parent.getScale(); 
+	}
 
 	void drift(const sb::Vector2f& target) {
 		const sb::Vector2f& pos = parent.getPosition();
@@ -1270,7 +1276,6 @@ public:
 		_tetromino.translate(worldTranslation);
 
 		if (isInvalid(_tetromino)) {
-			//std::cout << "Sorry man, no can do!" << std::endl;
 			_tetromino.translate(-worldTranslation);
 		}
 	}
@@ -1281,7 +1286,6 @@ public:
 		_tetromino.rotate(-90 * sb::ToRadian);
 
 		if (isInvalid(_tetromino)) {
-			//std::cout << "Sorry, no can do!" << std::endl;
 			_tetromino.rotate(90 * sb::ToRadian);
 		}			
 	}
@@ -1971,7 +1975,7 @@ void print32(TransformEffects& effects) {
 	std::cout << "spin: " << effects.getTargetRotation() * sb::ToDegrees << std::endl;
 
 	if (effects.isScaling())
-		std::cout << "pop: " << effects.getTargetScale() << std::endl;
+		std::cout << "pop: " << effects.getTargetScale().x << std::endl;
 }
 
 sb::Vector2f discretize(const sb::Vector2f& v, const sb::Vector2f& discretization) {
@@ -2103,22 +2107,37 @@ void demo35() {
 		if (sb::Input::isKeyGoingDown(sb::KeyCode::d))
 			block.getEffects().die();
 
-		//tetromino.update(ds);
-		//if (sb::Input::isTouchGoingDown(1))
-		//	tetromino.getEffects().pop();
-		//if (sb::Input::isTouchDown(1)) {
-		//	sb::Vector2f touch = sb::Input::getTouchPosition(window);
-		//	tetromino.getEffects().drift(touch);
-		//}
-
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(block);
 		window.display();
 	}
 }
 
+void demo36() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Board board(sb::Vector2i(2, 2));
+
+	board.enableGrid(true);
+	board.createTetromino('m', sb::Vector2i(0, 1));
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::Down))
+			board.moveTetromino(sb::Vector2i(0, -1));
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(board);
+		window.display();
+	}
+}
+
 void demo() {
-	demo35();
+	demo36();
+
+	//demo35();
 
 	//demo34();
 
@@ -2188,5 +2207,11 @@ void demo() {
 
     //demo1();
 
-    // demo0();
+    //demo0();
 }
+
+// Drift
+// Spin
+// Pop
+// Explode
+// Bounce
