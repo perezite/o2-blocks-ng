@@ -405,11 +405,121 @@ sb::FloatRect getTransformedBounds(sb::FloatRect& bounds, const sb::Transform& t
 	return sb::FloatRect(min.x, min.y, max.x - min.x, max.y - min.y);
 }
 
+template <class T>
+struct Animation {
+	sb::Tween<T> tween;
+	bool playing = false;
+	float t = 0;
+
+	void start() {
+		t = 0;
+		playing = true;
+	}
+
+	void update(float ds) {
+		if (isPlaying())
+			t += ds;
+	}
+
+	inline T value() { return tween.value(t); }
+
+	T targetValue() const { return tween.targetValue(); }
+
+	bool isPlaying() { return playing && t < tween.getDuration(); }
+
+};
+
+typedef Animation<float> Animationf;
+typedef Animation<sb::Vector2f> Animation2f;
+
+template <class T>
+struct Behaviour {
+protected: 
+	T& parent;
+
+	Behaviour(T& parent_) : parent(parent_)
+	{ }
+
+	Behaviour& operator=(const Behaviour& other) 
+	{
+		return *this;
+	}
+};
+
+class TransformEffects : public Behaviour<sb::Transformable> {
+	Animation2f _drift;
+	Animationf _spin;
+	Animationf _wobble;
+
+public:
+	TransformEffects(sb::Transformable& parent) : Behaviour(parent) { }
+
+	inline bool isMoving() { return _drift.isPlaying(); }
+
+	inline bool isRotating() { return _spin.isPlaying(); }
+
+	inline bool isScaling() { return _wobble.isPlaying(); }
+
+	inline sb::Vector2f getTargetPosition() { return _drift.targetValue(); }
+
+	inline float getTargetRotation() { return _spin.targetValue(); }
+
+	inline float getTargetScale() { return _wobble.targetValue(); }
+
+	void drift(const sb::Vector2f& target) {
+		const sb::Vector2f& pos = parent.getPosition();
+		_drift.tween = sb::Tween2f().sineOut(pos, target, 0.15f);
+		_drift.start();
+	}
+
+	void bounce(const sb::Vector2f& target, float duration = 0.15f) {
+		const sb::Vector2f& pos = parent.getPosition();
+		_drift.tween = sb::Tween2f().bounceOut(pos, target, duration);
+		_drift.start();
+	}
+
+	void spin(float radians) {
+		_spin.tween = sb::Tweenf().bounceOut(parent.getRotation(), radians, 0.5f);
+		_spin.start();
+	}
+
+	void pop() {
+		if (!_wobble.isPlaying()) {
+			float scale = parent.getScale().x;
+			_wobble.tween = sb::Tweenf().quintInOut(scale, 1.4f * scale, 0.2f)
+				.expoOut(1.4f * scale, scale, 0.4f);
+			_wobble.start();
+		}
+	}
+
+	void die(float duration = 0.8f) {
+		_wobble.tween = sb::Tweenf().backInOut(parent.getScale().x, 0, duration);
+		float angle = parent.getRotation();
+		_spin.tween = sb::Tweenf().backInOut(angle, angle + sb::random(-90, 90) * sb::ToRadian, 0.3f * duration);
+		_wobble.start();
+		_spin.start();
+	}
+
+	void update(float ds) {
+		_drift.update(ds);
+		_wobble.update(ds);
+		_spin.update(ds);
+
+		if (_wobble.isPlaying())
+			parent.setScale(_wobble.value());
+		if (_drift.isPlaying())
+			parent.setPosition(_drift.value());
+		if (_spin.isPlaying())
+			parent.setRotation(_spin.value());
+	}
+};
+
 class Tetromino : public sb::Drawable, public sb::Transformable {
 	char _type;
     std::vector<Block> _blocks;
     std::vector<sb::Vector2i> _blockPositions;
     sb::IntRect _blockBounds;
+	TransformEffects _effects;
 
 protected:
     void clear() {
@@ -455,9 +565,11 @@ protected:
     }
 
 public:
-    Tetromino(char type = 'i') {
+    Tetromino(char type = 'i') : _effects(*this) {
         setType(type);
     }
+
+	inline TransformEffects& getEffects() { return _effects; }
 
 	inline char getType() const { return _type; }
 
@@ -498,6 +610,10 @@ public:
 
 		return getTransformedBounds(bounds, getTransform());
     }
+
+	void update(float ds) {
+		_effects.update(ds);
+	}
 
     virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
         states.transform *= getTransform();
@@ -1751,33 +1867,6 @@ void demo28() {
 	}
 }
 
-template <class T>
-struct Animation {
-	sb::Tween<T> tween;
-	bool playing = false;
-	float t = 0;
-
-	void start() {
-		t = 0;
-		playing = true;
-	}
-
-	void update(float ds) {
-		if (isPlaying())
-			t += ds;
-	}
-
-	inline T value() { return tween.value(t); }
-
-	T targetValue() const { return tween.targetValue(); }
-
-	bool isPlaying() { return playing && t < tween.getDuration(); }
-
-};
-
-typedef Animation<float> Animationf;
-typedef Animation<sb::Vector2f> Animation2f;
-
 void demo29() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
 	sb::Quad quad;
@@ -1803,76 +1892,6 @@ void demo29() {
 		window.display();
 	}
 }
-
-
-class TransformEffects {
-	sb::Transformable& _target;
-	Animation2f _drift;
-	Animationf _spin;
-	Animationf _wobble;
-
-public:
-	TransformEffects(sb::Transformable& target) : _target(target) { }
-
-	inline bool isMoving() { return _drift.isPlaying(); }
-
-	inline bool isRotating() { return _spin.isPlaying(); }
-
-	inline bool isScaling() { return _wobble.isPlaying(); }
-
-	inline sb::Vector2f getTargetPosition() { return _drift.targetValue(); }
-
-	inline float getTargetRotation() { return _spin.targetValue(); }
-
-	inline float getTargetScale() { return _wobble.targetValue(); }
-
-	void drift(const sb::Vector2f& target) {
-		const sb::Vector2f& pos = _target.getPosition();
-		_drift.tween = sb::Tween2f().sineOut(pos, target, 0.15f);
-		_drift.start();
-	}
-
-	void bounce(const sb::Vector2f& target, float duration = 0.15f) {
-		const sb::Vector2f& pos = _target.getPosition();
-		_drift.tween = sb::Tween2f().bounceOut(pos, target, duration);
-		_drift.start();
-	}
-
-	void spin(float radians) {
-		_spin.tween = sb::Tweenf().bounceOut(_target.getRotation(), radians, 0.5f);
-		_spin.start();
-	}
-
-	void pop() {
-		if (!_wobble.isPlaying()) {
-			float scale = _target.getScale().x;
-			_wobble.tween = sb::Tweenf().quintInOut(scale, 1.4f * scale, 0.2f)
-				.expoOut(1.4f * scale, scale, 0.4f);
-			_wobble.start();
-		}
-	}
-	
-	void die(float duration = 0.8f) {
-		_wobble.tween = sb::Tweenf().backInOut(_target.getScale().x, 0, duration);
-		float angle = _target.getRotation();
-		_spin.tween = sb::Tweenf().backInOut(angle, angle + sb::random(-90, 90) * sb::ToRadian, 0.3f * duration);
-		_wobble.start();
-		_spin.start();
-	}
-
-	void update(float ds) {
-		_drift.update(ds);
-		_wobble.update(ds);
-		_spin.update(ds);
-
-		if (_wobble.isPlaying())
-			_target.setScale(_wobble.value());
-		if (_drift.isPlaying())
-			_target.setPosition(_drift.value());
-		if (_spin.isPlaying())
-			_target.setRotation(_spin.value());
-	}
-};
 
 class MyQuad : public sb::Drawable, public sb::Transformable {
 	sb::Quad _quad;
@@ -2033,10 +2052,36 @@ void demo33() {
 	}
 }
 
+void demo34() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Tetromino tetromino('z');
+
+	tetromino.setScale(0.1f);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		tetromino.update(ds);
+		if (sb::Input::isTouchGoingDown(1))
+			tetromino.getEffects().pop();
+		if (sb::Input::isTouchDown(1)) {
+			sb::Vector2f touch = sb::Input::getTouchPosition(window);
+			tetromino.getEffects().drift(touch);
+		}
+			
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(tetromino);
+		window.display();
+	}
+}
+
 void demo() {
+	demo34();
+
 	//demo33();
 
-	demo32();
+	//demo32();
 
 	//demo31();
 
