@@ -366,7 +366,6 @@ public:
 		//_spin.start();
 	}
 
-
 	void pop() {
 		if (!_wobble.isPlaying()) {
 			float scale = parent.getScale().x;
@@ -409,19 +408,25 @@ public:
 
 class TransformEffects : public sb::Transformable {
 	Animation2f _drift;
+	Animationf _wobble;
 	Animationf _spin;
 
 public:
 	void driftTo(const sb::Vector2f& end, sb::Transformable& target, float duration = 0.15f) {
 		sb::Vector2f effectPosition = target.getPosition() + _drift.value();
 		target.setPosition(end);
-		sb::Vector2f offset = effectPosition - target.getPosition();
+		sb::Vector2f offset = effectPosition - end;
 		_drift.tween = sb::Tween2f().sineOut(offset, sb::Vector2f(0), duration);
 		_drift.start();
 	}
 
 	inline void driftBy(const sb::Vector2f& amount, sb::Transformable& target, float duration = 0.15f) {
 		driftTo(target.getPosition() + amount, target, duration);
+	}
+
+	void pop(sb::Transformable& target, float duration = 0.15f) {
+		_wobble.tween = sb::Tweenf().quintInOut(_wobble.value(), 0.4f, 0.2f).expoOut(0.4f, 0, 0.4f);
+		_wobble.start();
 	}
 
 	void spinTo(float radians, sb::Transformable& target, float duration = 0.5f) {
@@ -436,20 +441,17 @@ public:
 		spinTo(target.getRotation() + radians, target, duration);
 	}
 
-	sb::Transform apply(const sb::Transform& transform) {
+	void apply(sb::Transform& transform) {
 		sb::Transform effectRotation(sb::Vector2f(0), sb::Vector2f(1), _spin.value());
 		sb::Transform effectTranslation(_drift.value(), sb::Vector2f(1), 0);
-		return effectTranslation * transform * effectRotation;
+		sb::Transform effectScale(sb::Vector2f(0), (1 + _wobble.value()) * sb::Vector2f(1), 0);
+		transform = effectTranslation * transform * effectRotation * effectScale;
 	}
 
 	void update(float ds) {
 		_drift.update(ds);
+		_wobble.update(ds);
 		_spin.update(ds);
-
-		if (_drift.isPlaying())
-			setPosition(_drift.value());
-		if (_spin.isPlaying())
-			setRotation(_spin.value());
 	}
 };
 
@@ -545,8 +547,8 @@ public:
 	}
 
     virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
-		states.transform *= _effects.apply(getTransform());
-		//states.transform *= getTransform() * _effects.getTransform();
+		states.transform *= getTransform();
+		_effects.apply(states.transform);
         updateLighting(states.transform);
         target.draw(_sprite, states);
     }
@@ -727,8 +729,8 @@ public:
 	}
 
     virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
-		states.transform *= _effects.apply(getTransform());
-		//states.transform *= getTransform() * _effects.getTransform();
+		states.transform *= getTransform();
+		_effects.apply(states.transform);
         for (size_t i = 0; i < _blocks.size(); i++)
             target.draw(_blocks[i], states);
     }
@@ -2367,7 +2369,7 @@ void demo42() {
 
 void demo43() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
-	Tetromino tetromino('z');
+	Tetromino tetromino('m');
 
 	tetromino.setScale(0.1f);
 	tetromino.setPosition(0.2f);
@@ -2378,12 +2380,12 @@ void demo43() {
 		sb::Input::update();
 		window.update();
 		tetromino.update(ds);
-		if (sb::Input::isTouchGoingDown(1)) {
-			sb::Vector2f touch = sb::Input::getTouchPosition(window);
-			tetromino.getEffects().driftTo(touch, tetromino, 2);
-		}
+		if (sb::Input::isTouchGoingDown(1))
+			tetromino.getEffects().driftTo(sb::Input::getTouchPosition(window), tetromino, 2);
 		if (sb::Input::isKeyGoingDown(sb::KeyCode::Up))
-			tetromino.getEffects().spinBy(90 * sb::ToRadian, tetromino);
+			tetromino.getEffects().spinBy(-90 * sb::ToRadian, tetromino);
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::p))
+			tetromino.getEffects().pop(tetromino, 1);
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(tetromino);
@@ -2391,8 +2393,36 @@ void demo43() {
 	}
 }
 
+void demo44() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Board board(sb::Vector2i(10, 10));
+
+	board.createTetromino('m', sb::Vector2i(4, 4));
+	board.enableGrid(true);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		board.getTetromino().update(ds);
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::Up))
+			board.rotateTetromino();
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::p))
+			board.getTetromino().getEffects().pop(board.getTetromino());
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::Down))
+			board.moveTetromino(sb::Vector2i(0, -1));
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(board);
+		window.display();
+	}
+}
+
 void demo() {
-	demo43();
+	demo44();
+
+	//demo43();
 
 	//demo42();
 
