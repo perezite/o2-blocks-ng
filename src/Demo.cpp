@@ -2373,8 +2373,6 @@ void demo43() {
 	tetromino.setPosition(0.2f);
 	tetromino.setRotation(45 * sb::ToRadian);
 
-	// NEXT: Implement pop effect to make sure this works with scaling effects as well
-
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
 		sb::Input::update();
