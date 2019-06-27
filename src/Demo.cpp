@@ -454,7 +454,7 @@ public:
 	}
 
 	void implode(sb::Transformable& target, float duration = 0.8f) {
-		_wobble.tween = sb::Tweenf().backOut(_wobble.value(), -1, duration);
+		_wobble.tween = sb::Tweenf().backInOut(_wobble.value(), -1, duration);
 		_wobble.start();
 
 		sb::Tweenf tween = sb::Tweenf().backInOut(1, 0, 1);
@@ -1340,6 +1340,8 @@ public:
 
 	inline Tetromino& getTetromino() { return _tetromino; }
 
+	inline std::vector<Block>& getBlocks() { return _blocks; }
+
 	inline const sb::Vector2i& getBoardSize() const { return _boardSize; }
 
 	inline size_t getLinesCleared() const { return _linesCleared; }
@@ -1431,6 +1433,9 @@ public:
 			_tetromino.update(ds);
 		else 
 			createRandomTetromino();
+
+		for (size_t i = 0; i < _blocks.size(); i++)
+			_blocks[i].update(ds);
 
 		if (!_isDead) {
 			step(_tetromino, ds);
@@ -2494,8 +2499,37 @@ void demo45() {
 	}
 }
 
+void demo46() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Board board(sb::Vector2i(10, 14));
+
+	adjustCameraToBoard(window.getCamera(), board);
+	board.createBlock('m', sb::Vector2i(4, 4));
+	board.createBlock('m', sb::Vector2i(5, 5));
+	board.enableGrid(true);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		for (size_t i = 0; i < board.getBlocks().size(); i++)
+			board.getBlocks()[i].update(ds);
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::i)) {
+			std::vector<Block>& blocks = board.getBlocks();
+			for (size_t i = 0; i < blocks.size(); i++) {
+				blocks[i].getEffects().implode(blocks[i]);
+			}
+		}
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(board);
+		window.display();
+	}
+}
+
 void demo() {
-	demo45();
+	demo46();
 
 	//demo44();
 
@@ -2588,5 +2622,5 @@ void demo() {
     //demo0();
 }
 
-// Explode
 // Bounce
+// Lines
