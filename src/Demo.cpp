@@ -427,6 +427,10 @@ protected:
 	}
 
 public:
+	bool isPlaying() {
+		return _drift.isPlaying() || _wobble.isPlaying() || _spin.isPlaying();
+	}
+
 	void driftTo(const sb::Vector2f& end, sb::Transformable& target, float duration = 0.2f) {
 		sb::Vector2f effectPosition = target.getPosition() + _drift.value();
 		target.setPosition(end);
@@ -488,8 +492,15 @@ public:
 };
 
 class Block : public sb::Drawable, public sb::Transformable {
+public:
+	enum struct State {
+		Alive, Dying, Garbage
+	};
+
+private:
     sb::Sprite _sprite;
     const Light* _light;
+	State _state;
 	TransformEffects _effects;
 	TransformEffects2 _effects2;
 
@@ -543,11 +554,18 @@ protected:
         }
     }
 
+	void die(float ds) {
+		if (!_effects.isPlaying())
+			_state = State::Garbage;
+	}
+
 public:
-    Block(char type = 'i') : _light(NULL), _effects2(*this)
+    Block(char type = 'i') : _light(NULL), _state(State::Alive), _effects2(*this)
     {
         setType(type);
     }
+
+	inline const State& getState() const { return _state; }
 
 	inline TransformEffects2& getEffects2() { SB_WARNING("Obsolete!") ; return _effects2; }
 
@@ -562,8 +580,15 @@ public:
 
     inline void setLight(const Light& light) { _light = &light; }
 
+	void implode(float duration = 0.8f) {
+		getEffects().implode(*this, duration);
+		_state = State::Dying;
+	}
+
 	void update(float ds) {
 		_effects.update(ds);
+		if (_state == State::Dying)
+			die(ds);
 	}
 
     virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
@@ -1417,6 +1442,11 @@ public:
 		_tetromino = computeProjection();
 		freeze(_tetromino);
 		clearLines();
+	}
+
+	void implodeBlocks(float duration = 0.8f) {
+		for (size_t i = 0; i < _blocks.size(); i++)
+			_blocks[i].implode(duration);
 	}
 
 	Tetromino computeProjection() {
@@ -2491,7 +2521,9 @@ void demo45() {
 		block.update(ds);
 
 		if (sb::Input::isKeyGoingDown(sb::KeyCode::i))
-			 block.getEffects().implode(block);
+			block.implode();
+
+		std::cout << (int)block.getState() << std::endl;
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(block);
@@ -2512,15 +2544,10 @@ void demo46() {
 		float ds = getDeltaSeconds();
 		sb::Input::update();
 		window.update();
-		for (size_t i = 0; i < board.getBlocks().size(); i++)
-			board.getBlocks()[i].update(ds);
+		board.update(ds);
 
-		if (sb::Input::isKeyGoingDown(sb::KeyCode::i)) {
-			std::vector<Block>& blocks = board.getBlocks();
-			for (size_t i = 0; i < blocks.size(); i++) {
-				blocks[i].getEffects().implode(blocks[i]);
-			}
-		}
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::i)) 
+			board.implodeBlocks();
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(board);
@@ -2530,6 +2557,8 @@ void demo46() {
 
 void demo() {
 	demo46();
+
+	//demo45();
 
 	//demo44();
 
