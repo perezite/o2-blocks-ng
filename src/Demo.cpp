@@ -2815,8 +2815,37 @@ void demo52() {
 	}
 }
 
+void demo53() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Board board(sb::Vector2i(10, 14));
+
+	adjustCameraToBoard(window.getCamera(), board);
+	board.createTetromino('z', sb::Vector2i(4, 4));
+	addBlocks52(board);
+	board.enableGrid(true);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		board.updateEntities(ds);
+
+		input44(window, board, ds);
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::d))
+			board.dropTetromino();
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::q))
+			board.quickdropTetromino();
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(board);
+		window.display();
+	}
+}
+
 void demo() {
-	demo52();
+	demo53();
+	
+	//demo52();
 
 	//demo51();
 
