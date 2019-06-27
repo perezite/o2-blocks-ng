@@ -1226,7 +1226,8 @@ protected:
 	bool isOccupied(const sb::Vector2i& position) {
 		for (size_t i = 0; i < _blocks.size(); i++) {
 			const sb::Vector2i blockPosition = worldToBoardPosition(_blocks[i].getPosition());
-			if (blockPosition == position)
+			bool isBlockAlive = _blocks[i].getState() == Block::State::Alive;
+			if (blockPosition == position && isBlockAlive)
 				return true;
 		}
 
@@ -1354,6 +1355,14 @@ protected:
 		return false;
 	}
 
+	static bool isGarbage(const Block& block) { 
+		return block.getState() == Block::State::Garbage; 
+	}
+
+	void disposeGarbage() {
+		_blocks.erase(std::remove_if(_blocks.begin(), _blocks.end(), isGarbage), _blocks.end());	
+	}
+
 public:
 	Board(const sb::Vector2i& boardSize) 
 		: _batch(1024), _boardSize(boardSize), _grid(boardSize, 0.01f), 
@@ -1459,6 +1468,8 @@ public:
 	}
 
 	void update(float ds) {
+		disposeGarbage();
+
 		if (_hasTetromino)
 			_tetromino.update(ds);
 		else 
