@@ -614,7 +614,7 @@ public:
 
     inline void setLight(const Light& light) { _light = &light; }
 
-	void implode(float duration = 0.8f) {
+	void die(float duration = 0.8f) {
 		getEffects().implode(*this, duration);
 		_state = State::Imploding;
 	}
@@ -1321,7 +1321,7 @@ protected:
 			sb::Vector2i boardPos = worldToBoardPosition(_blocks[i].getPosition());
 			if (boardPos.y == y) {
 				float duration = isOccupied(sb::Vector2i(boardPos.x, boardPos.y + 1)) ? 0.01f : 0.8f;
-				_blocks[i].implode(duration);
+				_blocks[i].die(duration);
 			}
 		}
 	}
@@ -1519,7 +1519,7 @@ public:
 
 	void implodeBlocks(float duration = 0.8f) {
 		for (size_t i = 0; i < _blocks.size(); i++)
-			_blocks[i].implode(duration);
+			_blocks[i].die(duration);
 	}
 
 	void clearLowestLineWithBlocks() {
@@ -2605,7 +2605,7 @@ void demo45() {
 		block.update(ds);
 
 		if (sb::Input::isKeyGoingDown(sb::KeyCode::i))
-			block.implode();
+			block.die();
 
 		std::cout << (int)block.getState() << std::endl;
 
@@ -2942,7 +2942,7 @@ void demo55() {
 		update55(block, particleSystem, ds);
 
 		if (sb::Input::isKeyGoingDown(sb::KeyCode::i))
-			block.implode(1);
+			block.die(1);
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(block);
@@ -2952,9 +2952,74 @@ void demo55() {
 	}
 }
 
+class BlockExplosion : public sb::ParticleSystem {
+	bool _isActive;
+
+protected:
+	static sb::Texture& getTexture() {
+		static sb::Texture texture("Textures/SimpleParticle.png");
+		return texture;
+	}
+
+public:
+	BlockExplosion(size_t numParticles) : ParticleSystem(numParticles), _isActive(false)
+	{ 
+		setLifetime(1);
+		setEmissionRatePerSecond(0);
+		setParticleLifetimeRange(2.f * sb::Vector2f(0.1f, 1));
+		setParticleSpeedRange(sb::Vector2f(0.1f, 1));
+		hasRandomEmissionDirection(true);
+		setParticleSizeRange(sb::Vector2f(0.01f, 0.13f));
+		setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
+		getTexture().enableMipmap(true);
+		setTexture(getTexture());
+		setParticleColor(createColor(240, 0, 0, 150));
+		addBurst(0, 50);
+	}
+
+	virtual void update(float ds) {
+		if (_isActive) {
+			ParticleSystem::update(ds);
+			if (!isAlive())
+				_isActive = false;
+		}
+	}
+
+	void explode() {
+		if (!_isActive) {
+			reset();
+			_isActive = true;
+		}
+	}
+};
+
+void demo56() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	sb::Texture texture;
+	BlockExplosion explosion(512);
+	
+	explosion.setScale(0.2f);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		explosion.update(ds);
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::e))
+			explosion.explode();
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(explosion);
+
+		window.display();
+	}
+}
 
 void demo() {
-	demo55();
+	demo56();
+
+	//demo55();
 
 	//demo54();
 

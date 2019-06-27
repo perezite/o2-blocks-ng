@@ -151,6 +151,7 @@ namespace sb
 		virtual void draw(DrawTarget& target, DrawStates states = DrawStates::getDefault());
 
 		void reset();
+
 	public:
 		std::string id;
 
