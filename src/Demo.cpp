@@ -412,7 +412,7 @@ class TransformEffects : public sb::Transformable {
 	Animationf _spin;
 
 public:
-	void driftTo(const sb::Vector2f& end, sb::Transformable& target, float duration = 0.15f) {
+	void driftTo(const sb::Vector2f& end, sb::Transformable& target, float duration = 0.2f) {
 		sb::Vector2f effectPosition = target.getPosition() + _drift.value();
 		target.setPosition(end);
 		sb::Vector2f offset = effectPosition - end;
@@ -420,7 +420,7 @@ public:
 		_drift.start();
 	}
 
-	inline void driftBy(const sb::Vector2f& amount, sb::Transformable& target, float duration = 0.15f) {
+	inline void driftBy(const sb::Vector2f& amount, sb::Transformable& target, float duration = 0.2f) {
 		driftTo(target.getPosition() + amount, target, duration);
 	}
 
@@ -1340,18 +1340,6 @@ public:
 
 	inline void setStepInterval(float dropIntervalInSeconds) { _stepIntervalInSeconds = dropIntervalInSeconds; }
 
-	void setTetrominoPosition(sb::Vector2f pos) {
-		sb::Vector2f previousPos = _tetromino.getPosition();
-		sb::Vector2f newPos = getTransform() * pos;
-		newPos.y = std::min(previousPos.y, newPos.y);
-
-		if (isReachable(_tetromino, newPos)) {
-			sb::Vector2i boardPos = worldToBoardPosition(newPos);
-			sb::Vector2f worldPos = boardToWorldPosition(boardPos);
-			_tetromino.setPosition(worldPos);
-		}
-	}
-
 	void createBlock(char type, const sb::Vector2i& position) {
 		Block block(type);
 		block.setPosition(boardToWorldPosition(position));
@@ -1371,22 +1359,36 @@ public:
 		createTetromino(tetromino, boardPosition);
 	}
 
-	void moveTetromino(const sb::Vector2i& translation) {
-		sb::Vector2f cellSize = getCellSize();
-		sb::Vector2f worldTranslation(translation.x * cellSize.x, translation.y * cellSize.y);
-		_tetromino.getEffects().driftBy(worldTranslation, _tetromino, 1);
+	void driftTetrominoTo(sb::Vector2f pos) {
+		sb::Vector2f previousPos = _tetromino.getPosition();
+		sb::Vector2f newPos = getTransform() * pos;
+		newPos.y = std::min(previousPos.y, newPos.y);
 
-		if (isInvalid(_tetromino)) 
-			_tetromino.getEffects().driftBy(-worldTranslation, _tetromino);
+		if (isReachable(_tetromino, newPos)) {
+			sb::Vector2i boardPos = worldToBoardPosition(newPos);
+			sb::Vector2f worldPos = boardToWorldPosition(boardPos);
+			_tetromino.getEffects().driftTo(worldPos, _tetromino);
+		}
 	}
 
-	inline void moveTetromino(int x, int y) { moveTetromino(sb::Vector2i(x, y)); }
+	void driftTetrominoBy(const sb::Vector2i& translation) {
+		sb::Vector2f cellSize = getCellSize();
+		sb::Vector2f worldTranslation(translation.x * cellSize.x, translation.y * cellSize.y);
+		sb::Vector2f end = _tetromino.getPosition() + worldTranslation;
+		driftTetrominoTo(end);
+	}
 
-	void rotateTetromino() {
+	inline void driftTetrominoBy(int x, int y) { driftTetrominoBy(sb::Vector2i(x, y)); }
+
+	void spinTetromino() {
 		_tetromino.getEffects().spinBy(-90 * sb::ToRadian, _tetromino, 0.75f);
 
 		if (isInvalid(_tetromino)) 
 			_tetromino.getEffects().spinBy(90 * sb::ToRadian, _tetromino);
+	}
+
+	void popTetromino() {
+		_tetromino.getEffects().pop(_tetromino);
 	}
 
 	void quickdrop() {
@@ -1570,7 +1572,7 @@ void demo19() {
 		window.update();
 		if (sb::Input::isKeyGoingDown(sb::KeyCode::r) || 
 			isTetrominoTouchGoingDown(window, board))
-			board.rotateTetromino();
+			board.spinTetromino();
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(board);
@@ -1581,7 +1583,7 @@ void demo19() {
 void input20(sb::Window& window, Board& board) {
 	if (sb::Input::isKeyGoingDown(sb::KeyCode::r) ||
 		isTetrominoTouchGoingDown(window, board))
-		board.rotateTetromino();
+		board.spinTetromino();
 }
 
 void demo20() {
@@ -1618,13 +1620,13 @@ bool isTouchDown(sb::Window& window, Board& board) {
 
 void input21(sb::Window& window, Board& board) {
 	if (sb::Input::isKeyGoingDown(sb::KeyCode::Left))
-		board.moveTetromino(-1, 0);
+		board.driftTetrominoBy(-1, 0);
 	if (sb::Input::isKeyGoingDown(sb::KeyCode::Right))
-		board.moveTetromino(1, 0);
+		board.driftTetrominoBy(1, 0);
 	if (sb::Input::isKeyGoingDown(sb::KeyCode::Down))
-		board.moveTetromino(0, -1);
+		board.driftTetrominoBy(0, -1);
 	if (isTouchDown(window, board))
-	board.setTetrominoPosition(sb::Input::getTouchPosition(window));
+	board.driftTetrominoTo(sb::Input::getTouchPosition(window));
 }
 
 void demo21() {
@@ -1651,15 +1653,15 @@ void demo21() {
 
 void input22(sb::Window& window, Board& board) {
 	if (sb::Input::isKeyGoingDown(sb::KeyCode::Left))
-		board.moveTetromino(-1, 0);
+		board.driftTetrominoBy(-1, 0);
 	if (sb::Input::isKeyGoingDown(sb::KeyCode::Right))
-		board.moveTetromino(1, 0);
+		board.driftTetrominoBy(1, 0);
 	if (sb::Input::isKeyGoingDown(sb::KeyCode::Down))
-		board.moveTetromino(0, -1);
+		board.driftTetrominoBy(0, -1);
 	if (sb::Input::isKeyGoingDown(sb::KeyCode::Up))
-		board.rotateTetromino();
+		board.spinTetromino();
 	if (isTouchDown(window, board))
-		board.setTetrominoPosition(sb::Input::getTouchPosition(window));
+		board.driftTetrominoTo(sb::Input::getTouchPosition(window));
 }
 
 void demo22() {
@@ -1743,7 +1745,7 @@ void demo24() {
 	board.createBlock('m', sb::Vector2i(2, 2));
 	board.createBlock('m', sb::Vector2i(1, 3));
 	board.createTetromino('i', sb::Vector2i(3, 2));
-	board.rotateTetromino();
+	board.spinTetromino();
 	board.enableGrid(true);
 	board.setStepInterval(1);
 
@@ -1849,20 +1851,20 @@ namespace {
 			if (sb::Input::isTouchGoingDown(1))
 				touchOffset = _board.getTetromino().getPosition() - sb::Input::getTouchPosition(window);
 			if (sb::Input::isTouchDown(1))
-				_board.setTetrominoPosition(sb::Input::getTouchPosition(window) + touchOffset);
+				_board.driftTetrominoTo(sb::Input::getTouchPosition(window) + touchOffset);
 			if (getSwipe(window, ds).y > 0.05f * window.getInverseAspect())
-				_board.rotateTetromino();
+				_board.spinTetromino();
 			if (isProjectionTouchGoingDown(window, _board))
 				_board.quickdrop();
 
 			if (sb::Input::isKeyGoingDown(sb::KeyCode::Left))
-				_board.moveTetromino(-1, 0);
+				_board.driftTetrominoBy(-1, 0);
 			if (sb::Input::isKeyGoingDown(sb::KeyCode::Right))
-				_board.moveTetromino(1, 0);
+				_board.driftTetrominoBy(1, 0);
 			if (sb::Input::isKeyGoingDown(sb::KeyCode::Down))
-				_board.moveTetromino(0, -1);
+				_board.driftTetrominoBy(0, -1);
 			if (sb::Input::isKeyGoingDown(sb::KeyCode::Up))
-				_board.rotateTetromino();
+				_board.spinTetromino();
 			if (sb::Input::isKeyGoingDown(sb::KeyCode::Space))
 				_board.quickdrop();
 		}
@@ -2271,7 +2273,7 @@ void demo38() {
 		window.update();
 		board.getTetromino().update(ds);
 		if (sb::Input::isKeyGoingDown(sb::KeyCode::Down)) {
-			board.moveTetromino(sb::Vector2i(0, -1));
+			board.driftTetrominoBy(sb::Vector2i(0, -1));
 		}
 		
 		window.clear(sb::Color(1, 1, 1, 1));
@@ -2359,7 +2361,7 @@ void demo42() {
 		window.update();
 		board.getTetromino().update(ds);
 		if (sb::Input::isKeyGoingDown(sb::KeyCode::Up))
-			board.rotateTetromino();
+			board.spinTetromino();
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(board);
@@ -2393,11 +2395,47 @@ void demo43() {
 	}
 }
 
+void touchInput44(sb::Window& window, Board& board, float ds) {
+	static float secondsSinceLastTouch = 1;
+	static sb::Vector2f touchOffset;
+	secondsSinceLastTouch += ds;
+
+	if (sb::Input::isTouchGoingDown(1)) {
+		touchOffset = board.getTetromino().getPosition() - sb::Input::getTouchPosition(window);
+		if (secondsSinceLastTouch >= 1) 
+			board.popTetromino();
+		secondsSinceLastTouch = 0;
+	}
+	if (sb::Input::isTouchDown(1))
+		board.driftTetrominoTo(sb::Input::getTouchPosition(window) + touchOffset);
+	if (getSwipe(window, ds).y > 0.05f * window.getInverseAspect() 
+		|| isTouchGoingDown(window, board.getTetromino()))
+		board.spinTetromino();
+}
+
+void input44(sb::Window& window, Board& board, float ds) {
+	if (sb::Input::isKeyGoingDown(sb::KeyCode::Up))
+		board.spinTetromino();
+	if (sb::Input::isKeyGoingDown(sb::KeyCode::p))
+		board.popTetromino();
+	if (sb::Input::isKeyGoingDown(sb::KeyCode::Down))
+		board.driftTetrominoBy(sb::Vector2i(0, -1));
+	if (sb::Input::isKeyGoingDown(sb::KeyCode::Left))
+		board.driftTetrominoBy(sb::Vector2i(-1, 0));
+	if (sb::Input::isKeyGoingDown(sb::KeyCode::Right))
+		board.driftTetrominoBy(sb::Vector2i(1, 0));
+
+	touchInput44(window, board, ds);
+
+}
+
 void demo44() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
-	Board board(sb::Vector2i(10, 10));
+	Board board(sb::Vector2i(10, 14));
 
+	adjustCameraToBoard(window.getCamera(), board);
 	board.createTetromino('m', sb::Vector2i(4, 4));
+	board.createBlock('j', sb::Vector2i(4, 2));
 	board.enableGrid(true);
 
 	while (window.isOpen()) {
@@ -2405,13 +2443,7 @@ void demo44() {
 		sb::Input::update();
 		window.update();
 		board.getTetromino().update(ds);
-
-		if (sb::Input::isKeyGoingDown(sb::KeyCode::Up))
-			board.rotateTetromino();
-		if (sb::Input::isKeyGoingDown(sb::KeyCode::p))
-			board.getTetromino().getEffects().pop(board.getTetromino());
-		if (sb::Input::isKeyGoingDown(sb::KeyCode::Down))
-			board.moveTetromino(sb::Vector2i(0, -1));
+		input44(window, board, ds);
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(board);
@@ -2511,7 +2543,5 @@ void demo() {
     //demo0();
 }
 
-// Drift
-// Pop
 // Explode
 // Bounce

@@ -296,7 +296,7 @@ public:
 		spawnTheTetromino(type);
 	}
 
-	void rotateTetromino() {
+	void spinTetromino() {
 		if (canTetrominoRotate())
 			_tetromino.rotate();
 	}
@@ -336,7 +336,7 @@ struct Scene : public sb::Drawable {
 
 	void input() {
 		if (sb::Input::isKeyGoingDown(sb::KeyCode::r))
-			board.rotateTetromino();
+			board.spinTetromino();
 	}
 
 	void update() {
