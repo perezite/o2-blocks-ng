@@ -83,7 +83,8 @@ namespace sb
 			}
 		}
 
-		void scale(float factor) {
+		template <class T>
+		void scale(T factor) {
 			for (size_t i = 0; i < _easingCommands.size(); i++) {
 				_easingCommands[i].from *= factor;
 				_easingCommands[i].to *= factor;

@@ -259,6 +259,11 @@ struct Animation {
 		playing = true;
 	}
 
+	void stop() {
+		t = tween.getDuration();
+		playing = false;
+	}
+
 	void update(float ds) {
 		if (isPlaying())
 			t += ds;
@@ -412,6 +417,20 @@ class TransformEffects : public sb::Transformable {
 	Animationf _spin;
 
 protected:
+	void smoothMoveTo(const sb::Vector2f& end, sb::Transformable& target, sb::Tween2f& normalizedTween, float duration) {
+		sb::Vector2f effectPosition = target.getPosition() + _drift.value();
+		target.setPosition(end);
+		sb::Vector2f offset = effectPosition - end;
+		normalizedTween.stretchDuration(duration);
+		normalizedTween.scale(offset);
+		_drift.tween = normalizedTween;
+		_drift.start();
+	}
+
+	inline void smoothMoveBy(const sb::Vector2f& amount, sb::Transformable& target, sb::Tweenf& normalizedTween, float duration) {
+		driftTo(target.getPosition() + amount, target, duration);
+	}
+
 	void smoothRotateTo(float radians, sb::Transformable& target, sb::Tweenf& normalizedTween, float duration) {
 		float effectRotation = target.getRotation() + _spin.value();
 		float offset = effectRotation - radians;
@@ -422,7 +441,7 @@ protected:
 		_spin.start();
 	}
 
-	void smoothRotateBy(float radians, sb::Transformable& target, sb::Tweenf& normalizedTween, float duration) {
+	inline void smoothRotateBy(float radians, sb::Transformable& target, sb::Tweenf& normalizedTween, float duration) {
 		smoothRotateTo(target.getRotation() + radians, target, normalizedTween, duration);
 	}
 
@@ -431,16 +450,22 @@ public:
 		return _drift.isPlaying() || _wobble.isPlaying() || _spin.isPlaying();
 	}
 
-	void driftTo(const sb::Vector2f& end, sb::Transformable& target, float duration = 0.2f) {
-		sb::Vector2f effectPosition = target.getPosition() + _drift.value();
-		target.setPosition(end);
-		sb::Vector2f offset = effectPosition - end;
-		_drift.tween = sb::Tween2f().sineOut(offset, sb::Vector2f(0), duration);
-		_drift.start();
+	inline void driftTo(const sb::Vector2f& end, sb::Transformable& target, float duration = 0.2f) {
+		sb::Tween2f tween = sb::Tween2f().sineOut(sb::Vector2f(1), sb::Vector2f(0), 1);
+		smoothMoveTo(end, target, tween, duration);
 	}
 
 	inline void driftBy(const sb::Vector2f& amount, sb::Transformable& target, float duration = 0.2f) {
 		driftTo(target.getPosition() + amount, target, duration);
+	}
+
+	void bounceTo(const sb::Vector2f& end, sb::Transformable& target, float duration = 0.5f) {
+		sb::Tween2f tween = sb::Tween2f().bounceOut(sb::Vector2f(1), sb::Vector2f(0), 1);
+		smoothMoveTo(end, target, tween, duration);
+	}
+
+	inline void bounceBy(const sb::Vector2f& amount, sb::Transformable& target, float duration = 0.2f) {
+		bounceTo(target.getPosition() + amount, target, duration);
 	}
 
 	void pop(sb::Transformable& target, float duration = 0.15f) {
@@ -470,6 +495,12 @@ public:
 		sb::Transform effectTranslation(_drift.value(), sb::Vector2f(1), 0);
 		sb::Transform effectScale(sb::Vector2f(0), (1 + _wobble.value()) * sb::Vector2f(1), 0);
 		transform = effectTranslation * transform * effectRotation * effectScale;
+	}
+
+	void stop() {
+		_drift.stop();
+		_wobble.stop();
+		_spin.stop();
 	}
 
 	void update(float ds) {
@@ -1217,10 +1248,17 @@ protected:
 		return sb::Vector2f(1.f / _boardSize.x, 1.f / _boardSize.x);
 	}
 
-	void move(Tetromino& tetromino, const sb::Vector2i& translation) {
+	void moveBy(Tetromino& tetromino, const sb::Vector2i& translation) {
 		sb::Vector2i position = worldToBoardPosition(tetromino.getPosition());
 		position += translation;
 		tetromino.setPosition(boardToWorldPosition(position));
+	}
+
+	void bounceBy(Tetromino& tetromino, const sb::Vector2i& translation) {
+		sb::Vector2i position = worldToBoardPosition(tetromino.getPosition());
+		position += translation;
+		tetromino.getEffects().bounceTo(boardToWorldPosition(position), tetromino);
+		// tetromino.setPosition(boardToWorldPosition(position));
 	}
 
 	bool isOccupied(const sb::Vector2i& position) {
@@ -1310,11 +1348,12 @@ protected:
 
 	void drop(Tetromino& tetromino) {
 		sb::Vector2f previousPosition = tetromino.getPosition();
-		move(tetromino, sb::Vector2i(0, -1));
+		bounceBy(tetromino, sb::Vector2i(0, -1));
 
 		if (isInvalid(tetromino)) {
 			//std::cout << "A collision, sir" << std::endl;
-			tetromino.setPosition(previousPosition);
+			//tetromino.setPosition(previousPosition);
+			bounceBy(tetromino, sb::Vector2i(0, 1));
 			freeze(tetromino);
 			clearLines();
 			createRandomTetromino();
@@ -1338,7 +1377,7 @@ protected:
 			sb::Vector2i pos = worldToBoardPosition(testTetromino.getPosition());
 			if (pos == boardPosTo)
 				return true;
-			move(testTetromino, dir);
+			moveBy(testTetromino, dir);
 		}
 
 		return false;
@@ -1359,8 +1398,14 @@ protected:
 		return block.getState() == Block::State::Garbage; 
 	}
 
-	void disposeGarbage() {
+	void dispose() {
 		_blocks.erase(std::remove_if(_blocks.begin(), _blocks.end(), isGarbage), _blocks.end());	
+	}
+
+	void bounceBy(Block& block, const sb::Vector2i& translation) {
+		sb::Vector2i position = worldToBoardPosition(block.getPosition());
+		position += translation;
+		block.getEffects().bounceTo(boardToWorldPosition(position), block);
 	}
 
 public:
@@ -1447,10 +1492,22 @@ public:
 		_tetromino.getEffects().pop(_tetromino);
 	}
 
+	void dropTetromino() {
+		drop(_tetromino);
+	}
+
 	void quickdrop() {
 		_tetromino = computeProjection();
 		freeze(_tetromino);
 		clearLines();
+	}
+
+	void dropBlocks() {
+		for (size_t i = 0; i < _blocks.size(); i++)
+			bounceBy(_blocks[i], sb::Vector2i(0, -1));
+			
+		//for (size_t i = 0; i < _blocks.size(); i++)
+		//	_blocks[i].
 	}
 
 	void implodeBlocks(float duration = 0.8f) {
@@ -1460,15 +1517,16 @@ public:
 
 	Tetromino computeProjection() {
 		Tetromino projection = _tetromino;
+		projection.getEffects().stop();
 		while (!isInvalid(projection))
-			move(projection, sb::Vector2i(0, -1));
-		move(projection, sb::Vector2i(0, 1));
+			moveBy(projection, sb::Vector2i(0, -1));
+		moveBy(projection, sb::Vector2i(0, 1));
 
 		return projection;
 	}
 
 	void update(float ds) {
-		disposeGarbage();
+		dispose();
 
 		if (_hasTetromino)
 			_tetromino.update(ds);
@@ -1494,10 +1552,10 @@ public:
 		target.draw(_batch);
 		
 		if (_hasTetromino) {
-			_batch.draw(_tetromino, states);
 			Tetromino projection = computeProjection();
 			projection.setColor(sb::Color(1, 1, 1, 0.25f));
 			_batch.draw(projection, states);
+			_batch.draw(_tetromino, states);
 			target.draw(_batch);
 		}
 	}
@@ -2566,8 +2624,91 @@ void demo46() {
 	}
 }
 
+void demo47() {
+	srand(12353859);
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Light light;
+	Block block('j');
+
+	block.setScale(0.2f);
+	block.setPosition(0, 0.3f);
+	block.setLight(light);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		block.update(ds);
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::b))
+			block.getEffects().bounceBy(sb::Vector2f(0, -0.1f), block, 0.75f);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(block);
+		window.display();
+	}
+}
+
+void demo48() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Board board(sb::Vector2i(10, 14));
+
+	adjustCameraToBoard(window.getCamera(), board);
+	board.createTetromino('z', sb::Vector2i(4, 8));
+	board.enableGrid(true);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		for (size_t i = 0; i < board.getBlocks().size(); i++)
+			board.getBlocks()[i].update(ds);
+		if (board.hasTetromino())
+			board.getTetromino().update(ds);
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::b) && board.hasTetromino())
+			board.dropTetromino();
+	
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(board);
+		window.display();
+	}
+}
+
+void demo49() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Board board(sb::Vector2i(10, 14));
+
+	adjustCameraToBoard(window.getCamera(), board);
+	board.createBlock('z', sb::Vector2i(4, 8));
+	board.enableGrid(true);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		for (size_t i = 0; i < board.getBlocks().size(); i++)
+			board.getBlocks()[i].update(ds);
+		if (board.hasTetromino())
+			board.getTetromino().update(ds);
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::b))
+			board.dropBlocks();
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(board);
+		window.display();
+	}
+}
+
 void demo() {
-	demo46();
+	demo49();
+
+	//demo48();
+
+	//demo47();
+
+	//demo46();
 
 	//demo45();
 
@@ -2662,5 +2803,4 @@ void demo() {
     //demo0();
 }
 
-// Bounce
 // Lines

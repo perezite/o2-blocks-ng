@@ -88,6 +88,19 @@ namespace sb
 	}
 
 	template <class T>
+	inline Vector2<T> operator*(const Vector2<T>& left, const Vector2<T>& right)
+	{
+		return Vector2<T>(left.x * right.x, left.y * right.y);
+	}
+
+	template <class T>
+	inline Vector2<T>& operator*=(Vector2<T>& left, const Vector2<T>& right)
+	{
+		left = left * right;
+		return left;
+	}
+
+	template <class T>
 	inline Vector2<T> operator/(const Vector2<T>& vector, const T& scalar)
 	{
 		return Vector2<T>(vector.x / scalar, vector.y / scalar);
