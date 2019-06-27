@@ -486,11 +486,11 @@ public:
 	}
 
 	void implode(sb::Transformable& target, float duration = 0.8f) {
-		_wobble.tween = sb::Tweenf().backInOut(_wobble.value(), -1, duration);
+		_wobble.tween = sb::Tweenf().backIn(_wobble.value(), -1, duration);
 		_wobble.start();
 
 		sb::Tweenf tween = sb::Tweenf().backInOut(1, 0, 1);
-		smoothRotateBy(sb::random(-90, 90) * sb::ToRadian, target, tween, duration * 0.3f);
+		smoothRotateBy(sb::random(-45, 45) * sb::ToRadian, target, tween, duration * 0.3f);
 	}
 
 	void apply(sb::Transform& transform) {
@@ -528,7 +528,7 @@ public:
 class Block : public sb::Drawable, public sb::Transformable {
 public:
 	enum struct State {
-		Alive, Dying, Garbage
+		Alive, Imploding, Garbage
 	};
 
 private:
@@ -588,7 +588,7 @@ protected:
         }
     }
 
-	void die(float ds) {
+	void updateImploding(float ds) {
 		if (!_effects.isPlaying())
 			_state = State::Garbage;
 	}
@@ -616,13 +616,13 @@ public:
 
 	void implode(float duration = 0.8f) {
 		getEffects().implode(*this, duration);
-		_state = State::Dying;
+		_state = State::Imploding;
 	}
 
 	void update(float ds) {
 		_effects.update(ds);
-		if (_state == State::Dying)
-			die(ds);
+		if (_state == State::Imploding)
+			updateImploding(ds);
 	}
 
     virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
@@ -2848,13 +2848,23 @@ sb::Color createColor(int r, int g = 255, int b = 255, int a = 255) {
 void initColors54(std::vector<sb::Color>& colors) {
 	colors.resize(7);
 	int alpha = 150;
-	colors[0] = createColor(255, 242,   0, alpha);
-	colors[1] = createColor(  0, 240, 240, alpha);
-	colors[2] = createColor(  0,   0, 240, alpha);
+	colors[0] = createColor(  0,   0, 240, alpha);
+	colors[1] = createColor(255, 242,   0, alpha);
+	colors[2] = createColor(  0, 240, 240, alpha);
 	colors[3] = createColor(  0, 240,   0, alpha);
 	colors[4] = createColor(240, 160,   0, alpha);
 	colors[5] = createColor(240,   0,   0, alpha);
 	colors[6] = createColor(160,   0, 240, alpha);
+}
+
+void init54(sb::ParticleSystem& particleSystem, sb::Texture& texture, sb::Color& color) {
+	particleSystem.setTexture(texture);
+	particleSystem.setEmissionRatePerSecond(50);
+	particleSystem.setParticleSizeRange(sb::Vector2f(0.1f, 0.13f));
+	particleSystem.setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
+	particleSystem.setParticleColor(color);
+	particleSystem.setEmissionShape(sb::Disk(0.075f, 0.1f, 0, 2 * sb::Pi));
+	particleSystem.setScale(0.3f);
 }
 
 void demo54() {
@@ -2867,13 +2877,7 @@ void demo54() {
 	initColors54(colors);
 	texture.loadFromAsset("Textures/SimpleParticle.png");
 	texture.enableMipmap(true);
-	particleSystem.setTexture(texture);
-	particleSystem.setEmissionRatePerSecond(50);
-	particleSystem.setParticleSizeRange(sb::Vector2f(0.1f, 0.13f));
-	particleSystem.setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
-	particleSystem.setParticleColor(createColor(255, 242, 0, 150));
-	particleSystem.setEmissionShape(sb::Disk(0.075f, 0.1f, 0, 2 * sb::Pi));
-	particleSystem.setScale(0.3f);
+	init54(particleSystem, texture, colors[0]);
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -2889,13 +2893,70 @@ void demo54() {
 			particleSystem.setParticleColor(colors[currentColor]);
 		}
 
-		//window.draw(board);
 		window.display();
 	}
 }
 
+void init55(sb::ParticleSystem& particleSystem, sb::Texture& texture, sb::Color& color) {
+	particleSystem.setTexture(texture);
+	particleSystem.setEmissionRatePerSecond(0);
+	particleSystem.setParticleLifetimeRange(2.f * sb::Vector2f(0.1f, 1));
+	particleSystem.setParticleSpeedRange(sb::Vector2f(0.1f, 1));
+	particleSystem.hasRandomEmissionDirection(true);
+	particleSystem.setParticleSizeRange(sb::Vector2f(0.01f, 0.13f));
+	particleSystem.setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
+	particleSystem.setParticleColor(color);
+}
+
+void update55(Block& block, sb::ParticleSystem& particleSystem, float ds) {
+	static bool isExploding = false;
+
+	if (!isExploding && block.getState() == Block::State::Garbage) {
+		particleSystem.reset();
+		particleSystem.addBurst(0, 50);
+		isExploding = true;
+	}
+
+	block.update(ds);
+	particleSystem.update(ds);
+}
+
+void demo55() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	sb::Texture texture;
+	sb::ParticleSystem particleSystem(1024);
+	sb::Color color = createColor(0, 0, 240, 150);
+	Block block('j');
+
+	texture.loadFromAsset("Textures/SimpleParticle.png");
+	texture.enableMipmap(true);
+	init55(particleSystem, texture, color);
+	float factor = 0.5f;
+	particleSystem.setScale(factor * 0.3f);
+	block.setScale(factor * 0.2f);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		update55(block, particleSystem, ds);
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::i))
+			block.implode(1);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(block);
+		window.draw(particleSystem);
+
+		window.display();
+	}
+}
+
+
 void demo() {
-	demo54();
+	demo55();
+
+	//demo54();
 
 	//demo53();
 	
