@@ -411,6 +411,21 @@ class TransformEffects : public sb::Transformable {
 	Animationf _wobble;
 	Animationf _spin;
 
+protected:
+	void smoothRotateTo(float radians, sb::Transformable& target, sb::Tweenf& normalizedTween, float duration) {
+		float effectRotation = target.getRotation() + _spin.value();
+		float offset = effectRotation - radians;
+		target.setRotation(radians);
+		normalizedTween.stretchDuration(duration);
+		normalizedTween.scale(offset);
+		_spin.tween = normalizedTween;
+		_spin.start();
+	}
+
+	void smoothRotateBy(float radians, sb::Transformable& target, sb::Tweenf& normalizedTween, float duration) {
+		smoothRotateTo(target.getRotation() + radians, target, normalizedTween, duration);
+	}
+
 public:
 	void driftTo(const sb::Vector2f& end, sb::Transformable& target, float duration = 0.2f) {
 		sb::Vector2f effectPosition = target.getPosition() + _drift.value();
@@ -430,15 +445,20 @@ public:
 	}
 
 	void spinTo(float radians, sb::Transformable& target, float duration = 0.5f) {
-		float effectRotation = target.getRotation() + _spin.value();
-		float offset = effectRotation - radians;
-		target.setRotation(radians);
-		_spin.tween = sb::Tweenf().bounceOut(offset, 0, duration);
-		_spin.start();
+		sb::Tweenf tween = sb::Tweenf().bounceOut(1, 0, 1);
+		smoothRotateTo(radians, target, tween, duration);
 	}
 
 	void spinBy(float radians, sb::Transformable& target, float duration = 0.5f) {
 		spinTo(target.getRotation() + radians, target, duration);
+	}
+
+	void implode(sb::Transformable& target, float duration = 0.8f) {
+		_wobble.tween = sb::Tweenf().backOut(_wobble.value(), -1, duration);
+		_wobble.start();
+
+		sb::Tweenf tween = sb::Tweenf().backInOut(1, 0, 1);
+		smoothRotateBy(sb::random(-90, 90) * sb::ToRadian, target, tween, duration * 0.3f);
 	}
 
 	void apply(sb::Transform& transform) {
@@ -2426,7 +2446,6 @@ void input44(sb::Window& window, Board& board, float ds) {
 		board.driftTetrominoBy(sb::Vector2i(1, 0));
 
 	touchInput44(window, board, ds);
-
 }
 
 void demo44() {
@@ -2451,8 +2470,34 @@ void demo44() {
 	}
 }
 
+void demo45() {
+	srand(12353859);
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Light light;
+	Block block('j');
+
+	block.setScale(0.5f);
+	block.setLight(light);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		block.update(ds);
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::i))
+			 block.getEffects().implode(block);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(block);
+		window.display();
+	}
+}
+
 void demo() {
-	demo44();
+	demo45();
+
+	//demo44();
 
 	//demo43();
 

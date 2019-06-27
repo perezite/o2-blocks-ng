@@ -73,6 +73,23 @@ namespace sb
 			return _easingCommands.empty() ? 0 : _easingCommands[_easingCommands.size() - 1].t1;
 		}
 
+		inline std::vector<EasingCommand>& getEasingCommands() { return _easingCommands; }
+
+		inline void stretchDuration(float newDuration) {
+			float factor = newDuration / getDuration();
+			for (size_t i = 0; i < _easingCommands.size(); i++) {
+				_easingCommands[i].t0 *= factor;
+				_easingCommands[i].t1 *= factor;
+			}
+		}
+
+		void scale(float factor) {
+			for (size_t i = 0; i < _easingCommands.size(); i++) {
+				_easingCommands[i].from *= factor;
+				_easingCommands[i].to *= factor;
+			}
+		}
+
 		Tween None(const T& value = T()) {
 			return Tween().linear(value, value, 0);
 		}
