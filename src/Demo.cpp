@@ -8,6 +8,7 @@
 #include "Sprite.h"
 #include "Math.h"
 #include "Tween.h"
+#include "ParticleSystem.h"
 #include <cstddef>
 #include <vector>
 #include <map>
@@ -288,7 +289,7 @@ protected:
 	Behaviour(T& parent_) : parent(parent_)
 	{ }
 
-	Behaviour(const Behaviour& other) : parent(this->parent) {
+	Behaviour(const Behaviour& other) : parent(other.parent) {
 	}
 
 	Behaviour& operator=(const Behaviour& other) {
@@ -389,6 +390,8 @@ public:
 	}
 
 	void update(float ds) {
+		SB_ERROR("deprecated");
+
 		_drift.update(ds);
 		_spin.update(ds);
 
@@ -1345,7 +1348,6 @@ protected:
 	}
 
 	void drop(Tetromino& tetromino) {
-		sb::Vector2f previousPosition = tetromino.getPosition();
 		bounceBy(tetromino, sb::Vector2i(0, -1));
 
 		if (isInvalid(tetromino)) {
@@ -2257,8 +2259,6 @@ void demo32() {
 	Tetromino tetromino('z');
 	TransformEffects2 effects(tetromino);
 
-	auto test = discretize(sb::Vector2f(0.15f, 0), sb::Vector2f(0.1f, 1));
-
 	tetromino.setScale(0.1f);
 	tetromino.setLight(light);
 
@@ -2434,7 +2434,6 @@ void demo39() {
 		window.update();
 		tetromino.update(ds);
 		if (sb::Input::isKeyGoingDown(sb::KeyCode::Up)) {
-			float rotation = tetromino.getRotation() + 90 * sb::ToRadian;
 			tetromino.getEffects2().spinBy(45 * sb::ToRadian, 1);
 		}
 
@@ -2842,8 +2841,63 @@ void demo53() {
 	}
 }
 
+sb::Color createColor(int r, int g = 255, int b = 255, int a = 255) {
+	return sb::Color(r / 255.f, g / 255.f, b / 255.f, a / 255.f);
+}
+
+void initColors54(std::vector<sb::Color>& colors) {
+	colors.resize(7);
+	int alpha = 150;
+	colors[0] = createColor(255, 242,   0, alpha);
+	colors[1] = createColor(  0, 240, 240, alpha);
+	colors[2] = createColor(  0,   0, 240, alpha);
+	colors[3] = createColor(  0, 240,   0, alpha);
+	colors[4] = createColor(240, 160,   0, alpha);
+	colors[5] = createColor(240,   0,   0, alpha);
+	colors[6] = createColor(160,   0, 240, alpha);
+}
+
+void demo54() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	std::vector<sb::Color> colors;
+	std::size_t currentColor = 0;
+	sb::Texture texture;
+	sb::ParticleSystem particleSystem(1024);
+
+	initColors54(colors);
+	texture.loadFromAsset("Textures/SimpleParticle.png");
+	texture.enableMipmap(true);
+	particleSystem.setTexture(texture);
+	particleSystem.setEmissionRatePerSecond(50);
+	particleSystem.setParticleSizeRange(sb::Vector2f(0.1f, 0.13f));
+	particleSystem.setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
+	particleSystem.setParticleColor(createColor(255, 242, 0, 150));
+	particleSystem.setEmissionShape(sb::Disk(0.075f, 0.1f, 0, 2 * sb::Pi));
+	particleSystem.setScale(0.3f);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		particleSystem.update(ds);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(particleSystem);
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::c)) {
+			currentColor = (currentColor + 1) % colors.size();
+			particleSystem.setParticleColor(colors[currentColor]);
+		}
+
+		//window.draw(board);
+		window.display();
+	}
+}
+
 void demo() {
-	demo53();
+	demo54();
+
+	//demo53();
 	
 	//demo52();
 
