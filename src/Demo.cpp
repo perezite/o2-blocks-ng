@@ -677,9 +677,6 @@ public:
         setType(type);
     }
 
-	Block(const Block& other) : _explosion(other._explosion), _effects2(*this)
-	{ }
-
 	inline const State& getState() const { return _state; }
 
 	inline TransformEffects2& getEffects2() { SB_WARNING("Obsolete!") ; return _effects2; }
@@ -844,10 +841,6 @@ public:
     Tetromino(char type = 'i') : _effects2(*this) {
         setType(type);
     }
-
-	Tetromino(const Tetromino& other) : _blocks(other._blocks), _effects2(*this) {
-
-	}
 
 	inline TransformEffects& getEffects() { return _effects; }
 
@@ -3201,13 +3194,14 @@ void demo59() {
 
 void demo60() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
-	//Tetromino test('m');
 
 	Board board(sb::Vector2i(10, 10));
 
 	adjustCameraToBoard(window.getCamera(), board);
-	//board.createTetromino('m', sb::Vector2i(5, 5));
-	//Tetromino& test2 = board.getTetromino();
+	board.enableGrid(true);
+	board.setStepInterval(100);
+
+	addBlocks(board, 'j', 0, { 0, 1, 2, 3, 4, 5, 6, 7 , 8 , 9 });
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -3215,8 +3209,8 @@ void demo60() {
 		window.update();
 		board.update(ds);
 
-		//if (sb::Input::isKeyGoingDown(sb::KeyCode::c))
-		//	board.clearLowestLineWithBlocks();
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::c))
+			board.clearLowestLineWithBlocks();
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(board);

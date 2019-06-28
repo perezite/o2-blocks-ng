@@ -355,15 +355,17 @@ namespace sb
 	{
 	}
 
-	ParticleSystem::Pool::Pool(const Pool& other) : _items(other._items), _numActiveItems(other._numActiveItems) {
-		copy(_prototype, other._prototype); 
+	ParticleSystem::Pool::Pool(const Pool& other) : _prototype(NULL), _items(other._items), _numActiveItems(other._numActiveItems) {
+		if (other.hasPrototype())
+			copy(_prototype, other._prototype); 
 	}
 
 	ParticleSystem::Pool & ParticleSystem::Pool::operator=(const Pool & other)
 	{
 		_items = other._items;
 		_numActiveItems = other._numActiveItems;
-		copy(_prototype, other._prototype);
+		if (hasPrototype())
+			copy(_prototype, other._prototype);
 		return *this;
 	}
 
@@ -437,19 +439,6 @@ namespace sb
 			item.particleSystem = new ParticleSystem(*_prototype);
 			item.isActive = false;
 			_items.push_back(item);
-		}
-	}
-
-	void ParticleSystem::Pool::clone(Pool& result) const
-	{
-		result._items.clear();
-		result._items.reserve(_items.size());
-		copy(result._prototype, _prototype);
-
-		for (std::size_t i = 0; i < _items.size(); i++) {
-			Item item;
-			item.isActive = _items[i].isActive;
-			item.particleSystem = new ParticleSystem(*_items[i].particleSystem);
 		}
 	}
 

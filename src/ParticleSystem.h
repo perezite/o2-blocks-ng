@@ -90,7 +90,6 @@ namespace sb
 			void setPrototype(const ParticleSystem& prototype);
 			Item& getAvailableItem();
 			void update();
-			void clone(Pool& result) const;
 			void clear();
 
 		protected:
