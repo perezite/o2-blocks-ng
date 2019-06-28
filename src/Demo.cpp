@@ -539,7 +539,7 @@ protected:
 	}
 
 	static std::map<char, sb::Color>& getColors() {
-		static const int alpha = 150;
+		static const int alpha = 200;
 		static std::map<char, sb::Color> colors = {
 			{ 'i', createColor(0, 240, 240, alpha) },
 			{ 'j', createColor(0, 0, 240, alpha) },
@@ -559,9 +559,9 @@ public:
 		setLifetime(1);
 		setEmissionRatePerSecond(0);
 		setParticleLifetimeRange(2.f * sb::Vector2f(0.1f, 1));
-		setParticleSpeedRange(sb::Vector2f(0.1f, 1));
+		setParticleSpeedRange(sb::Vector2f(0.1f, 3));
 		hasRandomEmissionDirection(true);
-		setParticleSizeRange(sb::Vector2f(0.01f, 0.13f));
+		setParticleSizeRange(sb::Vector2f(0.01f, 0.25f));
 		setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
 		getTexture().enableMipmap(true);
 		setTexture(getTexture());
@@ -603,6 +603,7 @@ private:
     const Light* _light;
 	State _state;
 	BlockExplosion _explosion;
+	bool _isExplosionEnabled;
 	sb::Transform _implosionStartTransform;
 	TransformEffects _effects;
 	TransformEffects2 _effects2;
@@ -666,12 +667,12 @@ protected:
 	}
 
 	void explode(float ds) {
-		if (!_explosion.isActive())
+		if (!_explosion.isActive() || !_isExplosionEnabled)
 			_state = State::Garbage;
 	}
 
 public:
-    Block(char type = 'i') : _light(NULL), _state(State::Alive), _explosion(128, type), _effects2(*this)
+    Block(char type = 'i') : _light(NULL), _state(State::Alive), _explosion(128, type), _effects2(*this), _isExplosionEnabled(true)
     {
 		_explosion.setScale(1.25f);
         setType(type);
@@ -692,6 +693,8 @@ public:
 
     inline void setLight(const Light& light) { _light = &light; }
 
+	inline void enableExplosion(bool enable) { _isExplosionEnabled = enable; }
+
 	void die(float duration = 0.8f) {
 		getEffects().implode(*this, duration);
 		_state = State::Imploding;
@@ -707,9 +710,12 @@ public:
 			explode(ds);
 	}
 
-    virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
+	void drawExplosion(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
+		states.transform *= _implosionStartTransform;
 		target.draw(_explosion, _implosionStartTransform);
+	}
 
+    virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
 		states.transform *= getTransform();
 		_effects.apply(states.transform);
         updateLighting(states.transform);
@@ -1341,10 +1347,10 @@ protected:
 		tetromino.setPosition(boardToWorldPosition(position));
 	}
 
-	void bounceBy(Tetromino& tetromino, const sb::Vector2i& translation) {
+	void driftBy(Tetromino& tetromino, const sb::Vector2i& translation) {
 		sb::Vector2i position = worldToBoardPosition(tetromino.getPosition());
 		position += translation;
-		tetromino.getEffects().bounceTo(boardToWorldPosition(position), tetromino);
+		tetromino.getEffects().driftTo(boardToWorldPosition(position), tetromino);
 	}
 
 	bool isOccupied(const sb::Vector2i& position) {
@@ -1403,7 +1409,9 @@ protected:
 		for (size_t i = 0; i < _blocks.size(); i++) {
 			sb::Vector2i boardPos = worldToBoardPosition(_blocks[i].getPosition());
 			if (boardPos.y == y) {
-				float duration = isOccupied(sb::Vector2i(boardPos.x, boardPos.y + 1)) ? 0.01f : 0.8f;
+				bool isAboveOccupied = isOccupied(sb::Vector2i(boardPos.x, boardPos.y + 1));
+				float duration = isAboveOccupied ? 0.01f : 0.8f;
+				_blocks[i].enableExplosion(!isAboveOccupied);
 				_blocks[i].die(duration);
 			}
 		}
@@ -1431,11 +1439,11 @@ protected:
 	}
 
 	void drop(Tetromino& tetromino) {
-		bounceBy(tetromino, sb::Vector2i(0, -1));
+		driftBy(tetromino, sb::Vector2i(0, -1));
 
 		if (isInvalid(tetromino)) {
 			//std::cout << "A collision, sir" << std::endl;
-			bounceBy(tetromino, sb::Vector2i(0, 1));
+			driftBy(tetromino, sb::Vector2i(0, 1));
 			freeze(tetromino);
 			clearLines();
 			createRandomTetromino();
@@ -1591,6 +1599,7 @@ public:
 
 	void quickdropTetromino() {
 		Tetromino projection = computeProjection();
+		_secondsSinceLastStep = 0;
 		_tetromino.getEffects().bounceTo(projection.getPosition(), _tetromino);
 	}
 
@@ -1650,7 +1659,9 @@ public:
 		for (size_t i = 0; i < _blocks.size(); i++) 
 			_batch.draw(_blocks[i], states);
 		target.draw(_batch);
-		
+		for (size_t i = 0; i < _blocks.size(); i++)
+			_blocks[i].drawExplosion(target, states);
+
 		if (_hasTetromino) {
 			Tetromino projection = computeProjection();
 			projection.setColor(sb::Color(1, 1, 1, 0.25f));
@@ -3192,6 +3203,11 @@ void demo59() {
 	std::cin.get();
 }
 
+void addBlocks(Board& board, int y, const std::vector<char>& types, const std::vector<int>& positions) {
+	for (size_t i = 0; i < types.size(); i++) 
+		board.createBlock(types[i], sb::Vector2i(positions[i], y));
+}
+
 void demo60() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
 
@@ -3201,7 +3217,12 @@ void demo60() {
 	board.enableGrid(true);
 	board.setStepInterval(100);
 
-	addBlocks(board, 'j', 0, { 0, 1, 2, 3, 4, 5, 6, 7 , 8 , 9 });
+	//addBlocks(board, 'j', 0, { 0, 1, 2, 3, 4, 5, 6, 7 , 8 , 9 });
+	//board.createBlock()
+	addBlocks(board, 0, { 'i', 'j', 'l', 'o', 's', 't' }, { 0, 1, 2, 3, 4, 5 });
+	//addBlocks(board, 'z', 1, { 0, 1, 2 });
+	//addBlocks(board, 'o', 2, { 0, 1 });
+	//addBlocks(board, 'l', 3, { 0 });
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -3215,12 +3236,72 @@ void demo60() {
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(board);
 
+		std::cout << board.getBlocks().size() << std::endl;
+
+		window.display();
+	}
+}
+
+void touchInputComplete(sb::Window& window, Board& board, float ds) {
+	static float secondsSinceLastTouch = 1;
+	static sb::Vector2f touchOffset;
+	secondsSinceLastTouch += ds;
+
+	if (sb::Input::isTouchGoingDown(1)) {
+		touchOffset = board.getTetromino().getPosition() - sb::Input::getTouchPosition(window);
+		if (secondsSinceLastTouch >= 1)
+			board.popTetromino();
+		secondsSinceLastTouch = 0;
+	}
+	if (sb::Input::isTouchDown(1))
+		board.driftTetrominoTo(sb::Input::getTouchPosition(window) + touchOffset);
+	if (getSwipe(window, ds).y > 0.05f * window.getInverseAspect()
+		|| isTouchGoingDown(window, board.getTetromino()))
+		board.spinTetromino();
+}
+
+void inputComplete(sb::Window& window, Board& board, float ds) {
+	if (sb::Input::isKeyGoingDown(sb::KeyCode::Up))
+		board.spinTetromino();
+	if (sb::Input::isKeyGoingDown(sb::KeyCode::p))
+		board.popTetromino();
+	if (sb::Input::isKeyGoingDown(sb::KeyCode::Down))
+		board.driftTetrominoBy(sb::Vector2i(0, -1));
+	if (sb::Input::isKeyGoingDown(sb::KeyCode::Left))
+		board.driftTetrominoBy(sb::Vector2i(-1, 0));
+	if (sb::Input::isKeyGoingDown(sb::KeyCode::Right))
+		board.driftTetrominoBy(sb::Vector2i(1, 0));
+	if (sb::Input::isKeyGoingDown(sb::KeyCode::Space))
+		board.quickdropTetromino();
+
+	touchInputComplete(window, board, ds);
+}
+
+void complete() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Board board(sb::Vector2i(10, 14));
+
+	adjustCameraToBoard(window.getCamera(), board);
+	board.enableGrid(true);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		board.update(ds);
+
+		inputComplete(window, board, ds);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(board);
 		window.display();
 	}
 }
 
 void demo() {
-	demo60();
+	complete();
+
+	//demo60();
 
 	//demo59();
 
