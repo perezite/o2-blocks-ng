@@ -2961,8 +2961,23 @@ protected:
 		return texture;
 	}
 
+	static std::map<char, sb::Color>& getColors() {
+		static const int alpha = 150;
+		static std::map<char, sb::Color> colors = { 
+			{ 'i', createColor(0, 240, 240, alpha) }, 
+			{ 'j', createColor(0, 0, 240, alpha) },
+			{ 'l', createColor(240, 160, 0, alpha) },
+			{ 'o', createColor(240, 240, 0, alpha) },
+			{ 's', createColor(0, 240, 0, alpha) },
+			{ 't', createColor(160, 0, 240, alpha) },
+			{ 'z', createColor(240, 0, 0, alpha) }
+		};
+
+		return colors;
+	}
+
 public:
-	BlockExplosion(size_t numParticles) : ParticleSystem(numParticles), _isActive(false)
+	BlockExplosion(size_t numParticles, char type = 'i') : ParticleSystem(numParticles), _isActive(false)
 	{ 
 		setLifetime(1);
 		setEmissionRatePerSecond(0);
@@ -2973,8 +2988,13 @@ public:
 		setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
 		getTexture().enableMipmap(true);
 		setTexture(getTexture());
-		setParticleColor(createColor(240, 0, 0, 150));
+		setType(type);
 		addBurst(0, 50);
+	}
+
+	void setType(char type) {
+		type = tolower(type);
+		setParticleColor(getColors()[type]);
 	}
 
 	virtual void update(float ds) {
@@ -2998,6 +3018,8 @@ void demo56() {
 	sb::Texture texture;
 	BlockExplosion explosion(512);
 	
+	std::vector<char> types = { 'i', 'j', 'l', 'o', 's', 't', 'z' };
+	size_t currentType = 0;
 	explosion.setScale(0.2f);
 
 	while (window.isOpen()) {
@@ -3008,6 +3030,12 @@ void demo56() {
 
 		if (sb::Input::isKeyGoingDown(sb::KeyCode::e))
 			explosion.explode();
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::t)) {
+			currentType = (currentType + 1) % types.size();
+			char type = types[currentType];
+			std::cout << type << std::endl;
+			explosion.setType(type);
+		}
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(explosion);
@@ -3016,7 +3044,6 @@ void demo56() {
 	}
 }
 
-// Color
 // Block state
 
 void demo() {
