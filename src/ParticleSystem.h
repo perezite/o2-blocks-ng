@@ -37,19 +37,49 @@ namespace sb
 			{ }
 		};
 
-		struct ParticleSystemPoolItem {
-			ParticleSystem* particleSystem;
-			bool isActive;
+		struct Emission {
+			Shape* _shape;
+
+		public:
+			Emission() : _shape(new Disk(0)) 
+			{ }
+
+			Emission(const Emission& other) {
+				_shape = other._shape->clone();
+			}
+
+			Emission& operator=(const Emission& other) {
+				_shape = other._shape->clone();
+				return *this;
+			}
+
+			virtual ~Emission() {
+				delete _shape;
+			}
+
+			inline Shape& getShape() { return *_shape; }
+
+			template <class T>
+			inline void setShape(const T& shape) {
+				delete _shape;
+				_shape = new T(shape);
+			}
 		};
 
 		class Pool {
 		public:
 			struct Item { 
+				Item() {}
+				Item(const Item& other);
+				Item& operator=(const Item& other);
+
 				ParticleSystem* particleSystem; 
 				bool isActive;
 			};
 
 			Pool();
+			Pool(const Pool& other);
+			Pool& operator=(const Pool& other);
 			virtual ~Pool();
 			inline std::vector<Item>& getAllItems() { return _items; }
 			inline static bool isItemActive(const Item& item) { return item.isActive; }
@@ -84,13 +114,8 @@ namespace sb
 			_particleDrag(0), _angularParticleDrag(0), _particleIntertia(1), _particleLifetimeRange(1, 1),
 			_particleSizeRange(0.1f, 0.1f), _particleRotationRange(0, 0), _particleSpeedRange(1, 1),
 			_particleVertexColors(4, Color(1, 1, 1, 1)), _hasParticleColorChannelsOverLifetime(4, false), 
-			_particleColorChannelsOverLifetime(4), _hasParticleScaleOverLifetime(false), _emissionShape(new Disk(0)), 
-			_hasRandomEmissionDirection(false)
+			_particleColorChannelsOverLifetime(4), _hasParticleScaleOverLifetime(false), _hasRandomEmissionDirection(false)
 		{ }
-
-		ParticleSystem(const ParticleSystem& other);
-
-		virtual ~ParticleSystem();
 
 		inline float getEmissionRatePerSecond() const { return _emissionRatePerSecond; }
 
@@ -123,10 +148,7 @@ namespace sb
 		inline void hasRandomEmissionDirection(bool hasRandomEmission) { _hasRandomEmissionDirection = hasRandomEmission; }
 
 		template <class T>
-		inline void setEmissionShape(const T& shape) {
-			delete _emissionShape;
-			_emissionShape = new T(shape);
-		}
+		inline void setEmissionShape(const T& shape) { _emission.setShape(shape); }
 
 		void setEmissionRatePerSecond(float rate);
 
@@ -241,7 +263,7 @@ namespace sb
 		std::vector<Tweenf> _particleColorChannelsOverLifetime;
 		bool _hasParticleScaleOverLifetime;
 		Tweenf _particleScaleOverLifetime;
-		Shape* _emissionShape;
+		Emission _emission;
 		bool _hasRandomEmissionDirection;
 
 		Pool _pool;

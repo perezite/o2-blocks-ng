@@ -677,6 +677,9 @@ public:
         setType(type);
     }
 
+	Block(const Block& other) : _explosion(other._explosion), _effects2(*this)
+	{ }
+
 	inline const State& getState() const { return _state; }
 
 	inline TransformEffects2& getEffects2() { SB_WARNING("Obsolete!") ; return _effects2; }
@@ -832,7 +835,7 @@ protected:
         else if (type == 'z')
             _blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(-1, 0), sb::Vector2i(0, -1), sb::Vector2i(1, -1) };
         else if (type == 'm')
-            _blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(1, 0) };
+            _blockPositions = { sb::Vector2i(0, 0)/*, sb::Vector2i(1, 0)*/ };
 
         createBlocks(_blockPositions, type);
     }
@@ -842,6 +845,10 @@ public:
         setType(type);
     }
 
+	Tetromino(const Tetromino& other) : _blocks(other._blocks), _effects2(*this) {
+
+	}
+
 	inline TransformEffects& getEffects() { return _effects; }
 
 	inline TransformEffects2& getEffects2() { SB_WARNING("obsolete"); return _effects2; }
@@ -849,7 +856,7 @@ public:
 	inline char getType() const { return _type; }
 
 	inline static const std::vector<char> getTypes() {
-		return{ 'i', 'j', 'l', 'o', 's', 't', 'z' };
+		return{ 'i', 'j', 'l', 'o', 's', 't', 'z', 'm' };
 	}
 
 	const std::vector<sb::Vector2f> getBlockPositions() {
@@ -1345,7 +1352,6 @@ protected:
 		sb::Vector2i position = worldToBoardPosition(tetromino.getPosition());
 		position += translation;
 		tetromino.getEffects().bounceTo(boardToWorldPosition(position), tetromino);
-		// tetromino.setPosition(boardToWorldPosition(position));
 	}
 
 	bool isOccupied(const sb::Vector2i& position) {
@@ -1436,7 +1442,6 @@ protected:
 
 		if (isInvalid(tetromino)) {
 			//std::cout << "A collision, sir" << std::endl;
-			//tetromino.setPosition(previousPosition);
 			bounceBy(tetromino, sb::Vector2i(0, 1));
 			freeze(tetromino);
 			clearLines();
@@ -1613,7 +1618,7 @@ public:
 	}
 
 	Tetromino computeProjection() {
-		Tetromino projection = _tetromino;
+		Tetromino projection(_tetromino);
 		projection.getEffects().stop();
 		while (!isInvalid(projection))
 			moveBy(projection, sb::Vector2i(0, -1));
@@ -2857,7 +2862,7 @@ void demo51() {
 	}
 }
 
-void addBlocks52(Board& board, int y, std::vector<int> horizontalPositions) {
+void addBlocks(Board& board, char type, int y, std::vector<int> horizontalPositions) {
 	std::vector<sb::Vector2i> positions = { sb::Vector2i(0, 0), sb::Vector2i(1, 0), sb::Vector2i(2, 0), sb::Vector2i(3, 0),
 		sb::Vector2i(6, 0), sb::Vector2i(7, 0), sb::Vector2i(8, 0), sb::Vector2i(9, 0),
 		sb::Vector2i(0, 1), sb::Vector2i(1, 1), sb::Vector2i(2, 1), sb::Vector2i(3, 1),
@@ -2865,13 +2870,13 @@ void addBlocks52(Board& board, int y, std::vector<int> horizontalPositions) {
 		sb::Vector2i(0, 2), sb::Vector2i(1, 2) };
 
 	for (size_t i = 0; i < horizontalPositions.size(); i++)
-		board.createBlock('j', sb::Vector2i(horizontalPositions[i], y));
+		board.createBlock(type, sb::Vector2i(horizontalPositions[i], y));
 }
 
 void addBlocks52(Board& board) {
-	addBlocks52(board, 0, { 0, 1, 2, 3, 6, 7, 8, 9 });
-	addBlocks52(board, 1, { 0, 1, 2, 3, 6, 7, 8, 9 });
-	addBlocks52(board, 2, { 1, 2 });
+	addBlocks(board, 'j', 0, { 0, 1, 2, 3, 6, 7, 8, 9 });
+	addBlocks(board, 'j', 1, { 0, 1, 2, 3, 6, 7, 8, 9 });
+	addBlocks(board, 'j', 2, { 1, 2 });
 }
 
 void demo52() {
@@ -3087,10 +3092,147 @@ void demo57() {
 	}
 }
 
-// Block state
+void demo58() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Tetromino tetromino('i');
+	Tetromino other = tetromino;
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+
+		window.clear(sb::Color(1, 1, 1, 1));
+
+		window.display();
+	}
+
+}
+
+class MyShape {
+public:
+	virtual float value() { return 0; }
+
+	virtual MyShape* clone() { return new MyShape(*this); }
+};
+
+class MyDisk : public MyShape {
+public:
+	virtual float value() { return 1; }
+
+	virtual MyShape* clone() { return new MyDisk(*this); }
+};
+
+class MyBox : public MyShape {
+public:
+	virtual float value() { return 2; }
+
+	virtual MyShape* clone() { return new MyBox(*this); }
+};
+
+class MyEmissionShape {
+	MyShape* _shape;
+
+public:
+	virtual ~MyEmissionShape() {
+		if (_shape)
+			delete _shape;
+	}
+
+	MyEmissionShape() : _shape(NULL)
+	{ }
+
+	MyEmissionShape(const MyEmissionShape& other)
+	{
+		_shape = other._shape->clone();
+	}
+
+	MyEmissionShape& operator=(const MyEmissionShape& other) {
+		_shape = other._shape->clone();
+		return *this;
+	}
+
+	template <class T>
+	inline void setShape(const T& shape) {  
+		if (_shape)
+			delete _shape;
+		_shape = new T(shape);
+	}
+
+	inline float getValue() { return _shape->value(); }
+};
+
+class MyParticleSystem {
+	MyEmissionShape _emissionShape;
+
+public:
+	template <class T>
+	inline void setEmissionShape(const T& shape) { _emissionShape.setShape(shape); }
+
+	float getEmissionShapeValue() {
+		return _emissionShape.getValue();
+	}
+};
+
+void demo59() {
+	MyParticleSystem system1;
+	system1.setEmissionShape(MyDisk());
+	MyParticleSystem system2;
+	system2 = system1;
+	std::cout << system2.getEmissionShapeValue() << std::endl;
+	std::cin.get();
+
+	MyDisk disk;
+	MyShape* shape;
+	shape = new MyShape(disk);
+	std::cout << shape->value() << std::endl;
+	std::cin.get();
+
+	MyEmissionShape shape2;
+	shape2.setShape(MyDisk());
+	std::cout << shape2.getValue() << std::endl;
+	std::cin.get();
+
+	MyParticleSystem particleSystem;
+	particleSystem.setEmissionShape(MyDisk());
+	std::cout << particleSystem.getEmissionShapeValue() << std::endl;
+	std::cin.get();
+}
+
+void demo60() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	//Tetromino test('m');
+
+	Board board(sb::Vector2i(10, 10));
+
+	adjustCameraToBoard(window.getCamera(), board);
+	//board.createTetromino('m', sb::Vector2i(5, 5));
+	//Tetromino& test2 = board.getTetromino();
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		board.update(ds);
+
+		//if (sb::Input::isKeyGoingDown(sb::KeyCode::c))
+		//	board.clearLowestLineWithBlocks();
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(board);
+
+		window.display();
+	}
+}
 
 void demo() {
-	demo57();
+	demo60();
+
+	//demo59();
+
+	//demo58();
+
+	//demo57();
 
 	//demo56();
 

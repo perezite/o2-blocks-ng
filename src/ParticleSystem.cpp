@@ -5,18 +5,6 @@
 
 namespace sb
 {
-	ParticleSystem::ParticleSystem(const ParticleSystem& other) 
-	{
-		*this = other;
-		this->_emissionShape = other._emissionShape->clone();
-		other._pool.clone(_pool);
-	}
-
-	ParticleSystem::~ParticleSystem()
-	{
-		delete _emissionShape;
-	}
-	
 	void ParticleSystem::setEmissionRatePerSecond(float rate)
 	{
 		_secondsSinceLastEmission = rate == 0 ? 0 : 1 / rate;
@@ -174,7 +162,7 @@ namespace sb
 
 	Vector2f ParticleSystem::getDirection(Particle& particle) 
 	{
-		bool randomDirection = _hasRandomEmissionDirection || _emissionShape->getBoundingRadius() < 0.0001f;
+		bool randomDirection = _hasRandomEmissionDirection || _emission.getShape().getBoundingRadius() < 0.0001f;
 		return randomDirection ? randomOnCircle(1) : (particle.getPosition() - getPosition()).normalized();
 	}
 
@@ -182,7 +170,7 @@ namespace sb
 	{
 		const sb::Vector2f& scale = getScale();
 
-		particle.setPosition(getTransform() * _emissionShape->random());
+		particle.setPosition(getTransform() * _emission.getShape().random());
 		float size = random(_particleSizeRange.x * scale.x, _particleSizeRange.y * scale.y);
 		particle.setScale(size, size);
 		particle.startScale = Vector2f(size, size);
@@ -367,6 +355,18 @@ namespace sb
 	{
 	}
 
+	ParticleSystem::Pool::Pool(const Pool& other) : _items(other._items), _numActiveItems(other._numActiveItems) {
+		copy(_prototype, other._prototype); 
+	}
+
+	ParticleSystem::Pool & ParticleSystem::Pool::operator=(const Pool & other)
+	{
+		_items = other._items;
+		_numActiveItems = other._numActiveItems;
+		copy(_prototype, other._prototype);
+		return *this;
+	}
+
 	ParticleSystem::Pool::~Pool()
 	{
 		clear();
@@ -447,7 +447,7 @@ namespace sb
 		copy(result._prototype, _prototype);
 
 		for (std::size_t i = 0; i < _items.size(); i++) {
-			ParticleSystemPoolItem item;
+			Item item;
 			item.isActive = _items[i].isActive;
 			item.particleSystem = new ParticleSystem(*_items[i].particleSystem);
 		}
@@ -473,5 +473,17 @@ namespace sb
 		item.isActive = true;
 		reset(*item.particleSystem);
 		_numActiveItems++;
+	}
+
+	ParticleSystem::Pool::Item::Item(const Item &other) : isActive(other.isActive)
+	{
+		particleSystem = new ParticleSystem(*other.particleSystem);
+	}
+
+	ParticleSystem::Pool::Item& ParticleSystem::Pool::Item::operator=(const Item& other)
+	{
+		isActive = other.isActive;
+		particleSystem = new ParticleSystem(*other.particleSystem);
+		return *this;
 	}
 }
