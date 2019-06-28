@@ -3477,9 +3477,70 @@ void demo64() {
 	}
 }
 
+void demo65() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	BlockCollisionEffect effect(128);
+	Block block1('i');
+	Block block2('j');
+	enum class DropState { Top, Bottom, Dropping, Ascending };
+	DropState dropState = DropState::Top;
+	sb::Vector2f top(0, 0.2f);
+	sb::Vector2f bottom(0, 0);
+	float effectTimer = 0;
+
+
+	effect.setPosition(0, -0.1f);
+	effect.setScale(0.2f);
+	block1.setScale(0.2f);
+	block1.setPosition(top);
+	block2.setScale(0.2f);
+	block2.setPosition(0, -0.2f);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		block1.update(ds);
+		block2.update(ds);
+		effect.update(ds);
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::c)) {
+			if (dropState == DropState::Top) {
+				block1.getEffects().driftTo(bottom, block1);	
+				dropState = DropState::Dropping;
+			}
+			else if (dropState == DropState::Bottom) {
+				block1.getEffects().driftTo(top, block1);
+				dropState = DropState::Ascending;
+			}
+		}
+
+		if (dropState == DropState::Dropping) {
+			if (!block1.getEffects().isPlaying()) {
+				dropState = DropState::Bottom;
+				effect.play();
+			}
+		}
+
+		if (dropState == DropState::Ascending) {
+			if (!block1.getEffects().isPlaying()) 
+				dropState = DropState::Top;			
+		}
+
+		std::cout << (int)dropState << std::endl;
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(block1);
+		window.draw(block2);
+		window.draw(effect);
+		window.display();
+	}
+}
 
 void demo() {
-	demo64();
+	demo65();
+
+	//demo64();
 
 	//demo63();
 
