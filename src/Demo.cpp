@@ -3306,11 +3306,14 @@ void init61(sb::ParticleSystem& system) {
 	system.hasRandomEmissionDirection(true);
 	system.setParticleLifetimeRange(2.f * sb::Vector2f(0.1f, 1));
 	system.setParticleSpeedRange(sb::Vector2f(0.1f, 1));
-	//system.setParticleSpeedRange(sb::Vector2f(0));
 	system.setParticleSizeRange(0.5f * sb::Vector2f(0.01f, 0.13f));
 	system.setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
 	system.setParticleColor(createColor(139, 69, 19, 255));
 	system.addBurst(0.5f, 20);
+	system.addBurst(1.5f, 20);
+	system.addBurst(2.5f, 20);
+	system.addBurst(3.5f, 20);
+
 }
 
 void demo61() {
@@ -3336,10 +3339,39 @@ void demo61() {
 	}
 }
 
+void demo62() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	sb::Texture texture;
+	sb::ParticleSystem particleSystem(512);
+	Block block;
+
+	texture.loadFromAsset("Textures/SimpleParticle.png");
+	texture.enableMipmap(true);
+	particleSystem.setTexture(texture);
+	particleSystem.setScale(0.2f);
+	init61(particleSystem);
+	block.setScale(0.2f);
+	particleSystem.setPosition(0, -0.1f);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		block.update(ds);
+		particleSystem.update(ds);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(block);
+		window.draw(particleSystem);
+		window.display();
+	}
+}
 
 
 void demo() {
-	demo61();
+	demo62();
+
+	//demo61();
 
 	//complete();
 
