@@ -855,7 +855,7 @@ public:
 	inline char getType() const { return _type; }
 
 	inline static const std::vector<char> getTypes() {
-		return{ 'i', 'j', 'l', 'o', 's', 't', 'z', 'm' };
+		return{ 'i', 'j', 'l', 'o', 's', 't', 'z' };
 	}
 
 	const std::vector<sb::Vector2f> getBlockPositions() {
@@ -1411,7 +1411,7 @@ protected:
 			if (boardPos.y == y) {
 				bool isAboveOccupied = isOccupied(sb::Vector2i(boardPos.x, boardPos.y + 1));
 				float duration = isAboveOccupied ? 0.01f : 0.8f;
-				_blocks[i].enableExplosion(!isAboveOccupied);
+				//_blocks[i].enableExplosion(!isAboveOccupied);
 				_blocks[i].die(duration);
 			}
 		}
