@@ -3437,9 +3437,51 @@ void demo63() {
 	}
 }
 
+void demo64() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	BlockCollisionEffect effect(128);
+	Block block1('i');
+	Block block2('j');
+	bool colliding = false;
+
+	effect.setPosition(0, -0.1f);
+	effect.setScale(0.2f);
+	block1.setScale(0.2f);
+	block1.setPosition(0, 0.2f);
+	block2.setScale(0.2f);
+	block2.setPosition(0, -0.2f);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		block1.update(ds);
+		block2.update(ds);
+		effect.update(ds);
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::c)) {
+			if (colliding)
+				block1.setPosition(0, 0.2f);
+			else {
+				block1.setPosition(0, 0);
+				effect.play();
+			}
+
+		}
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(block1);
+		window.draw(block2);
+		window.draw(effect);
+		window.display();
+	}
+}
+
 
 void demo() {
-	demo63();
+	demo64();
+
+	//demo63();
 
 	//demo62();
 
