@@ -3367,9 +3367,81 @@ void demo62() {
 	}
 }
 
+class BlockCollisionEffect : public sb::ParticleSystem {
+	bool _isActive;
+
+protected:
+	static sb::Texture& getTexture() {
+		static sb::Texture texture("Textures/SimpleParticle.png");
+		return texture;
+	}
+
+public:
+	BlockCollisionEffect(size_t numParticles) : sb::ParticleSystem(numParticles), _isActive(false)
+	{
+		setLifetime(0.5f);
+		setEmissionRatePerSecond(0);
+		setEmissionShape(sb::Box(1, 0.01f));
+		hasRandomEmissionDirection(true);
+		setParticleLifetimeRange(2.f * sb::Vector2f(0.1f, 0.5f));
+		setParticleSpeedRange(sb::Vector2f(0.1f, 1));
+		setParticleSizeRange(1.f * sb::Vector2f(0.01f, 0.13f));
+		setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
+		setParticleColor(createColor(139, 69, 19, 255));
+		setTexture(getTexture());
+		getTexture().enableMipmap(true);
+		addBurst(0, 20);
+	}
+
+	inline bool isActive() { return _isActive; }
+
+	virtual void update(float ds) {
+		if (_isActive) {
+			ParticleSystem::update(ds);
+			if (!isAlive())
+				_isActive = false;
+		}
+	}
+
+	void play() {
+		if (!_isActive) {
+			reset();
+			_isActive = true;
+		}
+	}
+};
+
+void demo63() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	BlockCollisionEffect effect(128);
+	Block block;
+
+	effect.setPosition(0, -0.1f);
+	effect.setScale(0.2f);
+	block.setScale(0.2f);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		block.update(ds);
+		effect.update(ds);
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::c))
+			effect.play();
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(block);
+		window.draw(effect);
+		window.display();
+	}
+}
+
 
 void demo() {
-	demo62();
+	demo63();
+
+	//demo62();
 
 	//demo61();
 
