@@ -9,6 +9,7 @@
 #include "Math.h"
 #include "Tween.h"
 #include "ParticleSystem.h"
+#include "Box.h"
 #include <cstddef>
 #include <vector>
 #include <map>
@@ -672,7 +673,7 @@ protected:
 	}
 
 public:
-    Block(char type = 'i') : _light(NULL), _state(State::Alive), _explosion(128, type), _effects2(*this), _isExplosionEnabled(true)
+    Block(char type = 'i') : _light(NULL), _state(State::Alive), _explosion(128, type), _isExplosionEnabled(true), _effects2(*this)
     {
 		_explosion.setScale(1.25f);
         setType(type);
@@ -3102,7 +3103,6 @@ void demo58() {
 	Tetromino other = tetromino;
 
 	while (window.isOpen()) {
-		float ds = getDeltaSeconds();
 		sb::Input::update();
 		window.update();
 
@@ -3115,6 +3115,8 @@ void demo58() {
 
 class MyShape {
 public:
+	virtual ~MyShape() { }
+
 	virtual float value() { return 0; }
 
 	virtual MyShape* clone() { return new MyShape(*this); }
@@ -3298,8 +3300,48 @@ void complete() {
 	}
 }
 
+void init61(sb::ParticleSystem& system) {
+	system.setEmissionRatePerSecond(0);
+	system.setEmissionShape(sb::Box(1, 0.01f));
+	system.hasRandomEmissionDirection(true);
+	system.setParticleLifetimeRange(2.f * sb::Vector2f(0.1f, 1));
+	system.setParticleSpeedRange(sb::Vector2f(0.1f, 1));
+	//system.setParticleSpeedRange(sb::Vector2f(0));
+	system.setParticleSizeRange(0.5f * sb::Vector2f(0.01f, 0.13f));
+	system.setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
+	system.setParticleColor(createColor(139, 69, 19, 255));
+	system.addBurst(0.5f, 20);
+}
+
+void demo61() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	sb::Texture texture;
+	sb::ParticleSystem particleSystem(512);
+
+	texture.loadFromAsset("Textures/SimpleParticle.png");
+	texture.enableMipmap(true);
+	particleSystem.setTexture(texture);
+	particleSystem.setScale(0.2f);
+	init61(particleSystem);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		particleSystem.update(ds);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(particleSystem);
+		window.display();
+	}
+}
+
+
+
 void demo() {
-	complete();
+	demo61();
+
+	//complete();
 
 	//demo60();
 
