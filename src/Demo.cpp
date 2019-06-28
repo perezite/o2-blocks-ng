@@ -525,16 +525,85 @@ public:
     inline const sb::Vector2f& getDirection() const { return _direction; }
 };
 
+sb::Color createColor(int r, int g = 255, int b = 255, int a = 255) {
+	return sb::Color(r / 255.f, g / 255.f, b / 255.f, a / 255.f);
+}
+
+class BlockExplosion : public sb::ParticleSystem {
+	bool _isActive;
+
+protected:
+	static sb::Texture& getTexture() {
+		static sb::Texture texture("Textures/SimpleParticle.png");
+		return texture;
+	}
+
+	static std::map<char, sb::Color>& getColors() {
+		static const int alpha = 150;
+		static std::map<char, sb::Color> colors = {
+			{ 'i', createColor(0, 240, 240, alpha) },
+			{ 'j', createColor(0, 0, 240, alpha) },
+			{ 'l', createColor(240, 160, 0, alpha) },
+			{ 'o', createColor(240, 240, 0, alpha) },
+			{ 's', createColor(0, 240, 0, alpha) },
+			{ 't', createColor(160, 0, 240, alpha) },
+			{ 'z', createColor(240, 0, 0, alpha) }
+		};
+
+		return colors;
+	}
+
+public:
+	BlockExplosion(size_t numParticles, char type = 'i') : ParticleSystem(numParticles), _isActive(false)
+	{
+		setLifetime(1);
+		setEmissionRatePerSecond(0);
+		setParticleLifetimeRange(2.f * sb::Vector2f(0.1f, 1));
+		setParticleSpeedRange(sb::Vector2f(0.1f, 1));
+		hasRandomEmissionDirection(true);
+		setParticleSizeRange(sb::Vector2f(0.01f, 0.13f));
+		setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
+		getTexture().enableMipmap(true);
+		setTexture(getTexture());
+		setType(type);
+		addBurst(0, 50);
+	}
+
+	inline bool isActive() { return _isActive; }
+
+	void setType(char type) {
+		type = tolower(type);
+		setParticleColor(getColors()[type]);
+	}
+
+	virtual void update(float ds) {
+		if (_isActive) {
+			ParticleSystem::update(ds);
+			if (!isAlive())
+				_isActive = false;
+		}
+	}
+
+	void explode() {
+		if (!_isActive) {
+			reset();
+			_isActive = true;
+		}
+	}
+};
+
 class Block : public sb::Drawable, public sb::Transformable {
 public:
 	enum struct State {
-		Alive, Imploding, Garbage
+		Alive, Imploding, Exploding, Garbage
 	};
 
 private:
     sb::Sprite _sprite;
     const Light* _light;
 	State _state;
+	BlockExplosion _explosion;
+	sb::Transform _implosionStartTransform;
 	TransformEffects _effects;
 	TransformEffects2 _effects2;
 
@@ -588,14 +657,23 @@ protected:
         }
     }
 
-	void updateImploding(float ds) {
-		if (!_effects.isPlaying())
+	void implode(float ds) {
+		if (!_effects.isPlaying()) {
+			_explosion.explode();
+			_implosionStartTransform = getTransform();
+			_state = State::Exploding;
+		}
+	}
+
+	void explode(float ds) {
+		if (!_explosion.isActive())
 			_state = State::Garbage;
 	}
 
 public:
-    Block(char type = 'i') : _light(NULL), _state(State::Alive), _effects2(*this)
+    Block(char type = 'i') : _light(NULL), _state(State::Alive), _explosion(128, type), _effects2(*this)
     {
+		_explosion.setScale(1.25f);
         setType(type);
     }
 
@@ -621,11 +699,17 @@ public:
 
 	void update(float ds) {
 		_effects.update(ds);
+		_explosion.update(ds);
+
 		if (_state == State::Imploding)
-			updateImploding(ds);
+			implode(ds);
+		if (_state == State::Exploding)
+			explode(ds);
 	}
 
     virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
+		target.draw(_explosion, _implosionStartTransform);
+
 		states.transform *= getTransform();
 		_effects.apply(states.transform);
         updateLighting(states.transform);
@@ -2841,10 +2925,6 @@ void demo53() {
 	}
 }
 
-sb::Color createColor(int r, int g = 255, int b = 255, int a = 255) {
-	return sb::Color(r / 255.f, g / 255.f, b / 255.f, a / 255.f);
-}
-
 void initColors54(std::vector<sb::Color>& colors) {
 	colors.resize(7);
 	int alpha = 150;
@@ -2952,67 +3032,6 @@ void demo55() {
 	}
 }
 
-class BlockExplosion : public sb::ParticleSystem {
-	bool _isActive;
-
-protected:
-	static sb::Texture& getTexture() {
-		static sb::Texture texture("Textures/SimpleParticle.png");
-		return texture;
-	}
-
-	static std::map<char, sb::Color>& getColors() {
-		static const int alpha = 150;
-		static std::map<char, sb::Color> colors = { 
-			{ 'i', createColor(0, 240, 240, alpha) }, 
-			{ 'j', createColor(0, 0, 240, alpha) },
-			{ 'l', createColor(240, 160, 0, alpha) },
-			{ 'o', createColor(240, 240, 0, alpha) },
-			{ 's', createColor(0, 240, 0, alpha) },
-			{ 't', createColor(160, 0, 240, alpha) },
-			{ 'z', createColor(240, 0, 0, alpha) }
-		};
-
-		return colors;
-	}
-
-public:
-	BlockExplosion(size_t numParticles, char type = 'i') : ParticleSystem(numParticles), _isActive(false)
-	{ 
-		setLifetime(1);
-		setEmissionRatePerSecond(0);
-		setParticleLifetimeRange(2.f * sb::Vector2f(0.1f, 1));
-		setParticleSpeedRange(sb::Vector2f(0.1f, 1));
-		hasRandomEmissionDirection(true);
-		setParticleSizeRange(sb::Vector2f(0.01f, 0.13f));
-		setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
-		getTexture().enableMipmap(true);
-		setTexture(getTexture());
-		setType(type);
-		addBurst(0, 50);
-	}
-
-	void setType(char type) {
-		type = tolower(type);
-		setParticleColor(getColors()[type]);
-	}
-
-	virtual void update(float ds) {
-		if (_isActive) {
-			ParticleSystem::update(ds);
-			if (!isAlive())
-				_isActive = false;
-		}
-	}
-
-	void explode() {
-		if (!_isActive) {
-			reset();
-			_isActive = true;
-		}
-	}
-};
-
 void demo56() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
 	sb::Texture texture;
@@ -3037,8 +3056,32 @@ void demo56() {
 			explosion.setType(type);
 		}
 
+		std::cout << explosion.isActive() << std::endl;
+
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(explosion);
+
+		window.display();
+	}
+}
+
+void demo57() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Block block('z');
+
+	block.setScale(0.1f);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		block.update(ds);
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::d))
+			block.die();
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(block);
 
 		window.display();
 	}
@@ -3047,7 +3090,9 @@ void demo56() {
 // Block state
 
 void demo() {
-	demo56();
+	demo57();
+
+	//demo56();
 
 	//demo55();
 
