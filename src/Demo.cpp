@@ -3561,8 +3561,56 @@ void demo66() {
 	}
 }
 
+void demo67() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Block block1('i');
+	Block block2('j');
+	enum class DropState { Top, Bottom, Dropping };
+	DropState dropState = DropState::Top;
+	sb::Vector2f top(0, 0.2f);
+	sb::Vector2f bottom(0, 0);
+
+	block1.setScale(0.2f);
+	block1.setPosition(top);
+	block2.setScale(0.2f);
+	block2.setPosition(0, -0.2f);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		block1.update(ds);
+		block2.update(ds);
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::c)) {
+			if (dropState == DropState::Top) {
+				block1.getEffects().driftTo(bottom, block1);
+				block2.getCollisionEffect().play(0.2f);
+				dropState = DropState::Dropping;
+			}
+			else if (dropState == DropState::Bottom) {
+				block1.setPosition(top);
+				dropState = DropState::Top;
+			}
+		}
+
+		if (dropState == DropState::Dropping) {
+			if (!block1.getEffects().isPlaying())
+				dropState = DropState::Bottom;
+		}
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(block1);
+		window.draw(block2);
+		block2.drawCollisionEffect(window);
+		window.display();
+	}
+}
+
 void demo() {
-	demo66();
+	demo67();
+
+	//demo66();
 
 	//demo65();
 
