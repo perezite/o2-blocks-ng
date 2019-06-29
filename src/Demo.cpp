@@ -3368,6 +3368,9 @@ void demo62() {
 }
 
 class BlockCollisionEffect : public sb::ParticleSystem {
+	enum class State { Idle, Delaying, Playing };
+	State _state;
+	float _delaySeconds;
 	bool _isActive;
 
 protected:
@@ -3377,7 +3380,7 @@ protected:
 	}
 
 public:
-	BlockCollisionEffect(size_t numParticles) : sb::ParticleSystem(numParticles), _isActive(false)
+	BlockCollisionEffect(size_t numParticles) : sb::ParticleSystem(numParticles), _state(State::Idle), _delaySeconds(0), _isActive(false)
 	{
 		setLifetime(0.5f);
 		setEmissionRatePerSecond(0);
@@ -3390,23 +3393,27 @@ public:
 		setParticleColor(createColor(139, 69, 19, 255));
 		setTexture(getTexture());
 		getTexture().enableMipmap(true);
-		addBurst(0, 20);
 	}
 
-	inline bool isActive() { return _isActive; }
-
 	virtual void update(float ds) {
-		if (_isActive) {
-			ParticleSystem::update(ds);
+		ParticleSystem::update(ds);
+		if (_state == State::Playing) {
 			if (!isAlive())
-				_isActive = false;
+				_state = State::Idle;
+		} 
+		else if (_state == State::Delaying) {
+			_delaySeconds -= ds;
+			if (_delaySeconds < 0)
+				play();
 		}
 	}
 
-	void play() {
-		if (!_isActive) {
+	void play(float delaySeconds = 0) {
+		if (_state != State::Playing) {
 			reset();
-			_isActive = true;
+			clearBursts();
+			addBurst(delaySeconds, 20);
+			_state = State::Playing;
 		}
 	}
 };
@@ -3482,12 +3489,11 @@ void demo65() {
 	BlockCollisionEffect effect(128);
 	Block block1('i');
 	Block block2('j');
-	enum class DropState { Top, Bottom, Dropping, Ascending };
+	enum class DropState { Top, Bottom, Dropping };
 	DropState dropState = DropState::Top;
 	sb::Vector2f top(0, 0.2f);
 	sb::Vector2f bottom(0, 0);
 	float effectTimer = 0;
-
 
 	effect.setPosition(0, -0.1f);
 	effect.setScale(0.2f);
@@ -3506,25 +3512,19 @@ void demo65() {
 
 		if (sb::Input::isKeyGoingDown(sb::KeyCode::c)) {
 			if (dropState == DropState::Top) {
-				block1.getEffects().driftTo(bottom, block1);	
+				block1.getEffects().driftTo(bottom, block1);
+				effect.play(0.2f);
 				dropState = DropState::Dropping;
 			}
 			else if (dropState == DropState::Bottom) {
-				block1.getEffects().driftTo(top, block1);
-				dropState = DropState::Ascending;
+				block1.setPosition(top);
+				dropState = DropState::Top;
 			}
 		}
 
 		if (dropState == DropState::Dropping) {
-			if (!block1.getEffects().isPlaying()) {
-				dropState = DropState::Bottom;
-				effect.play();
-			}
-		}
-
-		if (dropState == DropState::Ascending) {
 			if (!block1.getEffects().isPlaying()) 
-				dropState = DropState::Top;			
+				dropState = DropState::Bottom;
 		}
 
 		std::cout << (int)dropState << std::endl;

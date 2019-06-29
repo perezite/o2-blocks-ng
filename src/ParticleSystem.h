@@ -153,6 +153,8 @@ namespace sb
 
 		void addBurst(float emissionTime, std::size_t _numParticles);
 
+		void clearBursts();
+
 		void setParticleVertexColor(std::size_t index, const Color& color);
 
 		void setParticleColor(const Color& color);

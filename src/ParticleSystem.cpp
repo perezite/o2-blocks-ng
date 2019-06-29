@@ -16,6 +16,11 @@ namespace sb
 		_bursts.emplace_back(emissionTime, _numParticles);
 	}
 
+	void ParticleSystem::clearBursts()
+	{
+		_bursts.clear();
+	}
+
 	void ParticleSystem::setParticleVertexColor(std::size_t index, const Color& color)
 	{
 		SB_ERROR_IF(index > 4, "Vertex index out of range");
