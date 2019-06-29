@@ -593,6 +593,51 @@ public:
 	}
 };
 
+class BlockCollisionEffect : public sb::ParticleSystem {
+	enum class State { Idle, Playing };
+	State _state;
+
+protected:
+	static sb::Texture& getTexture() {
+		static sb::Texture texture("Textures/SimpleParticle.png");
+		return texture;
+	}
+
+public:
+	BlockCollisionEffect(size_t numParticles) : sb::ParticleSystem(numParticles), _state(State::Idle)
+	{
+		setLifetime(0.5f);
+		setEmissionRatePerSecond(0);
+		setEmissionShape(sb::Box(1, 0.01f));
+		hasRandomEmissionDirection(true);
+		setParticleLifetimeRange(2.f * sb::Vector2f(0.1f, 0.5f));
+		setParticleSpeedRange(sb::Vector2f(0.1f, 1));
+		setParticleSizeRange(1.f * sb::Vector2f(0.01f, 0.13f));
+		setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
+		setParticleColor(createColor(139, 69, 19, 255));
+		setTexture(getTexture());
+		getTexture().enableMipmap(true);
+	}
+
+	virtual void update(float ds) {
+		std::cout << (int)_state << std::endl;
+		ParticleSystem::update(ds);
+		if (_state == State::Playing) {
+			if (!isAlive())
+				_state = State::Idle;
+		}
+	}
+
+	void play(float delaySeconds = 0) {
+		if (_state != State::Playing) {
+			clearBursts();
+			addBurst(delaySeconds, 20);
+			reset();
+			_state = State::Playing;
+		}
+	}
+};
+
 class Block : public sb::Drawable, public sb::Transformable {
 public:
 	enum struct State {
@@ -604,6 +649,7 @@ private:
     const Light* _light;
 	State _state;
 	BlockExplosion _explosion;
+	BlockCollisionEffect _collisionEffect;
 	bool _isExplosionEnabled;
 	sb::Transform _implosionStartTransform;
 	TransformEffects _effects;
@@ -673,9 +719,11 @@ protected:
 	}
 
 public:
-    Block(char type = 'i') : _light(NULL), _state(State::Alive), _explosion(128, type), _isExplosionEnabled(true), _effects2(*this)
+    Block(char type = 'i') : _light(NULL), _state(State::Alive), _explosion(128, type), _collisionEffect(128),
+		_isExplosionEnabled(true), _effects2(*this)
     {
 		_explosion.setScale(1.25f);
+		_collisionEffect.setPosition(0, 0.5f);
         setType(type);
     }
 
@@ -685,6 +733,8 @@ public:
 
 	inline TransformEffects& getEffects() { return _effects; }
 
+	inline BlockCollisionEffect& getCollisionEffect() { return _collisionEffect; }
+	
 	inline void setColor(const sb::Color& color) { _sprite.setColor(color); }
 
     void setType(char type) {
@@ -704,6 +754,7 @@ public:
 	void update(float ds) {
 		_effects.update(ds);
 		_explosion.update(ds);
+		_collisionEffect.update(ds);
 
 		if (_state == State::Imploding)
 			implode(ds);
@@ -714,6 +765,11 @@ public:
 	void drawExplosion(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
 		states.transform *= _implosionStartTransform;
 		target.draw(_explosion, _implosionStartTransform);
+	}
+
+	void drawCollisionEffect(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
+		states.transform *= getTransform();
+		target.draw(_collisionEffect, states);
 	}
 
     virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
@@ -3367,57 +3423,6 @@ void demo62() {
 	}
 }
 
-class BlockCollisionEffect : public sb::ParticleSystem {
-	enum class State { Idle, Delaying, Playing };
-	State _state;
-	float _delaySeconds;
-	bool _isActive;
-
-protected:
-	static sb::Texture& getTexture() {
-		static sb::Texture texture("Textures/SimpleParticle.png");
-		return texture;
-	}
-
-public:
-	BlockCollisionEffect(size_t numParticles) : sb::ParticleSystem(numParticles), _state(State::Idle), _delaySeconds(0), _isActive(false)
-	{
-		setLifetime(0.5f);
-		setEmissionRatePerSecond(0);
-		setEmissionShape(sb::Box(1, 0.01f));
-		hasRandomEmissionDirection(true);
-		setParticleLifetimeRange(2.f * sb::Vector2f(0.1f, 0.5f));
-		setParticleSpeedRange(sb::Vector2f(0.1f, 1));
-		setParticleSizeRange(1.f * sb::Vector2f(0.01f, 0.13f));
-		setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
-		setParticleColor(createColor(139, 69, 19, 255));
-		setTexture(getTexture());
-		getTexture().enableMipmap(true);
-	}
-
-	virtual void update(float ds) {
-		ParticleSystem::update(ds);
-		if (_state == State::Playing) {
-			if (!isAlive())
-				_state = State::Idle;
-		} 
-		else if (_state == State::Delaying) {
-			_delaySeconds -= ds;
-			if (_delaySeconds < 0)
-				play();
-		}
-	}
-
-	void play(float delaySeconds = 0) {
-		if (_state != State::Playing) {
-			reset();
-			clearBursts();
-			addBurst(delaySeconds, 20);
-			_state = State::Playing;
-		}
-	}
-};
-
 void demo63() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
 	BlockCollisionEffect effect(128);
@@ -3493,7 +3498,6 @@ void demo65() {
 	DropState dropState = DropState::Top;
 	sb::Vector2f top(0, 0.2f);
 	sb::Vector2f bottom(0, 0);
-	float effectTimer = 0;
 
 	effect.setPosition(0, -0.1f);
 	effect.setScale(0.2f);
@@ -3527,8 +3531,6 @@ void demo65() {
 				dropState = DropState::Bottom;
 		}
 
-		std::cout << (int)dropState << std::endl;
-
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(block1);
 		window.draw(block2);
@@ -3537,8 +3539,32 @@ void demo65() {
 	}
 }
 
+void demo66() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Block block1('i');
+
+	block1.setScale(0.2f);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		block1.update(ds);
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::c))
+			block1.getCollisionEffect().play(0.2f);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(block1);
+		block1.drawCollisionEffect(window);
+		window.display();
+	}
+}
+
 void demo() {
-	demo65();
+	demo66();
+
+	//demo65();
 
 	//demo64();
 

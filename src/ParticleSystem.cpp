@@ -59,9 +59,21 @@ namespace sb
 		_pool.setPrototype(subSystem);
 	}
 
+	bool ParticleSystem::hasUnemittedBursts() 
+	{
+		bool found = false;
+		for (size_t i = 0; i < _bursts.size(); i++) {
+			if (_bursts[i].emitted == false)
+				found = true;
+		}
+
+		return found;
+	}
+
 	bool ParticleSystem::isAlive() 
 	{
-		return !_hasLifetime || _secondsSinceBirth < _lifetime || _pool.getNumActiveItems() > 0 || _numActiveParticles > 0;
+		return !_hasLifetime || _secondsSinceBirth < _lifetime || _pool.getNumActiveItems() > 0 
+			|| _numActiveParticles > 0 || hasUnemittedBursts();
 	}
 
 	void ParticleSystem::reset()

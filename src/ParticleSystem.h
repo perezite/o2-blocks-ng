@@ -167,6 +167,8 @@ namespace sb
 
 		void setSubSystemOnParticleDeath(const ParticleSystem& subSystem);
 
+		bool hasUnemittedBursts();
+
 		bool isAlive();
 
 		void update(float ds);
