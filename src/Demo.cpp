@@ -924,21 +924,69 @@ protected:
         createBlocks(_blockPositions, type);
     }
 
-	bool inside(float value, float min, float max) {
+	bool isInInterval(float value, float min, float max) {
 		return value >= min && value < max;
+	}
+
+	std::vector<int> getXBlockCoordinates() {
+		std::vector<int> xCoordinates(_blockPositions.size());
+		for (size_t i = 0; i < xCoordinates.size(); i++)
+			xCoordinates[i] = _blockPositions[i].x;
+		return xCoordinates;
+	}
+
+	std::vector<int> getYBlockCoordinates() {
+		std::vector<int> yCoordinates(_blockPositions.size());
+		for (size_t i = 0; i < yCoordinates.size(); i++)
+			yCoordinates[i] = _blockPositions[i].y;
+		return yCoordinates;
+	}
+
+	sb::Vector2i getMinimumBlockCoordinates() {
+		std::vector<int> xCoordinates = getXBlockCoordinates();
+		std::vector<int> yCoordinates = getYBlockCoordinates();
+		auto minX = *std::min_element(xCoordinates.begin(), xCoordinates.end());
+		auto minY = *std::min_element(yCoordinates.begin(), yCoordinates.end());
+		return sb::Vector2i(minX, minY);
+	}
+
+	sb::Vector2i getMaximumBlockCoordinates() {
+		std::vector<int> xCoordinates = getXBlockCoordinates();
+		std::vector<int> yCoordinates = getYBlockCoordinates();
+		auto maxX = *std::max_element(xCoordinates.begin(), xCoordinates.end());
+		auto maxY = *std::max_element(yCoordinates.begin(), yCoordinates.end());
+		return sb::Vector2i(maxX, maxY);
+	}
+
+	std::vector<size_t> getBlocksInRow(int y) {
+		std::vector<size_t> blocksInRow;
+		for (size_t i = 0; i < _blockPositions.size(); i++) {
+			if (_blockPositions[i].y == y)
+				blocksInRow.push_back(i);
+		}
+		return blocksInRow;
+	}
+
+	std::vector<size_t> getBlocksInColumn(int x) {
+		std::vector<size_t> blocksInColumn;
+		for (size_t i = 0; i < _blockPositions.size(); i++) {
+			if (_blockPositions[i].x == x)
+				blocksInColumn.push_back(i);
+		}
+		return blocksInColumn;
 	}
 
 	std::vector<size_t> getBottomBlocks() {
 		float rotation = getRotation() * sb::ToDegrees;
 		rotation = fmod(rotation, 360.f);
-		// if (inside(rotation, 0, 45) || inisde(rotation, 315, 360)) 
-		//		return getBlocksInRow(getMinimumCoordinates().y);
-		// else if (inisde(rotation, 45, 135))
-		//		return getBlocksInColumn(getMaximumCoorinates().x);
-		// else if (inisde(rotation, 135, 225))
-		//		return getBlocksInColumn(getMaximumCoorinates().y);
-		// else if (inisde(rotation, 225, 315))
-		//		return getBlocksInColumn(getMinimumCoorinates().x);
+		 if (isInInterval(rotation, 0, 45) || isInInterval(rotation, 315, 360)) 
+				return getBlocksInRow(getMinimumBlockCoordinates().y);
+		 else if (isInInterval(rotation, 45, 135))
+				return getBlocksInColumn(getMaximumBlockCoordinates().x);
+		 else if (isInInterval(rotation, 135, 225))
+				return getBlocksInColumn(getMaximumBlockCoordinates().y);
+		 else if (isInInterval(rotation, 225, 315))
+				return getBlocksInColumn(getMinimumBlockCoordinates().x);
 
 		return std::vector<size_t>();
 	}
@@ -994,7 +1042,7 @@ public:
     }
 
 	void playCollisionEffect(float secondsDelay) {
-		// std::vector<size_t> bottomBlocks = getBottomBlocks();
+		std::vector<size_t> bottomBlocks = getBottomBlocks();
 		// addCollisionEffects(bottomBlocks);
 		// for (size_t i = 0; i < _collisionEffects.size(); i++)
 		//	_collisionEffects[i].play(secondsDelay);
@@ -1002,7 +1050,6 @@ public:
 
 	void update(float ds) {
 		_effects.update(ds);
-		// disposeGarbage();
 		//_effects2.update(ds);
 	}
 
@@ -3694,15 +3741,39 @@ void demo68() {
 	}
 }
 
-// block directional collision effect
-// tetromino find bottom blocks
-// tetromino collision effect
+void demo69() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Tetromino tetromino('m');
+
+	tetromino.setScale(0.2f);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		tetromino.update(ds);
+
+		//if (sb::Input::isKeyGoingDown(sb::KeyCode::c))
+		//	tetromino.playCollisionEffect(0.5f);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(tetromino);
+		// tetromino.drawCollisionEffect(window);
+
+		window.display();
+	}
+}
+
+// tetromino find bottom blocksInRow
+// tetromino collision effect on bottom blocksInRow with correct direction
 // collision effect on board tetromino harddrop
 // collision effect on board tetromino drop
 // collision effect on board tetromino move
 
 void demo() {
-	demo68();
+	demo69();
+
+	//demo68();
 
 	//demo67();
 
