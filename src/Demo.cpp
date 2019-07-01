@@ -594,6 +594,10 @@ public:
 };
 
 class BlockCollisionEffect : public sb::ParticleSystem {
+public: 
+	enum struct Position { Left, Top, Right, Bottom };
+
+private:
 	enum class State { Idle, Playing };
 	State _state;
 
@@ -601,6 +605,25 @@ protected:
 	static sb::Texture& getTexture() {
 		static sb::Texture texture("Textures/SimpleParticle.png");
 		return texture;
+	}
+
+	void setDirection(Position direction) {
+		if (direction == Position::Left) {
+			setPosition(-0.5f, 0);
+			setRotation(-90 * sb::ToRadian);
+		}
+		else if (direction == Position::Top) {
+			setPosition(0, 0.5f);
+			setRotation(0 * sb::ToRadian);
+		}
+		else if (direction == Position::Right) {
+			setPosition(0.5f, 0);
+			setRotation(90 * sb::ToRadian);
+		}
+		else if (direction == Position::Bottom) {
+			setPosition(0, -0.5f);
+			setRotation(180 * sb::ToRadian);
+		}
 	}
 
 public:
@@ -620,7 +643,6 @@ public:
 	}
 
 	virtual void update(float ds) {
-		std::cout << (int)_state << std::endl;
 		ParticleSystem::update(ds);
 		if (_state == State::Playing) {
 			if (!isAlive())
@@ -628,7 +650,9 @@ public:
 		}
 	}
 
-	void play(float delaySeconds = 0) {
+	void play(float delaySeconds = 0, Position direction = Position::Top) {
+		setDirection(direction);
+
 		if (_state != State::Playing) {
 			clearBursts();
 			addBurst(delaySeconds, 20);
@@ -895,10 +919,30 @@ protected:
         else if (type == 'z')
             _blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(-1, 0), sb::Vector2i(0, -1), sb::Vector2i(1, -1) };
         else if (type == 'm')
-            _blockPositions = { sb::Vector2i(0, 0)/*, sb::Vector2i(1, 0)*/ };
+            _blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(0, 1) };
 
         createBlocks(_blockPositions, type);
     }
+
+	bool inside(float value, float min, float max) {
+		return value >= min && value < max;
+	}
+
+	std::vector<size_t> getBottomBlocks() {
+		float rotation = getRotation() * sb::ToDegrees;
+		rotation = fmod(rotation, 360.f);
+		// if (inside(rotation, 0, 45) || inisde(rotation, 315, 360)) 
+		//		return getBlocksInRow(getMinimumCoordinates().y);
+		// else if (inisde(rotation, 45, 135))
+		//		return getBlocksInColumn(getMaximumCoorinates().x);
+		// else if (inisde(rotation, 135, 225))
+		//		return getBlocksInColumn(getMaximumCoorinates().y);
+		// else if (inisde(rotation, 225, 315))
+		//		return getBlocksInColumn(getMinimumCoorinates().x);
+
+		return std::vector<size_t>();
+	}
+
 
 public:
     Tetromino(char type = 'i') : _effects2(*this) {
@@ -949,8 +993,16 @@ public:
 		return getTransformedBounds(bounds, getTransform());
     }
 
+	void playCollisionEffect(float secondsDelay) {
+		// std::vector<size_t> bottomBlocks = getBottomBlocks();
+		// addCollisionEffects(bottomBlocks);
+		// for (size_t i = 0; i < _collisionEffects.size(); i++)
+		//	_collisionEffects[i].play(secondsDelay);
+	}
+
 	void update(float ds) {
 		_effects.update(ds);
+		// disposeGarbage();
 		//_effects2.update(ds);
 	}
 
@@ -1342,6 +1394,7 @@ void demo13() {
 class Board : public sb::Drawable, public sb::Transformable {
 	sb::DrawBatch _batch;
 	sb::Vector2i _boardSize;
+
 	Grid _grid;
 	bool _isGridEnabled;
 	std::vector<Block> _blocks;
@@ -1352,6 +1405,7 @@ class Board : public sb::Drawable, public sb::Transformable {
 	float _secondsSinceLastStep;
 	bool _isDead;
 	size_t _linesCleared;
+	bool _isAutodropEnabled;
 
 protected:
 
@@ -1468,7 +1522,6 @@ protected:
 			if (boardPos.y == y) {
 				bool isAboveOccupied = isOccupied(sb::Vector2i(boardPos.x, boardPos.y + 1));
 				float duration = isAboveOccupied ? 0.01f : 0.8f;
-				//_blocks[i].enableExplosion(!isAboveOccupied);
 				_blocks[i].die(duration);
 			}
 		}
@@ -1497,6 +1550,7 @@ protected:
 
 	void drop(Tetromino& tetromino) {
 		driftBy(tetromino, sb::Vector2i(0, -1));
+		// TODO: play collision effect
 
 		if (isInvalid(tetromino)) {
 			//std::cout << "A collision, sir" << std::endl;
@@ -1511,7 +1565,8 @@ protected:
 		_secondsSinceLastStep += ds;
 
 		while (_secondsSinceLastStep >= _stepIntervalInSeconds) {
-			drop(tetromino);
+			if (_isAutodropEnabled)
+				drop(tetromino);
 			_secondsSinceLastStep -= _stepIntervalInSeconds;
 		}
 	}
@@ -1570,7 +1625,7 @@ public:
 	Board(const sb::Vector2i& boardSize) 
 		: _batch(1024), _boardSize(boardSize), _grid(boardSize, 0.01f), 
 		_isGridEnabled(false), _hasTetromino(false), _stepIntervalInSeconds(0.5f), 
-		_secondsSinceLastStep(0), _isDead(false), _linesCleared(0)
+		_secondsSinceLastStep(0), _isDead(false), _linesCleared(0), _isAutodropEnabled(true)
 	{ }
 
 	inline bool hasTetromino() const { return _hasTetromino; }
@@ -1596,6 +1651,8 @@ public:
 	}
 
 	inline void enableGrid(bool enabled) { _isGridEnabled = enabled; }
+
+	inline void enableAutodrop(bool enable) { _isAutodropEnabled = enable; }
 
 	inline void setStepInterval(float dropIntervalInSeconds) { _stepIntervalInSeconds = dropIntervalInSeconds; }
 
@@ -1635,6 +1692,8 @@ public:
 		sb::Vector2f worldTranslation(translation.x * cellSize.x, translation.y * cellSize.y);
 		sb::Vector2f end = _tetromino.getPosition() + worldTranslation;
 		driftTetrominoTo(end);
+
+		// TODO: play collision effect
 	}
 
 	inline void driftTetrominoBy(int x, int y) { driftTetrominoBy(sb::Vector2i(x, y)); }
@@ -1658,6 +1717,7 @@ public:
 		Tetromino projection = computeProjection();
 		_secondsSinceLastStep = 0;
 		_tetromino.getEffects().bounceTo(projection.getPosition(), _tetromino);
+		// TODO: play collision effect
 	}
 
 	void dropBlocks() {
@@ -1699,7 +1759,6 @@ public:
 	}
 
 	void update(float ds) {
-
 		updateEntities(ds);
 
 		if (!_isDead) {
@@ -3607,8 +3666,45 @@ void demo67() {
 	}
 }
 
+void demo68() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Block block('m');
+
+	block.setScale(0.2f);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		block.update(ds);
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::Left))
+			block.getCollisionEffect().play(0.5f, BlockCollisionEffect::Position::Left);
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::Up))
+			block.getCollisionEffect().play(0.5f, BlockCollisionEffect::Position::Top);
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::Right))
+			block.getCollisionEffect().play(0.5f, BlockCollisionEffect::Position::Right);
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::Down))
+			block.getCollisionEffect().play(0.5f, BlockCollisionEffect::Position::Bottom);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(block);
+		block.drawCollisionEffect(window);
+		window.display();
+	}
+}
+
+// block directional collision effect
+// tetromino find bottom blocks
+// tetromino collision effect
+// collision effect on board tetromino harddrop
+// collision effect on board tetromino drop
+// collision effect on board tetromino move
+
 void demo() {
-	demo67();
+	demo68();
+
+	//demo67();
 
 	//demo66();
 
