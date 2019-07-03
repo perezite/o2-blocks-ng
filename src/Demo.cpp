@@ -1790,7 +1790,7 @@ public:
 		_secondsSinceLastStep = 0;
 		float effectSeconds = 0.5f;
 		_tetromino.getEffects().bounceTo(projection.getPosition(), _tetromino, effectSeconds);
-		_tetromino.playCollisionEffect(effectSeconds * 0.475f);
+		_tetromino.playCollisionEffect(effectSeconds * 0.6f);
 	}
 
 	void dropBlocks() {
@@ -3811,7 +3811,7 @@ void demo70() {
 	window.getCamera().setWidth(1.3f);
 	board.createBlock('j', sb::Vector2i(2, 1));
 	board.createTetromino('m', sb::Vector2i(2, 7));
-	board.showGrid(true);
+	//board.showGrid(true);
 	board.enableAutodrop(false);
 
 	while (window.isOpen()) {
