@@ -976,13 +976,14 @@ protected:
 		return blocksInColumn;
 	}
 
-	inline float positive(float value) {
-		return value < 0 ? -value : value;
+	inline float getProperRotation(float degrees) {
+		degrees = fmod(degrees, 360.f);
+		degrees = degrees > 0 ? 360 - degrees : -degrees;
+		return degrees;
 	}
 
 	std::vector<size_t> getBottomBlocks() {
-		float rotation = positive(getRotation()) * sb::ToDegrees;
-		rotation = fmod(rotation, 360.f);
+		float rotation = getProperRotation(getRotation() * sb::ToDegrees);
 		if (isInInterval(rotation, 45, 135))
 			return getBlocksInColumn(getMaximumBlockCoordinates().x);
 		else if (isInInterval(rotation, 135, 225))
@@ -994,8 +995,7 @@ protected:
 	}
 
 	BlockCollisionEffect::Position getBlockCollisionEffectPosition() {
-		float rotation = positive(getRotation()) * sb::ToDegrees;
-		rotation = fmod(rotation, 360.f);
+		float rotation = getProperRotation(getRotation() * sb::ToDegrees);
 		if (isInInterval(rotation, 45, 135))
 			return BlockCollisionEffect::Position::Right;
 		else if (isInInterval(rotation, 135, 225))
@@ -3770,6 +3770,7 @@ void demo69() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
 	Light light;
 	Tetromino tetromino('m');
+	size_t currentType = 0;
 
 	tetromino.setScale(0.2f);
 	tetromino.setLight(light);
@@ -3782,8 +3783,15 @@ void demo69() {
 
 		if (sb::Input::isKeyGoingDown(sb::KeyCode::c))
 			tetromino.playCollisionEffect(0.5f);
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::i))
+			tetromino.rotate(90 * sb::ToRadian);
 		if (sb::Input::isKeyGoingDown(sb::KeyCode::r))
 			tetromino.rotate(-90 * sb::ToRadian);
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::t)) {
+			currentType = (currentType + 1) % Tetromino::getTypes().size();
+			tetromino.setType(Tetromino::getTypes()[currentType]);
+			tetromino.setLight(light);
+		}
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(tetromino);
