@@ -3768,9 +3768,11 @@ void demo68() {
 
 void demo69() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Light light;
 	Tetromino tetromino('m');
 
 	tetromino.setScale(0.2f);
+	tetromino.setLight(light);
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
