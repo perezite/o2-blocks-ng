@@ -369,7 +369,7 @@ public:
 		//float effectRotation = parent.getRotation() + _spin.value();
 		//float offset = effectRotation - radians;
 		//parent.setRotation(radians);
-		//_spin.tween = sb::Tweenf().bounceOut(offset, 0, duration);
+		//_spin.tween = sb::Tweenf().bounceOut(offset, 0, effectSeconds);
 		//_spin.start();
 	}
 
@@ -1722,7 +1722,7 @@ public:
 		return getTransformedBounds(bounds, getTransform());
 	}
 
-	inline void enableGrid(bool enabled) { _isGridEnabled = enabled; }
+	inline void showGrid(bool enabled) { _isGridEnabled = enabled; }
 
 	inline void enableAutodrop(bool enable) { _isAutodropEnabled = enable; }
 
@@ -1785,11 +1785,12 @@ public:
 		drop(_tetromino);
 	}
 
-	void quickdropTetromino() {
+	void hardDropTetromino() {
 		Tetromino projection = computeProjection();
 		_secondsSinceLastStep = 0;
-		_tetromino.getEffects().bounceTo(projection.getPosition(), _tetromino);
-		// TODO: play collision effect
+		float effectSeconds = 0.5f;
+		_tetromino.getEffects().bounceTo(projection.getPosition(), _tetromino, effectSeconds);
+		_tetromino.playCollisionEffect(effectSeconds * 0.475f);
 	}
 
 	void dropBlocks() {
@@ -1856,6 +1857,7 @@ public:
 			_batch.draw(projection, states);
 			_batch.draw(_tetromino, states);
 			target.draw(_batch);
+			_tetromino.drawCollisionEffect(target, states);
 		}
 	}
 };
@@ -1897,7 +1899,7 @@ void demo15() {
 	Board board(sb::Vector2i(10, 18));
 
 	adjustCameraToBoard(window.getCamera(), board);
-	board.enableGrid(true);
+	board.showGrid(true);
 	board.createBlock('j', sb::Vector2i(5, 5));
 	board.createTetromino('i');
 
@@ -1916,7 +1918,7 @@ void demo16() {
 	Board board(sb::Vector2i(10, 18));
 
 	adjustCameraToBoard(window.getCamera(), board);
-	board.enableGrid(true);
+	board.showGrid(true);
 	board.createBlock('j', sb::Vector2i(5, 10));
 	board.createTetromino('i');
 
@@ -1937,7 +1939,7 @@ void demo17() {
 	Board board(sb::Vector2i(10, 5));
 
 	adjustCameraToBoard(window.getCamera(), board);
-	board.enableGrid(true);
+	board.showGrid(true);
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -1986,7 +1988,7 @@ void demo19() {
 	Board board(sb::Vector2i(10, 10));
 
 	adjustCameraToBoard(window.getCamera(), board);
-	board.enableGrid(true);
+	board.showGrid(true);
 	board.createTetromino('i', sb::Vector2i(4, 2));
 	board.createBlock('j', sb::Vector2i(2, 2));
 
@@ -2014,7 +2016,7 @@ void demo20() {
 	Board board(sb::Vector2i(10, 10));
 
 	adjustCameraToBoard(window.getCamera(), board);
-	board.enableGrid(true);
+	board.showGrid(true);
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -2057,7 +2059,7 @@ void demo21() {
 	Board board(sb::Vector2i(10, 10));
 
 	adjustCameraToBoard(window.getCamera(), board);
-	board.enableGrid(true);
+	board.showGrid(true);
 	addBlocks(board);
 
 	while (window.isOpen()) {
@@ -2092,7 +2094,7 @@ void demo22() {
 	Board board(sb::Vector2i(10, 10));
 
 	adjustCameraToBoard(window.getCamera(), board);
-	board.enableGrid(true);
+	board.showGrid(true);
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -2119,13 +2121,13 @@ void input23(sb::Window& window, Board& board) {
 		Tetromino projection = board.computeProjection();
 		const sb::Vector2f touch = sb::Input::getTouchPosition(window);
 		if (projection.getBounds().contains(touch)) {
-			board.quickdropTetromino();
+			board.hardDropTetromino();
 			quickdrop = true;
 		}
 	}
 
 	if (sb::Input::isKeyGoingDown(sb::KeyCode::Space)) {
-		board.quickdropTetromino();
+		board.hardDropTetromino();
 		quickdrop = true;
 	}
 		
@@ -2138,7 +2140,7 @@ void demo23() {
 	Board board(sb::Vector2i(10, 10));
 
 	adjustCameraToBoard(window.getCamera(), board);
-	board.enableGrid(true);
+	board.showGrid(true);
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -2169,7 +2171,7 @@ void demo24() {
 	board.createBlock('m', sb::Vector2i(1, 3));
 	board.createTetromino('i', sb::Vector2i(3, 2));
 	board.spinTetromino();
-	board.enableGrid(true);
+	board.showGrid(true);
 	board.setStepInterval(1);
 
 	while (window.isOpen()) {
@@ -2189,7 +2191,7 @@ void demo25() {
 	Board board(sb::Vector2i(10, 18));
 
 	adjustCameraToBoard(window.getCamera(), board);
-	board.enableGrid(true);
+	board.showGrid(true);
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -2278,7 +2280,7 @@ namespace {
 			if (getSwipe(window, ds).y > 0.05f * window.getInverseAspect())
 				_board.spinTetromino();
 			if (isProjectionTouchGoingDown(window, _board))
-				_board.quickdropTetromino();
+				_board.hardDropTetromino();
 
 			if (sb::Input::isKeyGoingDown(sb::KeyCode::Left))
 				_board.driftTetrominoBy(-1, 0);
@@ -2289,7 +2291,7 @@ namespace {
 			if (sb::Input::isKeyGoingDown(sb::KeyCode::Up))
 				_board.spinTetromino();
 			if (sb::Input::isKeyGoingDown(sb::KeyCode::Space))
-				_board.quickdropTetromino();
+				_board.hardDropTetromino();
 		}
 
 		void update(float ds) {
@@ -2310,7 +2312,7 @@ void demo26() {
 	Game game(sb::Vector2i(10, 18));
 
 	adjustCameraToBoard(window.getCamera(), game.getBoard());
-	game.getBoard().enableGrid(true);
+	game.getBoard().showGrid(true);
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -2330,7 +2332,7 @@ void demo27() {
 	Game game(sb::Vector2i(10, 18));
 
 	adjustCameraToBoard(window.getCamera(), game.getBoard());
-	game.getBoard().enableGrid(true);
+	game.getBoard().showGrid(true);
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -2685,7 +2687,7 @@ void demo38() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
 	Board board(sb::Vector2i(2, 2));
 
-	board.enableGrid(true);
+	board.showGrid(true);
 	board.createTetromino('m', sb::Vector2i(0, 1));
 
 	while (window.isOpen()) {
@@ -2772,7 +2774,7 @@ void demo42() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
 	Board board(sb::Vector2i(4, 4));
 
-	board.enableGrid(true);
+	board.showGrid(true);
 	board.createTetromino('m', sb::Vector2i(1, 2));
 
 	while (window.isOpen()) {
@@ -2855,7 +2857,7 @@ void demo44() {
 	adjustCameraToBoard(window.getCamera(), board);
 	board.createTetromino('m', sb::Vector2i(4, 4));
 	board.createBlock('j', sb::Vector2i(4, 2));
-	board.enableGrid(true);
+	board.showGrid(true);
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -2903,7 +2905,7 @@ void demo46() {
 	adjustCameraToBoard(window.getCamera(), board);
 	board.createBlock('m', sb::Vector2i(4, 4));
 	board.createBlock('m', sb::Vector2i(5, 5));
-	board.enableGrid(true);
+	board.showGrid(true);
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -2951,7 +2953,7 @@ void demo48() {
 
 	adjustCameraToBoard(window.getCamera(), board);
 	board.createTetromino('z', sb::Vector2i(4, 8));
-	board.enableGrid(true);
+	board.showGrid(true);
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -2977,7 +2979,7 @@ void demo49() {
 
 	adjustCameraToBoard(window.getCamera(), board);
 	board.createBlock('z', sb::Vector2i(4, 8));
-	board.enableGrid(true);
+	board.showGrid(true);
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -3002,7 +3004,7 @@ void demo50() {
 	Board board(sb::Vector2i(10, 14));
 
 	adjustCameraToBoard(window.getCamera(), board);
-	board.enableGrid(true);
+	board.showGrid(true);
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -3014,7 +3016,7 @@ void demo50() {
 			board.dropTetromino();
 
 		if (sb::Input::isKeyGoingDown(sb::KeyCode::q))
-			board.quickdropTetromino();
+			board.hardDropTetromino();
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(board);
@@ -3037,7 +3039,7 @@ void demo51() {
 	fillLine(board, 1);
 	fillLine(board, 2);
 
-	board.enableGrid(true);
+	board.showGrid(true);
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -3078,7 +3080,7 @@ void demo52() {
 	adjustCameraToBoard(window.getCamera(), board);
 	board.createTetromino('z', sb::Vector2i(4, 4));
 	addBlocks52(board);
-	board.enableGrid(true);
+	board.showGrid(true);
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -3102,7 +3104,7 @@ void demo53() {
 	adjustCameraToBoard(window.getCamera(), board);
 	board.createTetromino('z', sb::Vector2i(4, 4));
 	addBlocks52(board);
-	board.enableGrid(true);
+	board.showGrid(true);
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -3114,7 +3116,7 @@ void demo53() {
 		if (sb::Input::isKeyGoingDown(sb::KeyCode::d))
 			board.dropTetromino();
 		if (sb::Input::isKeyGoingDown(sb::KeyCode::q))
-			board.quickdropTetromino();
+			board.hardDropTetromino();
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(board);
@@ -3403,7 +3405,7 @@ void demo60() {
 	Board board(sb::Vector2i(10, 10));
 
 	adjustCameraToBoard(window.getCamera(), board);
-	board.enableGrid(true);
+	board.showGrid(true);
 	board.setStepInterval(100);
 
 	//addBlocks(board, 'j', 0, { 0, 1, 2, 3, 4, 5, 6, 7 , 8 , 9 });
@@ -3461,7 +3463,7 @@ void inputComplete(sb::Window& window, Board& board, float ds) {
 	if (sb::Input::isKeyGoingDown(sb::KeyCode::Right))
 		board.driftTetrominoBy(sb::Vector2i(1, 0));
 	if (sb::Input::isKeyGoingDown(sb::KeyCode::Space))
-		board.quickdropTetromino();
+		board.hardDropTetromino();
 
 	touchInputComplete(window, board, ds);
 }
@@ -3471,7 +3473,7 @@ void complete() {
 	Board board(sb::Vector2i(10, 14));
 
 	adjustCameraToBoard(window.getCamera(), board);
-	board.enableGrid(true);
+	board.showGrid(true);
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -3801,14 +3803,40 @@ void demo69() {
 	}
 }
 
-// tetromino find bottom blocksInRow
-// tetromino collision effect on bottom blocksInRow with correct direction
-// collision effect on board tetromino harddrop
+void demo70() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Board board(sb::Vector2i(10, 10));
+
+	adjustCameraToBoard(window.getCamera(), board);
+	window.getCamera().setWidth(1.3f);
+	board.createBlock('j', sb::Vector2i(2, 1));
+	board.createTetromino('m', sb::Vector2i(2, 7));
+	board.showGrid(true);
+	board.enableAutodrop(false);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		board.update(ds);
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::h))
+			board.hardDropTetromino();
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(board);
+
+		window.display();
+	}
+}
+
 // collision effect on board tetromino drop
 // collision effect on board tetromino move
 
 void demo() {
-	demo69();
+	demo70();
+
+	//demo69();
 
 	//demo68();
 
