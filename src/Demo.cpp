@@ -976,21 +976,35 @@ protected:
 		return blocksInColumn;
 	}
 
-	std::vector<size_t> getBottomBlocks() {
-		float rotation = getRotation() * sb::ToDegrees;
-		rotation = fmod(rotation, 360.f);
-		 if (isInInterval(rotation, 0, 45) || isInInterval(rotation, 315, 360)) 
-				return getBlocksInRow(getMinimumBlockCoordinates().y);
-		 else if (isInInterval(rotation, 45, 135))
-				return getBlocksInColumn(getMaximumBlockCoordinates().x);
-		 else if (isInInterval(rotation, 135, 225))
-				return getBlocksInColumn(getMaximumBlockCoordinates().y);
-		 else if (isInInterval(rotation, 225, 315))
-				return getBlocksInColumn(getMinimumBlockCoordinates().x);
-
-		return std::vector<size_t>();
+	inline float positive(float value) {
+		return value < 0 ? -value : value;
 	}
 
+	std::vector<size_t> getBottomBlocks() {
+		float rotation = positive(getRotation()) * sb::ToDegrees;
+		rotation = fmod(rotation, 360.f);
+		if (isInInterval(rotation, 45, 135))
+			return getBlocksInColumn(getMaximumBlockCoordinates().x);
+		else if (isInInterval(rotation, 135, 225))
+			return getBlocksInRow(getMaximumBlockCoordinates().y);
+		else if (isInInterval(rotation, 225, 315))
+			return getBlocksInColumn(getMinimumBlockCoordinates().x);
+		else
+			return getBlocksInRow(getMinimumBlockCoordinates().y);
+	}
+
+	BlockCollisionEffect::Position getBlockCollisionEffectPosition() {
+		float rotation = positive(getRotation()) * sb::ToDegrees;
+		rotation = fmod(rotation, 360.f);
+		if (isInInterval(rotation, 45, 135))
+			return BlockCollisionEffect::Position::Right;
+		else if (isInInterval(rotation, 135, 225))
+			return BlockCollisionEffect::Position::Top;
+		else if (isInInterval(rotation, 225, 315))
+			return BlockCollisionEffect::Position::Left;
+		else
+			return BlockCollisionEffect::Position::Bottom;
+	}
 
 public:
     Tetromino(char type = 'i') : _effects2(*this) {
@@ -1043,14 +1057,25 @@ public:
 
 	void playCollisionEffect(float secondsDelay) {
 		std::vector<size_t> bottomBlocks = getBottomBlocks();
-		// addCollisionEffects(bottomBlocks);
-		// for (size_t i = 0; i < _collisionEffects.size(); i++)
-		//	_collisionEffects[i].play(secondsDelay);
+		BlockCollisionEffect::Position effectPosition = getBlockCollisionEffectPosition();
+
+		for (size_t i = 0; i < bottomBlocks.size(); i++)
+			_blocks[bottomBlocks[i]].getCollisionEffect().play(secondsDelay, effectPosition);
 	}
 
 	void update(float ds) {
+		for (size_t i = 0; i < _blocks.size(); i++)
+			_blocks[i].update(ds);
+
 		_effects.update(ds);
 		//_effects2.update(ds);
+	}
+
+	void drawCollisionEffect(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
+		states.transform *= getTransform();
+
+		for (size_t i = 0; i < _blocks.size(); i++)
+			_blocks[i].drawCollisionEffect(target, states);
 	}
 
     virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
@@ -3753,12 +3778,14 @@ void demo69() {
 		window.update();
 		tetromino.update(ds);
 
-		//if (sb::Input::isKeyGoingDown(sb::KeyCode::c))
-		//	tetromino.playCollisionEffect(0.5f);
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::c))
+			tetromino.playCollisionEffect(0.5f);
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::r))
+			tetromino.rotate(-90 * sb::ToRadian);
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(tetromino);
-		// tetromino.drawCollisionEffect(window);
+		tetromino.drawCollisionEffect(window);
 
 		window.display();
 	}
