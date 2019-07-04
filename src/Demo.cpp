@@ -1463,11 +1463,51 @@ void demo13() {
 	}
 }
 
+class StripedQuad : public sb::Drawable, public sb::Transformable {
+	sb::Mesh _mesh;
+	size_t _numStripes;
+	float _alpha;
+
+protected:
+	void createMesh(const sb::Vector2f& extent) {
+		float stripeWidth = 2 * extent.x / _numStripes;
+		static const sb::Color black(0, 0, 0, _alpha);
+		static const sb::Color white(1, 1, 1, 0);
+
+		for (size_t i = 0; i < _numStripes; i++) {
+			bool isEven = i % 2 == 0;
+			const sb::Color& stripeBottomColor = isEven ? black : white;
+			const sb::Color& stripeTopColor = isEven ? black : white;
+			float stripeLeft = -extent.x + i * stripeWidth;
+			float stripeRight = stripeLeft + stripeWidth;
+			_mesh[i * 6 + 0] = sb::Vertex(sb::Vector2f(stripeLeft, -extent.y), stripeBottomColor);
+			_mesh[i * 6 + 1] = sb::Vertex(sb::Vector2f(stripeLeft, -extent.y), stripeBottomColor);
+			_mesh[i * 6 + 2] = sb::Vertex(sb::Vector2f(stripeLeft, +extent.y), stripeTopColor);
+			_mesh[i * 6 + 3] = sb::Vertex(sb::Vector2f(stripeRight, -extent.y), stripeBottomColor);
+			_mesh[i * 6 + 4] = sb::Vertex(sb::Vector2f(stripeRight, +extent.y), stripeTopColor);
+			_mesh[i * 6 + 5] = sb::Vertex(sb::Vector2f(stripeRight, +extent.y), stripeTopColor);
+		}
+	}
+
+public:
+	StripedQuad(size_t numStripes = 1, float alpha = 0.04f) : _mesh(6 * numStripes, sb::PrimitiveType::TriangleStrip),
+		_numStripes(numStripes), _alpha(alpha)
+	{
+		createMesh(sb::Vector2f(0.5f, 0.5f));
+	}
+
+	virtual void draw(sb::DrawTarget& target, sb::DrawStates states) {
+		states.transform *= getTransform();
+		target.draw(_mesh.getVertices(), _mesh.getPrimitiveType(), states);
+	}
+};
+
 class Board : public sb::Drawable, public sb::Transformable {
 	sb::DrawBatch _batch;
 	sb::Vector2i _boardSize;
 
 	Grid _grid;
+	StripedQuad _stripes;
 	bool _isGridEnabled;
 	std::vector<Block> _blocks;
 	Light _light;
@@ -1705,10 +1745,12 @@ protected:
 
 public:
 	Board(const sb::Vector2i& boardSize) 
-		: _batch(1024), _boardSize(boardSize), _grid(boardSize, 0.01f), 
+		: _batch(1024), _boardSize(boardSize), _grid(boardSize, 0.01f), _stripes(boardSize.x, 0.03f),
 		_isGridEnabled(false), _hasTetromino(false), _stepIntervalInSeconds(0.5f), 
 		_secondsSinceLastStep(0), _isDead(false), _linesCleared(0), _isAutodropEnabled(true)
-	{ }
+	{
+		_stripes.setScale(1, boardSize.y / (float)boardSize.x);
+	}
 
 	inline bool hasTetromino() const { return _hasTetromino; }
 
@@ -1853,6 +1895,8 @@ public:
 
 	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
 		states.transform *= getTransform();
+
+		target.draw(_stripes, states);
 
 		if (_isGridEnabled)
 			target.draw(_grid, states);
@@ -3445,6 +3489,29 @@ void demo60() {
 	}
 }
 
+class Backdrop : public sb::Drawable, public sb::Transformable {
+	sb::Mesh _mesh;
+
+public:
+	Backdrop() : _mesh(4, sb::PrimitiveType::TriangleStrip) {
+	}
+
+	void update(sb::Camera& camera) {
+		static sb::Color bottomColor = createColor(252, 182, 159);
+		static sb::Color topColor = createColor(255, 236, 210);
+		sb::Vector2f extent(camera.getWidth() * 0.5f, camera.getWidth() * camera.getInverseAspectRatio() * 0.5f);
+		_mesh[0] = sb::Vertex(sb::Vector2f(-extent.x, -extent.y), bottomColor);
+		_mesh[1] = sb::Vertex(sb::Vector2f(+extent.x, -extent.y), bottomColor);
+		_mesh[2] = sb::Vertex(sb::Vector2f(-extent.x, +extent.y), topColor);
+		_mesh[3] = sb::Vertex(sb::Vector2f(+extent.x, +extent.y), topColor);
+	}
+
+	virtual void draw(sb::DrawTarget& target, sb::DrawStates states) {
+		states.transform *= getTransform();
+		target.draw(_mesh.getVertices(), _mesh.getPrimitiveType(), states);
+	}
+};
+
 void touchInputComplete(sb::Window& window, Board& board, float ds) {
 	static float secondsSinceLastTouch = 1;
 	static sb::Vector2f touchOffset;
@@ -3482,20 +3549,23 @@ void inputComplete(sb::Window& window, Board& board, float ds) {
 
 void complete() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Backdrop backdrop;
 	Board board(sb::Vector2i(10, 14));
 
 	adjustCameraToBoard(window.getCamera(), board);
-	board.showGrid(true);
+	//board.showGrid(true);
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
 		sb::Input::update();
 		window.update();
+		backdrop.update(window.getCamera());
 		board.update(ds);
 
 		inputComplete(window, board, ds);
 
 		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(backdrop);
 		window.draw(board);
 		window.display();
 	}
@@ -3953,32 +4023,9 @@ void demo74() {
 	}
 }
 
-class Background2 : public sb::Drawable, public sb::Transformable {
-	sb::Mesh _mesh;
-
-public:
-	Background2() : _mesh(4, sb::PrimitiveType::TriangleStrip) {
-	}
-
-	void update(sb::Camera& camera) {
-		static sb::Color bottomColor = createColor(252, 182, 159);
-		static sb::Color topColor = createColor(255, 236, 210);
-		sb::Vector2f extent(camera.getWidth() * 0.5f, camera.getWidth() * camera.getInverseAspectRatio() * 0.5f);
-		_mesh[0] = sb::Vertex(sb::Vector2f(-extent.x, -extent.y), bottomColor);
-		_mesh[1] = sb::Vertex(sb::Vector2f(+extent.x, -extent.y), bottomColor);
-		_mesh[2] = sb::Vertex(sb::Vector2f(-extent.x, +extent.y), topColor);
-		_mesh[3] = sb::Vertex(sb::Vector2f(+extent.x, +extent.y), topColor);
-	}
-	
-	virtual void draw(sb::DrawTarget& target, sb::DrawStates states) {
-		states.transform *= getTransform();
-		target.draw(_mesh.getVertices(), _mesh.getPrimitiveType(), states);
-	}
-};
-
 void demo75() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
-	Background2 background;
+	Backdrop background;
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -3997,48 +4044,9 @@ sb::Color shade(const sb::Color& color, float factor) {
 	return sb::Color(color.r * factor, color.g * factor, color.b * factor, color.a);
 }
 
-class StripedQuad : public sb::Drawable, public sb::Transformable {
-	sb::Mesh _mesh;
-	size_t _numStripes;
-	float _alpha;
-
-protected:
-	void createMesh(const sb::Vector2f& extent) {
-		float stripeWidth = 2 * extent.x / _numStripes;
-		static const sb::Color black(0, 0, 0, _alpha);
-		static const sb::Color white(1, 1, 1, _alpha);
-
-		for (size_t i = 0; i < _numStripes; i++) {
-			bool isEven = i % 2 == 0;
-			const sb::Color& stripeBottomColor = isEven ? black : white;
-			const sb::Color& stripeTopColor = isEven ? black : white;
-			float stripeLeft = -extent.x + i * stripeWidth;
-			float stripeRight = stripeLeft + stripeWidth;
-			_mesh[i * 6 + 0] = sb::Vertex(sb::Vector2f(stripeLeft, -extent.y), stripeBottomColor);
-			_mesh[i * 6 + 1] = sb::Vertex(sb::Vector2f(stripeLeft, -extent.y), stripeBottomColor);
-			_mesh[i * 6 + 2] = sb::Vertex(sb::Vector2f(stripeLeft, +extent.y), stripeTopColor);
-			_mesh[i * 6 + 3] = sb::Vertex(sb::Vector2f(stripeRight, -extent.y), stripeBottomColor);
-			_mesh[i * 6 + 4] = sb::Vertex(sb::Vector2f(stripeRight, +extent.y), stripeTopColor);
-			_mesh[i * 6 + 5] = sb::Vertex(sb::Vector2f(stripeRight, +extent.y), stripeTopColor);
-		}
-	}
-
-public:
-	StripedQuad(size_t numStripes = 1, float alpha = 0.04f) : _mesh(6 * numStripes, sb::PrimitiveType::TriangleStrip), 
-		_numStripes(numStripes), _alpha(alpha)
-	{
-		createMesh(sb::Vector2f(0.5f, 0.5f));
-	}
-
-	virtual void draw(sb::DrawTarget& target, sb::DrawStates states) {
-		states.transform *= getTransform();
-		target.draw(_mesh.getVertices(), _mesh.getPrimitiveType(), states);
-	}
-};
-
 void demo76() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
-	Background2 background;
+	Backdrop Backdrop;
 	StripedQuad stripes(5);
 
 	stripes.setScale(1, 2);
@@ -4047,22 +4055,21 @@ void demo76() {
 		float ds = getDeltaSeconds();
 		sb::Input::update();
 		window.update();
-		background.update(window.getCamera());
+		Backdrop.update(window.getCamera());
 
 		window.clear(sb::Color(1, 1, 1, 1));
-		window.draw(background);
+		window.draw(Backdrop);
 		window.draw(stripes);
 
 		window.display();
 	}
 }
 
-// background with stripes
-
 void demo() {
-	//complete();
 
-	demo76();
+	complete();
+
+	//demo76();
 
 	//demo75();
 
