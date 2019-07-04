@@ -1693,6 +1693,12 @@ protected:
 		return lowest;
 	}
 
+	bool isInFinalPosition(Tetromino& tetromino) {
+		Tetromino testTetromino = tetromino;
+		driftBy(testTetromino, sb::Vector2i(0, -1));
+		return isInvalid(testTetromino);
+	}
+
 public:
 	Board(const sb::Vector2i& boardSize) 
 		: _batch(1024), _boardSize(boardSize), _grid(boardSize, 0.01f), 
@@ -1747,7 +1753,7 @@ public:
 		createTetromino(tetromino, boardPosition);
 	}
 
-	void driftTetrominoTo(sb::Vector2f pos) {
+	void driftTetrominoTo(sb::Vector2f pos, float effectSeconds = 0.2f) {
 		sb::Vector2f previousPos = _tetromino.getPosition();
 		sb::Vector2f newPos = getTransform() * pos;
 		newPos.y = std::min(previousPos.y, newPos.y);
@@ -1755,7 +1761,7 @@ public:
 		if (isReachable(_tetromino, newPos)) {
 			sb::Vector2i boardPos = worldToBoardPosition(newPos);
 			sb::Vector2f worldPos = boardToWorldPosition(boardPos);
-			_tetromino.getEffects().driftTo(worldPos, _tetromino);
+			_tetromino.getEffects().driftTo(worldPos, _tetromino, effectSeconds);
 		}
 	}
 
@@ -1763,9 +1769,11 @@ public:
 		sb::Vector2f cellSize = getCellSize();
 		sb::Vector2f worldTranslation(translation.x * cellSize.x, translation.y * cellSize.y);
 		sb::Vector2f end = _tetromino.getPosition() + worldTranslation;
-		driftTetrominoTo(end);
+		float effectSeconds = 0.2f;
+		driftTetrominoTo(end, effectSeconds);
 
-		// TODO: play collision effect
+		if (isInFinalPosition(_tetromino))
+			_tetromino.playCollisionEffect(effectSeconds * 0.7f);
 	}
 
 	inline void driftTetrominoBy(int x, int y) { driftTetrominoBy(sb::Vector2i(x, y)); }
@@ -3811,7 +3819,7 @@ void demo70() {
 	window.getCamera().setWidth(1.3f);
 	board.createBlock('j', sb::Vector2i(2, 1));
 	board.createTetromino('m', sb::Vector2i(2, 7));
-	//board.showGrid(true);
+	board.showGrid(true);
 	board.enableAutodrop(false);
 
 	while (window.isOpen()) {
@@ -3830,11 +3838,70 @@ void demo70() {
 	}
 }
 
+void demo71() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Board board(sb::Vector2i(1, 3));
+
+	adjustCameraToBoard(window.getCamera(), board);
+	window.getCamera().setWidth(3);
+	//board.createBlock('j', sb::Vector2i(2, 1));
+	board.createTetromino('m', sb::Vector2i(0, 1));
+	board.showGrid(true);
+	board.enableAutodrop(false);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		board.update(ds);
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::Down))
+			board.driftTetrominoBy(sb::Vector2i(0, -1));
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(board);
+
+		window.display();
+	}
+}
+
+void demo72() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Board board(sb::Vector2i(10, 10));
+
+	adjustCameraToBoard(window.getCamera(), board);
+	window.getCamera().setWidth(1.5);
+	//board.createBlock('j', sb::Vector2i(2, 1));
+	board.createTetromino('m', sb::Vector2i(2, 4));
+	board.showGrid(true);
+	board.enableAutodrop(false);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		board.update(ds);
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::Down))
+			board.driftTetrominoBy(sb::Vector2i(0, -1));
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::Up))
+			board.spinTetromino();
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(board);
+
+		window.display();
+	}
+}
+
 // collision effect on board tetromino drop
-// collision effect on board tetromino move
 
 void demo() {
-	demo70();
+	demo72();
+
+	//demo71();
+
+	//demo70();
 
 	//demo69();
 
