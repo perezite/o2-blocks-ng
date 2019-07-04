@@ -3952,9 +3952,99 @@ void demo74() {
 		window.display();
 	}
 }
+
+class Background2 : public sb::Drawable, public sb::Transformable {
+	sb::Mesh _mesh;
+
+public:
+	Background2() : _mesh(4, sb::PrimitiveType::TriangleStrip) {
+	}
+
+	void update(sb::Camera& camera) {
+		static sb::Color bottomColor = createColor(252, 182, 159);
+		static sb::Color topColor = createColor(255, 236, 210);
+		sb::Vector2f extent(camera.getWidth() * 0.5f, camera.getWidth() * camera.getInverseAspectRatio() * 0.5f);
+		_mesh[0] = sb::Vertex(sb::Vector2f(-extent.x, -extent.y), bottomColor);
+		_mesh[1] = sb::Vertex(sb::Vector2f(+extent.x, -extent.y), bottomColor);
+		_mesh[2] = sb::Vertex(sb::Vector2f(-extent.x, +extent.y), topColor);
+		_mesh[3] = sb::Vertex(sb::Vector2f(+extent.x, +extent.y), topColor);
+	}
 	
+	virtual void draw(sb::DrawTarget& target, sb::DrawStates states) {
+		states.transform *= getTransform();
+		target.draw(_mesh.getVertices(), _mesh.getPrimitiveType(), states);
+	}
+};
+
+void demo75() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Background2 background;
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		background.update(window.getCamera());
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(background);
+
+		window.display();
+	}
+}
+
+
+class Background : public sb::Drawable, public sb::Transformable {
+	sb::Mesh _mesh;
+
+public:
+	Background() : _mesh(4, sb::PrimitiveType::TriangleStrip) {
+	}
+
+	void update(sb::Camera& camera) {
+		static sb::Color bottomColor = createColor(252, 182, 159);
+		static sb::Color topColor = createColor(255, 236, 210);
+		sb::Vector2f extent(camera.getWidth() * 0.5f, camera.getWidth() * camera.getInverseAspectRatio() * 0.5f);
+		_mesh[0] = sb::Vertex(sb::Vector2f(-extent.x, -extent.y), bottomColor);
+		_mesh[1] = sb::Vertex(sb::Vector2f(+extent.x, -extent.y), bottomColor);
+		_mesh[2] = sb::Vertex(sb::Vector2f(-extent.x, +extent.y), topColor);
+		_mesh[3] = sb::Vertex(sb::Vector2f(+extent.x, +extent.y), topColor);
+	}
+
+	virtual void draw(sb::DrawTarget& target, sb::DrawStates states) {
+		states.transform *= getTransform();
+		target.draw(_mesh.getVertices(), _mesh.getPrimitiveType(), states);
+	}
+};
+
+void demo76() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Background background;
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		background.update(window.getCamera());
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(background);
+
+		window.display();
+	}
+}
+
+
+// background with stripes
+
 void demo() {
-	demo74();
+	//complete();
+
+	demo76();
+
+	//demo75();
+
+	//demo74();
 
 	//demo73();
 
@@ -3981,8 +4071,6 @@ void demo() {
 	//demo62();
 
 	//demo61();
-
-	//complete();
 
 	//demo60();
 
