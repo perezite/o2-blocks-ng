@@ -3993,22 +3993,41 @@ void demo75() {
 	}
 }
 
+sb::Color shade(const sb::Color& color, float factor) {
+	return sb::Color(color.r * factor, color.g * factor, color.b * factor, color.a);
+}
 
-class Background : public sb::Drawable, public sb::Transformable {
+class StripedQuad : public sb::Drawable, public sb::Transformable {
 	sb::Mesh _mesh;
+	size_t _numStripes;
+	float _alpha;
 
-public:
-	Background() : _mesh(4, sb::PrimitiveType::TriangleStrip) {
+protected:
+	void createMesh(const sb::Vector2f& extent) {
+		float stripeWidth = 2 * extent.x / _numStripes;
+		static const sb::Color black(0, 0, 0, _alpha);
+		static const sb::Color white(1, 1, 1, _alpha);
+
+		for (size_t i = 0; i < _numStripes; i++) {
+			bool isEven = i % 2 == 0;
+			const sb::Color& stripeBottomColor = isEven ? black : white;
+			const sb::Color& stripeTopColor = isEven ? black : white;
+			float stripeLeft = -extent.x + i * stripeWidth;
+			float stripeRight = stripeLeft + stripeWidth;
+			_mesh[i * 6 + 0] = sb::Vertex(sb::Vector2f(stripeLeft, -extent.y), stripeBottomColor);
+			_mesh[i * 6 + 1] = sb::Vertex(sb::Vector2f(stripeLeft, -extent.y), stripeBottomColor);
+			_mesh[i * 6 + 2] = sb::Vertex(sb::Vector2f(stripeLeft, +extent.y), stripeTopColor);
+			_mesh[i * 6 + 3] = sb::Vertex(sb::Vector2f(stripeRight, -extent.y), stripeBottomColor);
+			_mesh[i * 6 + 4] = sb::Vertex(sb::Vector2f(stripeRight, +extent.y), stripeTopColor);
+			_mesh[i * 6 + 5] = sb::Vertex(sb::Vector2f(stripeRight, +extent.y), stripeTopColor);
+		}
 	}
 
-	void update(sb::Camera& camera) {
-		static sb::Color bottomColor = createColor(252, 182, 159);
-		static sb::Color topColor = createColor(255, 236, 210);
-		sb::Vector2f extent(camera.getWidth() * 0.5f, camera.getWidth() * camera.getInverseAspectRatio() * 0.5f);
-		_mesh[0] = sb::Vertex(sb::Vector2f(-extent.x, -extent.y), bottomColor);
-		_mesh[1] = sb::Vertex(sb::Vector2f(+extent.x, -extent.y), bottomColor);
-		_mesh[2] = sb::Vertex(sb::Vector2f(-extent.x, +extent.y), topColor);
-		_mesh[3] = sb::Vertex(sb::Vector2f(+extent.x, +extent.y), topColor);
+public:
+	StripedQuad(size_t numStripes = 1, float alpha = 0.04f) : _mesh(6 * numStripes, sb::PrimitiveType::TriangleStrip), 
+		_numStripes(numStripes), _alpha(alpha)
+	{
+		createMesh(sb::Vector2f(0.5f, 0.5f));
 	}
 
 	virtual void draw(sb::DrawTarget& target, sb::DrawStates states) {
@@ -4019,7 +4038,10 @@ public:
 
 void demo76() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
-	Background background;
+	Background2 background;
+	StripedQuad stripes(5);
+
+	stripes.setScale(1, 2);
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -4029,11 +4051,11 @@ void demo76() {
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(background);
+		window.draw(stripes);
 
 		window.display();
 	}
 }
-
 
 // background with stripes
 
