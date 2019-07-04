@@ -131,13 +131,13 @@ inline sb::Color colorFromRgba(unsigned char r, unsigned char g, unsigned char b
     return sb::Color(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
 }
 
-class Border : public sb::Drawable, public sb::Transformable {
+class Border2 : public sb::Drawable, public sb::Transformable {
 private:
     sb::Mesh _mesh;
     float _height;
 
 public:
-    Border(float height, float thickness)
+    Border2(float height, float thickness)
         : _mesh(10, sb::PrimitiveType::TriangleStrip), _height(height) {
         sb::Vector2f extent(0.5f, height / 2);
         sb::Color innerColor = colorFromRgba(143, 211, 244);
@@ -172,7 +172,7 @@ void demo3() {
     float aspect = 3 / 2.0f;
     sb::Window window(400, int(400 * aspect));
     sb::Mesh background(4, sb::PrimitiveType::TriangleStrip);
-    Border border(0.9f * getCameraHeight(window.getCamera()), 0.01f);
+    Border2 border(0.9f * getCameraHeight(window.getCamera()), 0.01f);
 
     init1(background, window.getCamera());
     border.attachToTop(window.getCamera());
@@ -1125,8 +1125,13 @@ namespace {
         return sw.getElapsedSeconds();
     }
 
+    static float lastElapsed = 0;
+
+	void resetDeltaSeconds() {
+		lastElapsed = getSeconds();
+	}
+
     float getDeltaSeconds() {
-        static float lastElapsed = 0;
         float elapsed = getSeconds();
         float delta = elapsed - lastElapsed;
         lastElapsed = elapsed;
@@ -1502,12 +1507,43 @@ public:
 	}
 };
 
+class Border : public sb::Drawable, public sb::Transformable {
+private:
+	sb::Mesh _mesh;
+
+public:
+	Border(float thickness, float height = 1, bool addThicknessToSize = false, 
+		const sb::Color& innerColor = createColor(236, 140, 105, 100), 
+		const sb::Color& outerColor = createColor(237, 110, 160, 100))
+		: _mesh(10, sb::PrimitiveType::TriangleStrip)
+	{
+		sb::Vector2f extent(0.5f, height / 2);
+		extent = addThicknessToSize ? extent + sb::Vector2f(thickness / 2) : extent;
+		_mesh[0] = sb::Vertex(sb::Vector2f(-extent.x, -extent.y), outerColor);
+		_mesh[1] = sb::Vertex(sb::Vector2f(-extent.x + thickness, -extent.y + thickness), innerColor);
+		_mesh[2] = sb::Vertex(sb::Vector2f(+extent.x, -extent.y), outerColor);
+		_mesh[3] = sb::Vertex(sb::Vector2f(+extent.x - thickness, -extent.y + thickness), innerColor);
+		_mesh[4] = sb::Vertex(sb::Vector2f(+extent.x, +extent.y), outerColor);
+		_mesh[5] = sb::Vertex(sb::Vector2f(+extent.x - thickness, +extent.y - thickness), innerColor);
+		_mesh[6] = sb::Vertex(sb::Vector2f(-extent.x, +extent.y), outerColor);
+		_mesh[7] = sb::Vertex(sb::Vector2f(-extent.x + thickness, +extent.y - thickness), innerColor);
+		_mesh[8] = sb::Vertex(sb::Vector2f(-extent.x, -extent.y), outerColor);
+		_mesh[9] = sb::Vertex(sb::Vector2f(-extent.x + thickness, -extent.y + thickness), innerColor);
+	}
+
+	virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
+		states.transform *= getTransform();
+		target.draw(_mesh.getVertices(), _mesh.getPrimitiveType(), states);
+	}
+};
+
 class Board : public sb::Drawable, public sb::Transformable {
 	sb::DrawBatch _batch;
 	sb::Vector2i _boardSize;
 
 	Grid _grid;
 	StripedQuad _stripes;
+	Border _border;
 	bool _isGridEnabled;
 	std::vector<Block> _blocks;
 	Light _light;
@@ -1515,7 +1551,7 @@ class Board : public sb::Drawable, public sb::Transformable {
 	bool _hasTetromino;
 	float _stepIntervalInSeconds;
 	float _secondsSinceLastStep;
-	bool _isDead;
+	bool _isFull;
 	size_t _linesCleared;
 	bool _isAutodropEnabled;
 
@@ -1529,17 +1565,11 @@ protected:
 		_hasTetromino = true;
 	}
 
-	void death() {
-		std::cout << "You, sir, are a dead man!" << std::endl;
-		_hasTetromino = false;
-		_isDead = true;
-	}
-
 	void createRandomTetromino() {
 		const std::vector<char> types = Tetromino::getTypes();
 		createTetromino(types[rand() % types.size()]);
 		if (isInvalid(_tetromino))
-			death();
+			die();
 	}
 
 	sb::Vector2f boardToWorldPosition(const sb::Vector2i& boardPos) {
@@ -1746,11 +1776,13 @@ protected:
 public:
 	Board(const sb::Vector2i& boardSize) 
 		: _batch(1024), _boardSize(boardSize), _grid(boardSize, 0.01f), _stripes(boardSize.x, 0.03f),
-		_isGridEnabled(false), _hasTetromino(false), _stepIntervalInSeconds(0.5f), 
-		_secondsSinceLastStep(0), _isDead(false), _linesCleared(0), _isAutodropEnabled(true)
+		_border(0.005f, boardSize.y / (float)boardSize.x, true), _isGridEnabled(false), _hasTetromino(false), 
+		_stepIntervalInSeconds(0.5f), _secondsSinceLastStep(0), _isFull(false), _linesCleared(0), _isAutodropEnabled(true)
 	{
 		_stripes.setScale(1, boardSize.y / (float)boardSize.x);
 	}
+
+	inline bool isDead() const { return _isFull; }
 
 	inline bool hasTetromino() const { return _hasTetromino; }
 
@@ -1779,6 +1811,12 @@ public:
 	inline void enableAutodrop(bool enable) { _isAutodropEnabled = enable; }
 
 	inline void setStepInterval(float dropIntervalInSeconds) { _stepIntervalInSeconds = dropIntervalInSeconds; }
+
+	void die() {
+		std::cout << "You, sir, are a dead man!" << std::endl;
+		_hasTetromino = false;
+		_isFull = true;
+	}
 
 	void createBlock(char type, const sb::Vector2i& position) {
 		Block block(type);
@@ -1888,7 +1926,7 @@ public:
 	void update(float ds) {
 		updateEntities(ds);
 
-		if (!_isDead) {
+		if (!_isFull) {
 			step(_tetromino, ds);
 		}
 	}
@@ -1915,6 +1953,8 @@ public:
 			target.draw(_batch);
 			_tetromino.drawCollisionEffect(target, states);
 		}
+
+		target.draw(_border, states);
 	}
 };
 
@@ -3547,13 +3587,20 @@ void inputComplete(sb::Window& window, Board& board, float ds) {
 	touchInputComplete(window, board, ds);
 }
 
+void updateSceneComplete(Board& board) {
+	if (board.isDead()) {
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "You lost the game", "You lost the game, press OK to try again", NULL);
+		resetDeltaSeconds();
+		board = Board(board.getBoardSize());
+	}
+}
+
 void complete() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
 	Backdrop backdrop;
 	Board board(sb::Vector2i(10, 14));
 
 	adjustCameraToBoard(window.getCamera(), board);
-	//board.showGrid(true);
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -3561,12 +3608,14 @@ void complete() {
 		window.update();
 		backdrop.update(window.getCamera());
 		board.update(ds);
+		updateSceneComplete(board);
 
 		inputComplete(window, board, ds);
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(backdrop);
-		window.draw(board);
+		sb::Transform test;
+		window.draw(board, test);
 		window.display();
 	}
 }
@@ -4028,7 +4077,6 @@ void demo75() {
 	Backdrop background;
 
 	while (window.isOpen()) {
-		float ds = getDeltaSeconds();
 		sb::Input::update();
 		window.update();
 		background.update(window.getCamera());
@@ -4052,7 +4100,6 @@ void demo76() {
 	stripes.setScale(1, 2);
 
 	while (window.isOpen()) {
-		float ds = getDeltaSeconds();
 		sb::Input::update();
 		window.update();
 		Backdrop.update(window.getCamera());
@@ -4060,14 +4107,65 @@ void demo76() {
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(Backdrop);
 		window.draw(stripes);
+		window.display();
+	}
+}
+
+void demo77() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Backdrop backdrop; 
+	Border border(0.01f);
+
+	while (window.isOpen()) {
+		sb::Input::update();
+		window.update();
+		backdrop.update(window.getCamera());
+
+		window.clear();
+		window.draw(backdrop);
+		window.draw(border);
+		window.display();
+	}
+}
+
+void updateScene(Board& board) {
+	if (board.isDead()) {
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "You lost the game", "You lost the game, press OK to try again", NULL);
+		resetDeltaSeconds();
+		board = Board(board.getBoardSize());
+	}
+}
+
+void demo78() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Board board(sb::Vector2i(10, 10));
+
+	adjustCameraToBoard(window.getCamera(), board);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		board.update(ds);
+		updateScene(board);
+	
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::d)) {
+			board.die();
+		}
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(board);
 
 		window.display();
 	}
 }
 
 void demo() {
-
 	complete();
+
+	//demo78();
+
+	//demo77();
 
 	//demo76();
 

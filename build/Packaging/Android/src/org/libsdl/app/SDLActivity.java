@@ -123,8 +123,6 @@ public class SDLActivity extends Activity {
         Log.v(TAG, "onCreate(): " + mSingleton);
         super.onCreate(savedInstanceState);
 
-
-
         SDLActivity.initialize();
         // So we can call stuff from static callbacks
         mSingleton = this;
@@ -180,15 +178,8 @@ public class SDLActivity extends Activity {
 
         setContentView(mLayout);
 
-		int iFlags = 
-            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
-            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
-            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
-            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-            View.SYSTEM_UI_FLAG_FULLSCREEN;
-
-        getWindow().getDecorView().setSystemUiVisibility(iFlags);     
-        
+		enableImmersiveMode();
+	
         // Get filename from "Open with" of another application
         Intent intent = getIntent();
 
@@ -202,7 +193,20 @@ public class SDLActivity extends Activity {
 
 		Audio.init(this);
     }
-
+	
+	protected void enableImmersiveMode() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+            );
+        }
+    }
+	
     // Events
     @Override
     protected void onPause() {
@@ -253,6 +257,7 @@ public class SDLActivity extends Activity {
         SDLActivity.mHasFocus = hasFocus;
         if (hasFocus) {
             SDLActivity.handleResume();
+			enableImmersiveMode();
         }
     }
 
@@ -833,7 +838,7 @@ public class SDLActivity extends Activity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                showDialog(dialogs++, args);
+                showDialog(dialogs++, args);  
             }
         });
 
@@ -849,7 +854,6 @@ public class SDLActivity extends Activity {
         }
 
         // return selected value
-
         return messageboxSelection[0];
     }
 
