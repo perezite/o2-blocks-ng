@@ -642,6 +642,8 @@ public:
 		getTexture().enableMipmap(true);
 	}
 
+	inline bool isPlaying() const { return _state == State::Playing; }
+
 	virtual void update(float ds) {
 		ParticleSystem::update(ds);
 		if (_state == State::Playing) {
@@ -756,6 +758,8 @@ public:
 	inline TransformEffects2& getEffects2() { SB_WARNING("Obsolete!") ; return _effects2; }
 
 	inline TransformEffects& getEffects() { return _effects; }
+
+	inline const BlockCollisionEffect& getCollisionEffect() const { return _collisionEffect; }
 
 	inline BlockCollisionEffect& getCollisionEffect() { return _collisionEffect; }
 	
@@ -874,6 +878,7 @@ sb::FloatRect getTransformedBounds(sb::FloatRect& bounds, const sb::Transform& t
 }
 
 class Tetromino : public sb::Drawable, public sb::Transformable {
+private:
 	char _type;
     std::vector<Block> _blocks;
     std::vector<sb::Vector2i> _blockPositions;
@@ -1011,6 +1016,15 @@ public:
         setType(type);
     }
 
+	bool isCollisionEffectPlaying() const {
+		for (size_t i = 0; i < _blocks.size(); i++) {
+			if (_blocks[i].getCollisionEffect().isPlaying())
+				return true;
+		}
+
+		return false;
+	}
+
 	inline TransformEffects& getEffects() { return _effects; }
 
 	inline TransformEffects2& getEffects2() { SB_WARNING("obsolete"); return _effects2; }
@@ -1068,7 +1082,6 @@ public:
 			_blocks[i].update(ds);
 
 		_effects.update(ds);
-		//_effects2.update(ds);
 	}
 
 	void drawCollisionEffect(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
@@ -1554,6 +1567,7 @@ class Board : public sb::Drawable, public sb::Transformable {
 	bool _isFull;
 	size_t _linesCleared;
 	bool _isAutodropEnabled;
+	std::vector<Tetromino> _dyingTetrominoes;
 
 protected:
 
@@ -1642,6 +1656,7 @@ protected:
 		char type = tetromino.getType();
 		const std::vector<sb::Vector2f> blockPositions = tetromino.getBlockPositions();
 		_hasTetromino = false;
+		_dyingTetrominoes.push_back(_tetromino);
 
 		for (size_t i = 0; i < blockPositions.size(); i++) {
 			sb::Vector2i boardPosition = worldToBoardPosition(blockPositions[i]);
@@ -1743,8 +1758,14 @@ protected:
 		return block.getState() == Block::State::Garbage; 
 	}
 
+
+	static bool isTetrominoGarbage(Tetromino& tetromino) {
+		return !tetromino.isCollisionEffectPlaying();
+	}
+
 	void dispose() {
 		_blocks.erase(std::remove_if(_blocks.begin(), _blocks.end(), isGarbage), _blocks.end());	
+		_dyingTetrominoes.erase(std::remove_if(_dyingTetrominoes.begin(), _dyingTetrominoes.end(), isTetrominoGarbage), _dyingTetrominoes.end());
 	}
 
 	void bounceBy(Block& block, const sb::Vector2i& translation, float duration = 0.5f) {
@@ -1921,6 +1942,11 @@ public:
 			_tetromino.update(ds);
 		else
 			createRandomTetromino();
+
+		for (size_t i = 0; i < _dyingTetrominoes.size(); i++)
+			_dyingTetrominoes[i].update(ds);
+
+		std::cout << _dyingTetrominoes.size() << std::endl;
 	}
 
 	void update(float ds) {
@@ -1953,6 +1979,9 @@ public:
 			target.draw(_batch);
 			_tetromino.drawCollisionEffect(target, states);
 		}
+
+		for (size_t i = 0; i < _dyingTetrominoes.size(); i++)
+			_dyingTetrominoes[i].drawCollisionEffect(target, states);
 
 		target.draw(_border, states);
 	}
