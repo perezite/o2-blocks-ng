@@ -5,9 +5,15 @@
 
 namespace sb
 {
+	void ParticleSystem::setEmissionDirection(const sb::Vector2f& emissionVector)
+	{
+		SB_ERROR_IF(_emissionType != EmissionType::Directional, "Emission type must be directional to specify an emission direction");
+		_emissionDirection = emissionVector.normalized();
+	}
+
 	void ParticleSystem::setEmissionRatePerSecond(float rate)
 	{
-		_secondsSinceLastEmission = rate == 0 ? 0 : 1 / rate;
+		//_secondsSinceLastEmission = rate == 0 ? 0 : 1 / rate;
 		_emissionRatePerSecond = rate;
 	}
 
@@ -179,8 +185,14 @@ namespace sb
 
 	Vector2f ParticleSystem::getDirection(Particle& particle) 
 	{
-		bool randomDirection = _hasRandomEmissionDirection || _emission.getShape().getBoundingRadius() < 0.0001f;
-		return randomDirection ? randomOnCircle(1) : (particle.getPosition() - getPosition()).normalized();
+		sb::Vector2f srection;
+		bool randomDirection = _emissionType == EmissionType::Random || _emission.getShape().getBoundingRadius() < 0.0001f;
+		if (randomDirection)
+			return randomOnCircle(1);
+		else if (_emissionType == EmissionType::Concentric)
+			return (particle.getPosition() - getPosition()).normalized();
+		else
+			return _emissionDirection;
 	}
 
 	void ParticleSystem::initParticle(Particle& particle) 

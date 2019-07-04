@@ -17,7 +17,6 @@
 namespace sb
 {
 	class ParticleSystem : public Drawable, public Body {
-
 		struct Particle : public Body {
 			std::vector<Color> startVertexColors = std::vector<Color>(4);
 			std::vector<Color> vertexColors = std::vector<Color>(4);
@@ -105,6 +104,8 @@ namespace sb
 		};
 
 	public:
+		enum class EmissionType { Concentric, Random, Directional };
+
 		ParticleSystem(std::size_t maxNumParticles)
 			: _mesh(maxNumParticles * 6, PrimitiveType::TriangleStrip), _texture(NULL),
 			_particles(maxNumParticles), _numActiveParticles(0),
@@ -113,7 +114,8 @@ namespace sb
 			_particleDrag(0), _angularParticleDrag(0), _particleIntertia(1), _particleLifetimeRange(1, 1),
 			_particleSizeRange(0.1f, 0.1f), _particleRotationRange(0, 0), _particleSpeedRange(1, 1),
 			_particleVertexColors(4, Color(1, 1, 1, 1)), _hasParticleColorChannelsOverLifetime(4, false), 
-			_particleColorChannelsOverLifetime(4), _hasParticleScaleOverLifetime(false), _hasRandomEmissionDirection(false)
+			_particleColorChannelsOverLifetime(4), _hasParticleScaleOverLifetime(false), 
+			_emissionType(EmissionType::Concentric), _emissionDirection(1, 0)
 		{ }
 
 		inline float getEmissionRatePerSecond() const { return _emissionRatePerSecond; }
@@ -144,7 +146,9 @@ namespace sb
 
 		inline void hasLifetime(bool hasLifetime) { _hasLifetime = hasLifetime; }
 
-		inline void hasRandomEmissionDirection(bool hasRandomEmission) { _hasRandomEmissionDirection = hasRandomEmission; }
+		inline void setEmissionDirection(EmissionType direction) { _emissionType = direction; }
+
+		void setEmissionDirection(const sb::Vector2f& emissionVector);
 
 		template <class T>
 		inline void setEmissionShape(const T& shape) { _emission.setShape(shape); }
@@ -267,7 +271,8 @@ namespace sb
 		bool _hasParticleScaleOverLifetime;
 		Tweenf _particleScaleOverLifetime;
 		Emission _emission;
-		bool _hasRandomEmissionDirection;
+		EmissionType _emissionType;
+		sb::Vector2f _emissionDirection;
 
 		Pool _pool;
 	};

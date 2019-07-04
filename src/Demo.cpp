@@ -530,28 +530,30 @@ sb::Color createColor(int r, int g = 255, int b = 255, int a = 255) {
 	return sb::Color(r / 255.f, g / 255.f, b / 255.f, a / 255.f);
 }
 
+std::map<char, sb::Color>& getBlockColors() {
+	static const int alpha = 200;
+	static std::map<char, sb::Color> colors = {
+		{ 'i', createColor(0, 240, 240, alpha) },
+		{ 'j', createColor(0, 0, 240, alpha) },
+		{ 'l', createColor(240, 160, 0, alpha) },
+		{ 'o', createColor(240, 240, 0, alpha) },
+		{ 's', createColor(0, 240, 0, alpha) },
+		{ 't', createColor(160, 0, 240, alpha) },
+		{ 'z', createColor(240, 0, 0, alpha) }
+	};
+
+	return colors;
+}
+
+inline sb::Color& getBlockColor(char type) { return getBlockColors()[type]; }
+
 class BlockExplosion : public sb::ParticleSystem {
 	bool _isActive;
 
 protected:
 	static sb::Texture& getTexture() {
-		static sb::Texture texture("Textures/SimpleParticle.png");
+		static sb::Texture texture("Textures/Particle1.png");
 		return texture;
-	}
-
-	static std::map<char, sb::Color>& getColors() {
-		static const int alpha = 200;
-		static std::map<char, sb::Color> colors = {
-			{ 'i', createColor(0, 240, 240, alpha) },
-			{ 'j', createColor(0, 0, 240, alpha) },
-			{ 'l', createColor(240, 160, 0, alpha) },
-			{ 'o', createColor(240, 240, 0, alpha) },
-			{ 's', createColor(0, 240, 0, alpha) },
-			{ 't', createColor(160, 0, 240, alpha) },
-			{ 'z', createColor(240, 0, 0, alpha) }
-		};
-
-		return colors;
 	}
 
 public:
@@ -561,7 +563,7 @@ public:
 		setEmissionRatePerSecond(0);
 		setParticleLifetimeRange(2.f * sb::Vector2f(0.1f, 1));
 		setParticleSpeedRange(sb::Vector2f(0.1f, 3));
-		hasRandomEmissionDirection(true);
+		setEmissionDirection(sb::ParticleSystem::EmissionType::Random);
 		setParticleSizeRange(sb::Vector2f(0.01f, 0.25f));
 		setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
 		getTexture().enableMipmap(true);
@@ -574,7 +576,7 @@ public:
 
 	void setType(char type) {
 		type = tolower(type);
-		setParticleColor(getColors()[type]);
+		setParticleColor(getBlockColor(type));
 	}
 
 	virtual void update(float ds) {
@@ -603,7 +605,7 @@ private:
 
 protected:
 	static sb::Texture& getTexture() {
-		static sb::Texture texture("Textures/SimpleParticle.png");
+		static sb::Texture texture("Textures/Particle1.png");
 		return texture;
 	}
 
@@ -632,7 +634,7 @@ public:
 		setLifetime(0.5f);
 		setEmissionRatePerSecond(0);
 		setEmissionShape(sb::Box(1, 0.01f));
-		hasRandomEmissionDirection(true);
+		setEmissionDirection(sb::ParticleSystem::EmissionType::Random);
 		setParticleLifetimeRange(2.f * sb::Vector2f(0.1f, 0.5f));
 		setParticleSpeedRange(sb::Vector2f(0.1f, 1));
 		setParticleSizeRange(1.f * sb::Vector2f(0.01f, 0.13f));
@@ -1043,6 +1045,8 @@ public:
 
 		return blockPositions;
 	}
+
+	inline const sb::Color& getColor() const { return getBlockColor(_type); }
 
 	void setColor(const sb::Color& color) {
 		for (size_t i = 0; i < _blocks.size(); i++)
@@ -3279,7 +3283,7 @@ void demo54() {
 	sb::ParticleSystem particleSystem(1024);
 
 	initColors54(colors);
-	texture.loadFromAsset("Textures/SimpleParticle.png");
+	texture.loadFromAsset("Textures/Particle1.png");
 	texture.enableMipmap(true);
 	init54(particleSystem, texture, colors[0]);
 
@@ -3306,7 +3310,7 @@ void init55(sb::ParticleSystem& particleSystem, sb::Texture& texture, sb::Color&
 	particleSystem.setEmissionRatePerSecond(0);
 	particleSystem.setParticleLifetimeRange(2.f * sb::Vector2f(0.1f, 1));
 	particleSystem.setParticleSpeedRange(sb::Vector2f(0.1f, 1));
-	particleSystem.hasRandomEmissionDirection(true);
+	particleSystem.setEmissionDirection(sb::ParticleSystem::EmissionType::Random);
 	particleSystem.setParticleSizeRange(sb::Vector2f(0.01f, 0.13f));
 	particleSystem.setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
 	particleSystem.setParticleColor(color);
@@ -3332,7 +3336,7 @@ void demo55() {
 	sb::Color color = createColor(0, 0, 240, 150);
 	Block block('j');
 
-	texture.loadFromAsset("Textures/SimpleParticle.png");
+	texture.loadFromAsset("Textures/Particle1.png");
 	texture.enableMipmap(true);
 	init55(particleSystem, texture, color);
 	float factor = 0.5f;
@@ -3652,7 +3656,7 @@ void complete() {
 void init61(sb::ParticleSystem& system) {
 	system.setEmissionRatePerSecond(0);
 	system.setEmissionShape(sb::Box(1, 0.01f));
-	system.hasRandomEmissionDirection(true);
+	system.setEmissionDirection(sb::ParticleSystem::EmissionType::Random);
 	system.setParticleLifetimeRange(2.f * sb::Vector2f(0.1f, 1));
 	system.setParticleSpeedRange(sb::Vector2f(0.1f, 1));
 	system.setParticleSizeRange(0.5f * sb::Vector2f(0.01f, 0.13f));
@@ -3670,7 +3674,7 @@ void demo61() {
 	sb::Texture texture;
 	sb::ParticleSystem particleSystem(512);
 
-	texture.loadFromAsset("Textures/SimpleParticle.png");
+	texture.loadFromAsset("Textures/Particle1.png");
 	texture.enableMipmap(true);
 	particleSystem.setTexture(texture);
 	particleSystem.setScale(0.2f);
@@ -3694,7 +3698,7 @@ void demo62() {
 	sb::ParticleSystem particleSystem(512);
 	Block block;
 
-	texture.loadFromAsset("Textures/SimpleParticle.png");
+	texture.loadFromAsset("Textures/Particle1.png");
 	texture.enableMipmap(true);
 	particleSystem.setTexture(texture);
 	particleSystem.setScale(0.2f);
@@ -4189,8 +4193,94 @@ void demo78() {
 	}
 }
 
+void init79(sb::ParticleSystem& particleSystem, sb::Texture& texture, const sb::Color& color) {
+	particleSystem.setTexture(texture);
+	particleSystem.setEmissionRatePerSecond(5);
+	particleSystem.setParticleSizeRange(0.8f * sb::Vector2f(0.1f, 0.13f));
+	particleSystem.setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
+	particleSystem.setParticleColor(color);
+	particleSystem.setEmissionShape(sb::Box(0.5f, 0.01f));
+	particleSystem.setEmissionDirection(sb::ParticleSystem::EmissionType::Directional);
+	particleSystem.setEmissionDirection(sb::Vector2f(0, 1));
+	particleSystem.setScale(0.3f);
+}
+
+void demo79() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	sb::Texture texture;
+	sb::ParticleSystem particleSystem(1024);
+
+	texture.loadFromAsset("Textures/Particle2.png");
+	texture.enableMipmap(true);
+	init79(particleSystem, texture, createColor(255, 0, 0));
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		particleSystem.update(ds);
+		if (sb::Input::isTouchDown(1)) 
+			particleSystem.setPosition(sb::Input::getTouchPosition(window));
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(particleSystem);
+
+		window.display();
+	}
+}
+
+void attachEmitter(Tetromino& tetromino, sb::ParticleSystem& emitter) {
+	sb::FloatRect bounds = tetromino.getBounds();
+	emitter.setPosition(bounds.left + 0.5f * bounds.width, bounds.top());
+	float emitterWidth = bounds.width / 0.3f;
+	emitter.setEmissionShape(sb::Box(emitterWidth, 0.001f));
+	emitter.setEmissionRatePerSecond(emitterWidth * 5);
+}
+
+void demo80() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	sb::Texture texture;
+	sb::ParticleSystem emitter(1024);
+	Tetromino tetromino('i');
+
+	texture.loadFromAsset("Textures/Particle2.png");
+	texture.enableMipmap(true);
+	init79(emitter, texture, tetromino.getColor());
+	emitter.setEmissionShape(sb::Box(1, 0.001f));
+	tetromino.setScale(0.1f);
+	attachEmitter(tetromino, emitter);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		emitter.update(ds);
+		tetromino.update(ds);
+
+		if (sb::Input::isTouchDown(1)) {
+			tetromino.setPosition(sb::Input::getTouchPosition(window));
+			attachEmitter(tetromino, emitter);
+		}
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::Up)) {
+			tetromino.getEffects().spinBy(-90 * sb::ToRadian, tetromino);
+			attachEmitter(tetromino, emitter);
+		}
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(tetromino);
+		window.draw(emitter);
+		drawOutline(window, tetromino.getBounds());
+
+		window.display();
+	}
+}
+
 void demo() {
-	complete();
+	//complete();
+
+	demo80();
+
+	//demo79();
 
 	//demo78();
 
