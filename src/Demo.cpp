@@ -4319,9 +4319,15 @@ protected:
 	void updateEmitter(const sb::FloatRect& bounds) {
 		if (_counter % 15 == 0) {
 			setPosition(bounds.left + 0.5f * bounds.width, bounds.top());
-			float emitterWidth = bounds.width * 5;
-			setEmissionShape(sb::Box(emitterWidth, 0.001f));
-			setEmissionRatePerSecond(emitterWidth * 5);
+			float maxLength = std::max(bounds.width, bounds.height);
+			setScale(maxLength);
+			setEmissionShape(sb::Box(bounds.width / maxLength, 0.01f));
+
+			float maxRatio = maxLength / std::min(bounds.width, bounds.height);
+			float maxFactor = maxRatio / 1.5f;
+			float factor = (bounds.width / maxLength) * maxFactor;
+			setEmissionRatePerSecond(factor * 5);
+			std::cout << factor * 5 << std::endl;
 		}
 
 		_counter++;
@@ -4332,9 +4338,9 @@ public:
 		setTexture(getTexture());
 		setParticleColor(color);
 		setEmissionRatePerSecond(5);
-		setParticleSizeRange(0.8f * sb::Vector2f(0.1f, 0.13f));
+		setParticleSizeRange(0.5f * sb::Vector2f(0.1f, 0.13f));
 		setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
-		setEmissionShape(sb::Box(0.5f, 0.01f));
+		setEmissionShape(sb::Box(1, 0.01f));
 		setEmissionDirection(sb::ParticleSystem::EmissionType::Directional);
 		setEmissionDirection(sb::Vector2f(0, 1));
 		setScale(0.3f);
@@ -4352,11 +4358,14 @@ public:
 
 void demo82() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
-	Tetromino tetromino('j');
+	Light light;
+	Tetromino tetromino('i');
 	BubbleEffect emitter(1024, tetromino.getColor());
 
+	//window.getCamera().setWidth(10);
+	//tetromino.setScale(1);
 	tetromino.setScale(0.1f);
-	emitter.setScale(0.2f);
+	tetromino.setLight(light);
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -4364,11 +4373,9 @@ void demo82() {
 		window.update();
 		if (sb::Input::isTouchDown(1))
 			tetromino.setPosition(sb::Input::getTouchPosition(window));
-		tetromino.update(ds);
-		if (sb::Input::isKeyGoingDown(sb::KeyCode::Up)) {
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::Up))
 			tetromino.getEffects().spinBy(-90 * sb::ToRadian, tetromino);
-			attachEmitter(tetromino, emitter);
-		}
+		tetromino.update(ds);
 		emitter.update(tetromino, ds);
 
 		window.clear(sb::Color(1, 1, 1, 1));
