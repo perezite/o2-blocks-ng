@@ -10,6 +10,7 @@
 #include "Tween.h"
 #include "ParticleSystem.h"
 #include "Box.h"
+#include "Music.h"
 #include <cstddef>
 #include <vector>
 #include <map>
@@ -4492,8 +4493,28 @@ void demo85() {
 	}
 }
 
+void demo86() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	sb::Music music;
+
+	music.loadFromAsset("Music/BackgroundMusic.ogg");
+	music.setLooping(true);
+	music.play();
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.display();
+	}
+}
+
 void demo() {
-	complete();
+	//complete();
+
+	demo86();
 
 	//demo85();
 
