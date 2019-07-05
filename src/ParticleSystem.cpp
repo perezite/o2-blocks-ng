@@ -76,17 +76,12 @@ namespace sb
 		return found;
 	}
 
-	bool ParticleSystem::isAlive() 
-	{
-		return !_hasLifetime || _secondsSinceBirth < _lifetime || _pool.getNumActiveItems() > 0 
-			|| _numActiveParticles > 0 || hasUnemittedBursts();
-	}
-
 	void ParticleSystem::die()
 	{
 		setLifetime(0);
 		setEmissionRatePerSecond(0);
 		clearBursts();
+		_state = State::Dying;
 	}
 
 	void ParticleSystem::reset()
@@ -113,6 +108,7 @@ namespace sb
 	{
 		_secondsSinceBirth += ds;
 	
+		updateState();
 		updateParticleSystem(ds);
 		updateParticles(ds);
 		updateSubSystems(ds);
@@ -121,11 +117,25 @@ namespace sb
 	}
 
 	void ParticleSystem::draw(DrawTarget& target, DrawStates states) {
-		if (isAlive()) {
+		if (isPlaying()) {
 			states.texture = _texture;
 			target.draw(_mesh.getVertices(), _mesh.getPrimitiveType(), states);
 			drawSubSystems(target, states);
 		}
+	}
+
+	bool ParticleSystem::isPlaying()
+	{
+		return !_hasLifetime || _secondsSinceBirth < _lifetime || _pool.getNumActiveItems() > 0
+			|| _numActiveParticles > 0 || hasUnemittedBursts();
+	}
+
+	void ParticleSystem::updateState()
+	{
+		if (_state == State::Alive)
+			updateAlive();
+		if (_state == State::Dying)
+			updateDying();
 	}
 
 	void ParticleSystem::updateParticleSystem(float ds)
@@ -358,7 +368,7 @@ namespace sb
 	void ParticleSystem::updateParticles(float ds)
 	{
 		removeDeadParticles();
-		if (isAlive()) {
+		if (isPlaying()) {
 			emitParticles(ds);
 			emitBursts(ds);
 			transformParticles(ds);
@@ -375,6 +385,18 @@ namespace sb
 			if (poolItems[i].isActive)
 				poolItems[i].particleSystem->update(ds);
 		}
+	}
+
+	void ParticleSystem::updateAlive()
+	{
+		if (!isPlaying())
+			_state = State::Garbage;
+	}
+
+	void ParticleSystem::updateDying()
+	{
+		if (!isPlaying())
+			_state = State::Garbage;
 	}
 
 	void ParticleSystem::drawSubSystems(DrawTarget& target, DrawStates& states)
@@ -436,7 +458,7 @@ namespace sb
 	void ParticleSystem::Pool::update()
 	{
 		for (std::size_t i = 0; i < _items.size(); i++) {
-			if (_items[i].isActive && !_items[i].particleSystem->isAlive()) {
+			if (_items[i].isActive && !_items[i].particleSystem->isPlaying()) {
 				_items[i].isActive = false;
 				_numActiveItems--;
 			}

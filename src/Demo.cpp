@@ -582,7 +582,7 @@ public:
 	virtual void update(float ds) {
 		if (_isActive) {
 			ParticleSystem::update(ds);
-			if (!isAlive())
+			if (!isPlaying())
 				_isActive = false;
 		}
 	}
@@ -649,7 +649,7 @@ public:
 	virtual void update(float ds) {
 		ParticleSystem::update(ds);
 		if (_state == State::Playing) {
-			if (!isAlive())
+			if (!isPlaying())
 				_state = State::Idle;
 		}
 	}
@@ -884,7 +884,59 @@ public:
 	virtual sb::FloatRect getBounds() = 0;
 };
 
+class BubbleEffect : public sb::ParticleSystem {
+	size_t _counter;
+
+protected:
+	static sb::Texture& getTexture() {
+		static sb::Texture texture("Textures/Particle2.png");
+		return texture;
+	}
+
+	void updateEmitter(const sb::FloatRect& bounds, float size) {
+		if ((_counter % 15 == 0) && getState() == sb::ParticleSystem::State::Alive) {
+			setPosition(bounds.left + 0.5f * bounds.width, bounds.top());
+			setScale(size);
+			setEmissionShape(sb::Box(bounds.width / size, 0.01f));
+
+			float maxLength = std::max(bounds.width, bounds.height);
+			float factor = (bounds.width / maxLength);
+			setEmissionRatePerSecond(factor * 5);
+			//std::cout << factor * 5 << std::endl;
+		}
+
+		_counter++;
+	}
+
+public:
+	BubbleEffect(size_t maxParticles, const sb::Color& color) : sb::ParticleSystem(maxParticles), _counter(0) {
+		setTexture(getTexture());
+		setParticleColor(color);
+		setEmissionRatePerSecond(0);
+		setParticleSizeRange(1.5f * sb::Vector2f(0.1f, 0.13f));
+		setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
+		setEmissionShape(sb::Box(1, 0.01f));
+		setEmissionType(sb::ParticleSystem::EmissionType::Directional);
+		setEmissionDirection(sb::Vector2f(0, 1));
+		setParticleSpeedRange(sb::Vector2f(2.5f));
+		setScale(0.3f);
+	}
+
+	void setParticleSize(float size) {
+		setParticleSizeRange(size * sb::Vector2f(0.1f, 0.13f));
+	}
+
+	void update(Boundable& boundable, Transformable& transformable, float ds) {
+		sb::ParticleSystem::update(ds);
+		updateEmitter(boundable.getBounds(), transformable.getScale().x);
+	}
+};
+
+
 class Tetromino : public sb::Drawable, public sb::Transformable, public Boundable {
+public:
+	enum class State { Alive, Dying, Garbage };
+
 private:
 	char _type;
     std::vector<Block> _blocks;
@@ -892,6 +944,8 @@ private:
     sb::IntRect _blockBounds;
 	TransformEffects _effects;
 	TransformEffects2 _effects2;
+	BubbleEffect _bubbleEffect;
+	State _state;
 
 protected:
     void clear() {
@@ -976,6 +1030,7 @@ protected:
 			if (_blockPositions[i].y == y)
 				blocksInRow.push_back(i);
 		}
+
 		return blocksInRow;
 	}
 
@@ -1018,11 +1073,6 @@ protected:
 			return BlockCollisionEffect::Position::Bottom;
 	}
 
-public:
-    Tetromino(char type = 'i') : _effects2(*this) {
-        setType(type);
-    }
-
 	bool isCollisionEffectPlaying() const {
 		for (size_t i = 0; i < _blocks.size(); i++) {
 			if (_blocks[i].getCollisionEffect().isPlaying())
@@ -1031,6 +1081,18 @@ public:
 
 		return false;
 	}
+
+	void updateDying() {
+		if (!isCollisionEffectPlaying() && _bubbleEffect.getState() == sb::ParticleSystem::State::Garbage)
+			_state = State::Garbage;
+	}
+
+public:
+    Tetromino(char type = 'i') : _effects2(*this), _bubbleEffect(256, getBlockColors()[type]), _state(State::Alive) {
+        setType(type);
+    }
+
+	inline State getState() const { return _state; }
 
 	inline TransformEffects& getEffects() { return _effects; }
 
@@ -1078,6 +1140,11 @@ public:
 		return getTransformedBounds(bounds, getTransform());
     }
 
+	void die() {
+		_bubbleEffect.die();
+		_state = State::Dying;
+	}
+
 	void playCollisionEffect(float secondsDelay) {
 		std::vector<size_t> bottomBlocks = getBottomBlocks();
 		BlockCollisionEffect::Position effectPosition = getBlockCollisionEffectPosition();
@@ -1091,6 +1158,10 @@ public:
 			_blocks[i].update(ds);
 
 		_effects.update(ds);
+		_bubbleEffect.update(*this, *this, ds);
+
+		if (_state == State::Dying)
+			updateDying();
 	}
 
 	void drawCollisionEffect(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
@@ -1098,6 +1169,10 @@ public:
 
 		for (size_t i = 0; i < _blocks.size(); i++)
 			_blocks[i].drawCollisionEffect(target, states);
+	}
+
+	void drawBubbleEffect(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
+		target.draw(_bubbleEffect, states);
 	}
 
     virtual void draw(sb::DrawTarget& target, sb::DrawStates states = sb::DrawStates::getDefault()) {
@@ -1665,6 +1740,7 @@ protected:
 		char type = tetromino.getType();
 		const std::vector<sb::Vector2f> blockPositions = tetromino.getBlockPositions();
 		_hasTetromino = false;
+		tetromino.die();
 		_dyingTetrominoes.push_back(_tetromino);
 
 		for (size_t i = 0; i < blockPositions.size(); i++) {
@@ -1769,7 +1845,7 @@ protected:
 
 
 	static bool isTetrominoGarbage(Tetromino& tetromino) {
-		return !tetromino.isCollisionEffectPlaying();
+		return tetromino.getState() == Tetromino::State::Garbage;
 	}
 
 	void dispose() {
@@ -1955,7 +2031,7 @@ public:
 		for (size_t i = 0; i < _dyingTetrominoes.size(); i++)
 			_dyingTetrominoes[i].update(ds);
 
-		std::cout << _dyingTetrominoes.size() << std::endl;
+		//std::cout << _dyingTetrominoes.size() << std::endl;
 	}
 
 	void update(float ds) {
@@ -4298,7 +4374,7 @@ void demo81() {
 		 if (sb::Input::isKeyGoingDown(sb::KeyCode::s))
 			 emitter.die();
 
-		std::cout << emitter.isAlive() << std::endl;
+		std::cout << (int)emitter.getState() << std::endl;
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(emitter);
@@ -4306,54 +4382,6 @@ void demo81() {
 		window.display();
 	}
 }
-
-class BubbleEffect : public sb::ParticleSystem {
-	size_t _counter;
-
-protected:
-	static sb::Texture& getTexture() {
-		static sb::Texture texture("Textures/Particle2.png");
-		return texture;
-	}
-
-	void updateEmitter(const sb::FloatRect& bounds, float size) {
-		if (_counter % 15 == 0) {
-			setPosition(bounds.left + 0.5f * bounds.width, bounds.top());
-			setScale(size);
-			setEmissionShape(sb::Box(bounds.width / size, 0.01f));
-
-			float maxLength = std::max(bounds.width, bounds.height);
-			float factor = (bounds.width / maxLength);
-			setEmissionRatePerSecond(factor * 5);
-			std::cout << factor * 5 << std::endl;
-		}
-
-		_counter++;
-	}
-
-public:
-	BubbleEffect(size_t maxParticles, const sb::Color& color) : sb::ParticleSystem(maxParticles), _counter(0) {
-		setTexture(getTexture());
-		setParticleColor(color);
-		setEmissionRatePerSecond(0);
-		setParticleSizeRange(1.5f * sb::Vector2f(0.1f, 0.13f));
-		setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
-		setEmissionShape(sb::Box(1, 0.01f));
-		setEmissionType(sb::ParticleSystem::EmissionType::Directional);
-		setEmissionDirection(sb::Vector2f(0, 1));
-		setParticleSpeedRange(sb::Vector2f(2.5f));
-		setScale(0.3f);
-	}
-
-	void setParticleSize(float size) {
-		setParticleSizeRange(size * sb::Vector2f(0.1f, 0.13f));
-	}
-
-	void update(Boundable& boundable, Transformable& transformable, float ds) {
-		sb::ParticleSystem::update(ds);
-		updateEmitter(boundable.getBounds(), transformable.getScale().x);
-	}
-};
 
 void demo82() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
@@ -4384,10 +4412,71 @@ void demo82() {
 	}
 }
 
+void demo83() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Light light;
+	Tetromino tetromino('t');
+
+	window.getCamera().setWidth(10);
+	tetromino.setScale(1);
+	//tetromino.setScale(0.1f);
+	tetromino.setLight(light);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		if (sb::Input::isTouchDown(1))
+			tetromino.setPosition(sb::Input::getTouchPosition(window));
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::Up))
+			tetromino.getEffects().spinBy(-90 * sb::ToRadian, tetromino);
+		tetromino.update(ds);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(tetromino);
+		tetromino.drawBubbleEffect(window);
+		window.display();
+	}
+}
+
+void demo84() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Light light;
+	Tetromino tetromino('t');
+
+	window.getCamera().setWidth(10);
+	tetromino.setScale(1);
+	//tetromino.setScale(0.1f);
+	tetromino.setLight(light);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		if (sb::Input::isTouchDown(1))
+			tetromino.setPosition(sb::Input::getTouchPosition(window));
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::Up))
+			tetromino.getEffects().spinBy(-90 * sb::ToRadian, tetromino);
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::d))
+			tetromino.die();
+		tetromino.update(ds);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(tetromino);
+		tetromino.drawBubbleEffect(window);
+		std::cout << (int)tetromino.getState() << std::endl;
+		window.display();
+	}
+}
+
 void demo() {
 	//complete();
 
-	demo82();
+	demo84();
+
+	demo83();
+
+	//demo82();
 
 	//demo81();
 

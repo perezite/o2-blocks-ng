@@ -104,6 +104,7 @@ namespace sb
 		};
 
 	public:
+		enum class State { Alive, Dying, Garbage };
 		enum class EmissionType { Concentric, Random, Directional };
 
 		ParticleSystem(std::size_t maxNumParticles)
@@ -115,7 +116,7 @@ namespace sb
 			_particleSizeRange(0.1f, 0.1f), _particleRotationRange(0, 0), _particleSpeedRange(1, 1),
 			_particleVertexColors(4, Color(1, 1, 1, 1)), _hasParticleColorChannelsOverLifetime(4, false), 
 			_particleColorChannelsOverLifetime(4), _hasParticleScaleOverLifetime(false), 
-			_emissionType(EmissionType::Concentric), _emissionDirection(1, 0)
+			_emissionType(EmissionType::Concentric), _emissionDirection(1, 0), _state(State::Alive)
 		{ }
 
 		inline float getEmissionRatePerSecond() const { return _emissionRatePerSecond; }
@@ -148,6 +149,8 @@ namespace sb
 
 		inline void setEmissionType(EmissionType type) { _emissionType = type; }
 
+		inline State getState() const { return _state; }
+
 		void setEmissionDirection(const sb::Vector2f& emissionDirection);
 
 		template <class T>
@@ -173,8 +176,6 @@ namespace sb
 
 		bool hasUnemittedBursts();
 
-		bool isAlive();
-
 		void die();
 
 		void reset();
@@ -183,14 +184,16 @@ namespace sb
 
 		virtual void draw(DrawTarget& target, DrawStates states = DrawStates::getDefault());
 
-	public:
 		std::string id;
 
 	protected:
+		bool isPlaying();
+
+		void updateState();
 
 		void updateParticleSystem(float ds);
 
-		inline static bool isParticleSystemDead(ParticleSystem* particleSystem) { return !particleSystem->isAlive(); }
+		inline static bool isParticleSystemDead(ParticleSystem* particleSystem) { return !particleSystem->isPlaying(); }
 		
 		static bool isParticleDead(const Particle& particle);
 
@@ -242,6 +245,10 @@ namespace sb
 
 		void updateSubSystems(float ds);
 
+		void updateAlive();
+
+		void updateDying();
+
 		void drawSubSystems(DrawTarget& target, DrawStates& states);
 
 	private:
@@ -275,6 +282,7 @@ namespace sb
 		Emission _emission;
 		EmissionType _emissionType;
 		sb::Vector2f _emissionDirection;
+		State _state;
 
 		Pool _pool;
 	};
