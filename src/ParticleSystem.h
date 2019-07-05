@@ -151,6 +151,8 @@ namespace sb
 
 		inline State getState() const { return _state; }
 
+		bool isPlaying();
+
 		void setEmissionDirection(const sb::Vector2f& emissionDirection);
 
 		template <class T>
@@ -187,8 +189,6 @@ namespace sb
 		std::string id;
 
 	protected:
-		bool isPlaying();
-
 		void updateState();
 
 		void updateParticleSystem(float ds);
@@ -244,8 +244,6 @@ namespace sb
 		void updateParticles(float ds);
 
 		void updateSubSystems(float ds);
-
-		void updateAlive();
 
 		void updateDying();
 

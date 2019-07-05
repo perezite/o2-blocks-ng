@@ -649,7 +649,7 @@ public:
 	virtual void update(float ds) {
 		ParticleSystem::update(ds);
 		if (_state == State::Playing) {
-			if (!isPlaying())
+			if (!sb::ParticleSystem::isPlaying())
 				_state = State::Idle;
 		}
 	}
@@ -1843,7 +1843,6 @@ protected:
 		return block.getState() == Block::State::Garbage; 
 	}
 
-
 	static bool isTetrominoGarbage(Tetromino& tetromino) {
 		return tetromino.getState() == Tetromino::State::Garbage;
 	}
@@ -2063,10 +2062,13 @@ public:
 			_batch.draw(_tetromino, states);
 			target.draw(_batch);
 			_tetromino.drawCollisionEffect(target, states);
+			_tetromino.drawBubbleEffect(target, states);
 		}
 
-		for (size_t i = 0; i < _dyingTetrominoes.size(); i++)
+		for (size_t i = 0; i < _dyingTetrominoes.size(); i++) {
 			_dyingTetrominoes[i].drawCollisionEffect(target, states);
+			_dyingTetrominoes[i].drawBubbleEffect(target, states);
+		}
 
 		target.draw(_border, states);
 	}
@@ -4469,12 +4471,35 @@ void demo84() {
 	}
 }
 
+void demo85() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	BlockCollisionEffect effect(512);
+
+	window.getCamera().setWidth(10);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::c))
+			effect.play(0);
+		effect.update(ds);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(effect);
+		//std::cout << (int)tetromino.getState() << std::endl;
+		window.display();
+	}
+}
+
 void demo() {
-	//complete();
+	complete();
 
-	demo84();
+	//demo85();
 
-	demo83();
+	//demo84();
+
+	//demo83();
 
 	//demo82();
 

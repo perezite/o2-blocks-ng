@@ -5,6 +5,12 @@
 
 namespace sb
 {
+	bool ParticleSystem::isPlaying()
+	{
+		return !_hasLifetime || _secondsSinceBirth < _lifetime || _pool.getNumActiveItems() > 0
+			|| _numActiveParticles > 0 || hasUnemittedBursts();
+	}
+
 	void ParticleSystem::setEmissionDirection(const sb::Vector2f& emissionDirection)
 	{
 		SB_ERROR_IF(_emissionType != EmissionType::Directional, "Emission type must be directional to specify an emission direction");
@@ -124,16 +130,10 @@ namespace sb
 		}
 	}
 
-	bool ParticleSystem::isPlaying()
-	{
-		return !_hasLifetime || _secondsSinceBirth < _lifetime || _pool.getNumActiveItems() > 0
-			|| _numActiveParticles > 0 || hasUnemittedBursts();
-	}
+
 
 	void ParticleSystem::updateState()
 	{
-		if (_state == State::Alive)
-			updateAlive();
 		if (_state == State::Dying)
 			updateDying();
 	}
@@ -385,12 +385,6 @@ namespace sb
 			if (poolItems[i].isActive)
 				poolItems[i].particleSystem->update(ds);
 		}
-	}
-
-	void ParticleSystem::updateAlive()
-	{
-		if (!isPlaying())
-			_state = State::Garbage;
 	}
 
 	void ParticleSystem::updateDying()
