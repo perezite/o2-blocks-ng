@@ -563,7 +563,7 @@ public:
 		setEmissionRatePerSecond(0);
 		setParticleLifetimeRange(2.f * sb::Vector2f(0.1f, 1));
 		setParticleSpeedRange(sb::Vector2f(0.1f, 3));
-		setEmissionDirection(sb::ParticleSystem::EmissionType::Random);
+		setEmissionType(sb::ParticleSystem::EmissionType::Random);
 		setParticleSizeRange(sb::Vector2f(0.01f, 0.25f));
 		setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
 		getTexture().enableMipmap(true);
@@ -634,7 +634,7 @@ public:
 		setLifetime(0.5f);
 		setEmissionRatePerSecond(0);
 		setEmissionShape(sb::Box(1, 0.01f));
-		setEmissionDirection(sb::ParticleSystem::EmissionType::Random);
+		setEmissionType(sb::ParticleSystem::EmissionType::Random);
 		setParticleLifetimeRange(2.f * sb::Vector2f(0.1f, 0.5f));
 		setParticleSpeedRange(sb::Vector2f(0.1f, 1));
 		setParticleSizeRange(1.f * sb::Vector2f(0.01f, 0.13f));
@@ -3315,7 +3315,7 @@ void init55(sb::ParticleSystem& particleSystem, sb::Texture& texture, sb::Color&
 	particleSystem.setEmissionRatePerSecond(0);
 	particleSystem.setParticleLifetimeRange(2.f * sb::Vector2f(0.1f, 1));
 	particleSystem.setParticleSpeedRange(sb::Vector2f(0.1f, 1));
-	particleSystem.setEmissionDirection(sb::ParticleSystem::EmissionType::Random);
+	particleSystem.setEmissionType(sb::ParticleSystem::EmissionType::Random);
 	particleSystem.setParticleSizeRange(sb::Vector2f(0.01f, 0.13f));
 	particleSystem.setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
 	particleSystem.setParticleColor(color);
@@ -3661,7 +3661,7 @@ void complete() {
 void init61(sb::ParticleSystem& system) {
 	system.setEmissionRatePerSecond(0);
 	system.setEmissionShape(sb::Box(1, 0.01f));
-	system.setEmissionDirection(sb::ParticleSystem::EmissionType::Random);
+	system.setEmissionType(sb::ParticleSystem::EmissionType::Random);
 	system.setParticleLifetimeRange(2.f * sb::Vector2f(0.1f, 1));
 	system.setParticleSpeedRange(sb::Vector2f(0.1f, 1));
 	system.setParticleSizeRange(0.5f * sb::Vector2f(0.01f, 0.13f));
@@ -4205,7 +4205,7 @@ void init79(sb::ParticleSystem& particleSystem, sb::Texture& texture, const sb::
 	particleSystem.setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
 	particleSystem.setParticleColor(color);
 	particleSystem.setEmissionShape(sb::Box(0.5f, 0.01f));
-	particleSystem.setEmissionDirection(sb::ParticleSystem::EmissionType::Directional);
+	particleSystem.setEmissionType(sb::ParticleSystem::EmissionType::Directional);
 	particleSystem.setEmissionDirection(sb::Vector2f(0, 1));
 	particleSystem.setScale(0.3f);
 }
@@ -4316,13 +4316,13 @@ protected:
 		return texture;
 	}
 
-	void updateEmitter(const sb::FloatRect& bounds) {
+	void updateEmitter(const sb::FloatRect& bounds, float size) {
 		if (_counter % 15 == 0) {
 			setPosition(bounds.left + 0.5f * bounds.width, bounds.top());
-			float maxLength = std::max(bounds.width, bounds.height);
-			setScale(maxLength);
-			setEmissionShape(sb::Box(bounds.width / maxLength, 0.01f));
+			setScale(size);
+			setEmissionShape(sb::Box(bounds.width / size, 0.01f));
 
+			float maxLength = std::max(bounds.width, bounds.height);
 			float factor = (bounds.width / maxLength);
 			setEmissionRatePerSecond(factor * 5);
 			std::cout << factor * 5 << std::endl;
@@ -4336,11 +4336,12 @@ public:
 		setTexture(getTexture());
 		setParticleColor(color);
 		setEmissionRatePerSecond(0);
-		setParticleSizeRange(0.5f * sb::Vector2f(0.1f, 0.13f));
+		setParticleSizeRange(1.5f * sb::Vector2f(0.1f, 0.13f));
 		setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
 		setEmissionShape(sb::Box(1, 0.01f));
-		setEmissionDirection(sb::ParticleSystem::EmissionType::Directional);
+		setEmissionType(sb::ParticleSystem::EmissionType::Directional);
 		setEmissionDirection(sb::Vector2f(0, 1));
+		setParticleSpeedRange(sb::Vector2f(2.5f));
 		setScale(0.3f);
 	}
 
@@ -4348,9 +4349,9 @@ public:
 		setParticleSizeRange(size * sb::Vector2f(0.1f, 0.13f));
 	}
 
-	void update(Boundable& boundable, float ds) {
+	void update(Boundable& boundable, Transformable& transformable, float ds) {
 		sb::ParticleSystem::update(ds);
-		updateEmitter(boundable.getBounds());
+		updateEmitter(boundable.getBounds(), transformable.getScale().x);
 	}
 };
 
@@ -4360,9 +4361,9 @@ void demo82() {
 	Tetromino tetromino('t');
 	BubbleEffect emitter(1024, tetromino.getColor());
 
-	//window.getCamera().setWidth(10);
-	//tetromino.setScale(1);
-	tetromino.setScale(0.1f);
+	window.getCamera().setWidth(10);
+	tetromino.setScale(1);
+	//tetromino.setScale(0.1f);
 	tetromino.setLight(light);
 
 	while (window.isOpen()) {
@@ -4374,7 +4375,7 @@ void demo82() {
 		if (sb::Input::isKeyGoingDown(sb::KeyCode::Up))
 			tetromino.getEffects().spinBy(-90 * sb::ToRadian, tetromino);
 		tetromino.update(ds);
-		emitter.update(tetromino, ds);
+		emitter.update(tetromino, tetromino, ds);
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(tetromino);

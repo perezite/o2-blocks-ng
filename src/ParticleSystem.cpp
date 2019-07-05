@@ -5,10 +5,10 @@
 
 namespace sb
 {
-	void ParticleSystem::setEmissionDirection(const sb::Vector2f& emissionVector)
+	void ParticleSystem::setEmissionDirection(const sb::Vector2f& emissionDirection)
 	{
 		SB_ERROR_IF(_emissionType != EmissionType::Directional, "Emission type must be directional to specify an emission direction");
-		_emissionDirection = emissionVector.normalized();
+		_emissionDirection = emissionDirection.normalized();
 	}
 
 	void ParticleSystem::setEmissionRatePerSecond(float rate)

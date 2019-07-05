@@ -146,9 +146,9 @@ namespace sb
 
 		inline void hasLifetime(bool hasLifetime) { _hasLifetime = hasLifetime; }
 
-		inline void setEmissionDirection(EmissionType direction) { _emissionType = direction; }
+		inline void setEmissionType(EmissionType type) { _emissionType = type; }
 
-		void setEmissionDirection(const sb::Vector2f& emissionVector);
+		void setEmissionDirection(const sb::Vector2f& emissionDirection);
 
 		template <class T>
 		inline void setEmissionShape(const T& shape) { _emission.setShape(shape); }
