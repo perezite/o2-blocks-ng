@@ -879,7 +879,12 @@ sb::FloatRect getTransformedBounds(sb::FloatRect& bounds, const sb::Transform& t
 	return sb::FloatRect(min.x, min.y, max.x - min.x, max.y - min.y);
 }
 
-class Tetromino : public sb::Drawable, public sb::Transformable {
+class Boundable {
+public:
+	virtual sb::FloatRect getBounds() = 0;
+};
+
+class Tetromino : public sb::Drawable, public sb::Transformable, public Boundable {
 private:
 	char _type;
     std::vector<Block> _blocks;
@@ -4302,15 +4307,73 @@ void demo81() {
 	}
 }
 
+class BubbleEffect : public sb::ParticleSystem {
+	size_t _counter;
+
+protected:
+	static sb::Texture& getTexture() {
+		static sb::Texture texture("Textures/Particle2.png");
+		return texture;
+	}
+
+	void updateEmitter(const sb::FloatRect& bounds) {
+		if (_counter % 15 == 0) {
+			setPosition(bounds.left + 0.5f * bounds.width, bounds.top());
+			float emitterWidth = bounds.width * 5;
+			setEmissionShape(sb::Box(emitterWidth, 0.001f));
+			setEmissionRatePerSecond(emitterWidth * 5);
+		}
+
+		_counter++;
+	}
+
+public:
+	BubbleEffect(size_t maxParticles, const sb::Color& color) : sb::ParticleSystem(maxParticles), _counter(0) {
+		setTexture(getTexture());
+		setParticleColor(color);
+		setEmissionRatePerSecond(5);
+		setParticleSizeRange(0.8f * sb::Vector2f(0.1f, 0.13f));
+		setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
+		setEmissionShape(sb::Box(0.5f, 0.01f));
+		setEmissionDirection(sb::ParticleSystem::EmissionType::Directional);
+		setEmissionDirection(sb::Vector2f(0, 1));
+		setScale(0.3f);
+	}
+
+	void setParticleSize(float size) {
+		setParticleSizeRange(size * sb::Vector2f(0.1f, 0.13f));
+	}
+
+	void update(Boundable& boundable, float ds) {
+		sb::ParticleSystem::update(ds);
+		updateEmitter(boundable.getBounds());
+	}
+};
+
 void demo82() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Tetromino tetromino('j');
+	BubbleEffect emitter(1024, tetromino.getColor());
+
+	tetromino.setScale(0.1f);
+	emitter.setScale(0.2f);
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
 		sb::Input::update();
 		window.update();
+		if (sb::Input::isTouchDown(1))
+			tetromino.setPosition(sb::Input::getTouchPosition(window));
+		tetromino.update(ds);
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::Up)) {
+			tetromino.getEffects().spinBy(-90 * sb::ToRadian, tetromino);
+			attachEmitter(tetromino, emitter);
+		}
+		emitter.update(tetromino, ds);
 
 		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(tetromino);
+		window.draw(emitter);
 		window.display();
 	}
 }
