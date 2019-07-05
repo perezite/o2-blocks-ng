@@ -175,11 +175,13 @@ namespace sb
 
 		bool isAlive();
 
+		void die();
+
+		void reset();
+
 		void update(float ds);
 
 		virtual void draw(DrawTarget& target, DrawStates states = DrawStates::getDefault());
-
-		void reset();
 
 	public:
 		std::string id;

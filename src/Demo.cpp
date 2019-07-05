@@ -4275,10 +4275,54 @@ void demo80() {
 	}
 }
 
+void demo81() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	sb::Texture texture;
+	sb::ParticleSystem emitter(1024);
+
+	texture.loadFromAsset("Textures/Particle2.png");
+	texture.enableMipmap(true);
+	init79(emitter, texture, sb::Color(1, 0, 0));
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		emitter.update(ds);
+
+		 if (sb::Input::isKeyGoingDown(sb::KeyCode::s))
+			 emitter.die();
+
+		std::cout << emitter.isAlive() << std::endl;
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(emitter);
+
+		window.display();
+	}
+}
+
+void demo82() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.display();
+	}
+}
+
 void demo() {
 	//complete();
 
-	demo80();
+	demo82();
+
+	//demo81();
+
+	//demo80();
 
 	//demo79();
 

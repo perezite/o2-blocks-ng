@@ -82,6 +82,13 @@ namespace sb
 			|| _numActiveParticles > 0 || hasUnemittedBursts();
 	}
 
+	void ParticleSystem::die()
+	{
+		setLifetime(0);
+		setEmissionRatePerSecond(0);
+		clearBursts();
+	}
+
 	void ParticleSystem::reset()
 	{
 		_secondsSinceLastEmission = _emissionRatePerSecond == 0 ? 0 : 1 / _emissionRatePerSecond;
