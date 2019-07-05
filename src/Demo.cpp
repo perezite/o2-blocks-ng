@@ -4323,9 +4323,7 @@ protected:
 			setScale(maxLength);
 			setEmissionShape(sb::Box(bounds.width / maxLength, 0.01f));
 
-			float maxRatio = maxLength / std::min(bounds.width, bounds.height);
-			float maxFactor = maxRatio / 1.5f;
-			float factor = (bounds.width / maxLength) * maxFactor;
+			float factor = (bounds.width / maxLength);
 			setEmissionRatePerSecond(factor * 5);
 			std::cout << factor * 5 << std::endl;
 		}
@@ -4337,7 +4335,7 @@ public:
 	BubbleEffect(size_t maxParticles, const sb::Color& color) : sb::ParticleSystem(maxParticles), _counter(0) {
 		setTexture(getTexture());
 		setParticleColor(color);
-		setEmissionRatePerSecond(5);
+		setEmissionRatePerSecond(0);
 		setParticleSizeRange(0.5f * sb::Vector2f(0.1f, 0.13f));
 		setParticleScaleOverLifetime(sb::Tweenf().backInOut(1, 1.5f, 0.2f).sineOut(1.5f, 0, 0.8f));
 		setEmissionShape(sb::Box(1, 0.01f));
@@ -4359,7 +4357,7 @@ public:
 void demo82() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
 	Light light;
-	Tetromino tetromino('i');
+	Tetromino tetromino('t');
 	BubbleEffect emitter(1024, tetromino.getColor());
 
 	//window.getCamera().setWidth(10);
