@@ -3716,6 +3716,11 @@ void complete() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
 	Backdrop backdrop;
 	Board board(sb::Vector2i(10, 14));
+	sb::Music music;
+		
+	music.loadFromAsset("Music/BackgroundMusic.ogg");
+	music.setLooping(true);
+	music.play();
 
 	adjustCameraToBoard(window.getCamera(), board);
 
@@ -4502,7 +4507,6 @@ void demo86() {
 	music.play();
 
 	while (window.isOpen()) {
-		float ds = getDeltaSeconds();
 		sb::Input::update();
 		window.update();
 
@@ -4512,9 +4516,9 @@ void demo86() {
 }
 
 void demo() {
-	//complete();
+	complete();
 
-	demo86();
+	//demo86();
 
 	//demo85();
 
