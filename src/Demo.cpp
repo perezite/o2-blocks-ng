@@ -414,6 +414,8 @@ public:
 class SoundEffect {
 	std::vector<float> _delays;
 	std::string _assetPath;
+	float _playbackIntervalSeconds;
+	float _secondsToNextPlayback;
 
 protected:
 	static bool isGarbage(float delay) {
@@ -430,10 +432,13 @@ protected:
 	}
 
 public:
-	inline void play() { getSound().play(); }
+	SoundEffect() : _playbackIntervalSeconds(0), _secondsToNextPlayback(0)
+	{ }
 
-	void play(float delay) {
-		_delays.push_back(delay);
+	inline void setPlaybackInterval(float seconds) { _playbackIntervalSeconds = seconds; }
+
+	void play(float delaySeconds = 0) {
+		_delays.push_back(delaySeconds);
 	}
 
 	void loadFromAssetPool(const std::string& assetPath) {
@@ -445,12 +450,14 @@ public:
 	}
 
 	void update(float ds) {
-		//std::cout << _delays.size() << std::endl;
+		_secondsToNextPlayback -= ds;
 
 		for (size_t i = 0; i < _delays.size(); i++) {
 			_delays[i] -= ds;
-			if (_delays[i] <= 0)
+			if (_delays[i] <= 0 && _secondsToNextPlayback <= 0) {
 				getSound().play();
+				_secondsToNextPlayback = _playbackIntervalSeconds;
+			}
 		}
 
 		_delays.erase(std::remove_if(_delays.begin(), _delays.end(), isGarbage), _delays.end());
@@ -1707,6 +1714,7 @@ class Board : public sb::Drawable, public sb::Transformable {
 	std::vector<Tetromino> _dyingTetrominoes;
 	SoundEffect _explosionSound;
 	SoundEffect _popSound;
+	SoundEffect _spinSound;
 
 protected:
 
@@ -1951,6 +1959,8 @@ public:
 		_stripes.setScale(1, boardSize.y / (float)boardSize.x);
 		_explosionSound.loadFromAssetPool("Sounds/Explosion.wav");
 		_popSound.loadFromAssetPool("Sounds/Grab.wav");
+		_spinSound.loadFromAssetPool("Sounds/Rotate.wav");
+		_spinSound.setPlaybackInterval(0.1f);
 	}
 
 	inline bool isDead() const { return _isFull; }
@@ -2033,11 +2043,28 @@ public:
 
 	inline void driftTetrominoBy(int x, int y) { driftTetrominoBy(sb::Vector2i(x, y)); }
 
+	//void playSpinSound() {
+	//	static sb::Stopwatch sw;
+	//	static float last = sw.getElapsedSeconds();
+	//	static float secondsToNextSound = 0;
+	//	float elapsed = sw.getElapsedSeconds() - last;
+	//	last = sw.getElapsedSeconds();
+	//	secondsToNextSound -= elapsed;
+	//	std::cout << secondsToNextSound << std::endl;
+	//	if (secondsToNextSound <= 0) {
+	//		_spinSound.play();
+	//		secondsToNextSound = 0.5f;
+	//	}
+	//}
+
 	void spinTetromino() {
 		_tetromino.getEffects().spinBy(-90 * sb::ToRadian, _tetromino, 0.75f);
 
-		if (isInvalid(_tetromino)) 
+		if (isInvalid(_tetromino))
 			_tetromino.getEffects().spinBy(90 * sb::ToRadian, _tetromino);
+		else
+			_spinSound.play();
+			//playSpinSound();
 	}
 
 	void popTetromino() {
@@ -2103,6 +2130,7 @@ public:
 	void updateSounds(float ds) {
 		_explosionSound.update(ds);
 		_popSound.update(ds);
+		_spinSound.update(ds);
 	}
 
 	void update(float ds) {
@@ -4720,7 +4748,6 @@ void demo91() {
 		window.display();
 	}
 }
-
 
 void demo() {
 	complete();
