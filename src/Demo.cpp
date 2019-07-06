@@ -368,11 +368,6 @@ public:
 
 	void spinBy(float radians, float duration = 0.5f) {
 		spinTo(parent.getRotation() + radians, duration);
-		//float effectRotation = parent.getRotation() + _spin.value();
-		//float offset = effectRotation - radians;
-		//parent.setRotation(radians);
-		//_spin.tween = sb::Tweenf().bounceOut(offset, 0, effectSeconds);
-		//_spin.start();
 	}
 
 	void pop() {
@@ -414,7 +409,52 @@ public:
 		if (_spin2.isPlaying())
 			parent.setRotation(_spin2.value());
 	}
+};
 
+class SoundEffect {
+	std::vector<float> _delays;
+	std::string _assetPath;
+
+protected:
+	static bool isGarbage(float delay) {
+		return delay <= 0;
+	}
+
+	static std::map<std::string, sb::Sound>& getSoundPool() {
+		static std::map<std::string, sb::Sound> soundPool;
+		return soundPool;
+	}
+
+	sb::Sound& getSound() {
+		return getSoundPool()[_assetPath];
+	}
+
+public:
+	inline void play() { getSound().play(); }
+
+	void play(float delay) {
+		_delays.push_back(delay);
+	}
+
+	void loadFromAssetPool(const std::string& assetPath) {
+		std::map<std::string, sb::Sound>& pool = getSoundPool();
+		if (pool.find(assetPath) == pool.end())
+			pool[assetPath].loadFromAsset(assetPath);
+
+		_assetPath = assetPath;
+	}
+
+	void update(float ds) {
+		//std::cout << _delays.size() << std::endl;
+
+		for (size_t i = 0; i < _delays.size(); i++) {
+			_delays[i] -= ds;
+			if (_delays[i] <= 0)
+				getSound().play();
+		}
+
+		_delays.erase(std::remove_if(_delays.begin(), _delays.end(), isGarbage), _delays.end());
+	}
 };
 
 class TransformEffects : public sb::Transformable {
@@ -595,52 +635,6 @@ public:
 			reset();
 			_isActive = true;
 		}
-	}
-};
-
-class SoundEffect {	
-	std::vector<float> _delays;
-	std::string _assetPath;
-
-protected:
-	static bool isGarbage(float delay) {
-		return delay <= 0;
-	}
-
-	static std::map<std::string, sb::Sound>& getSoundPool() {
-		static std::map<std::string, sb::Sound> soundPool;
-		return soundPool;
-	}
-
-	sb::Sound& getSound() {
-		return getSoundPool()[_assetPath];
-	}
-
-public:
-	inline void play() { getSound().play(); }
-
-	void play(float delay) {
-		_delays.push_back(delay);
-	}
-
-	void loadFromAssetPool(const std::string& assetPath) {
-		std::map<std::string, sb::Sound>& pool = getSoundPool();
-		if (pool.find(assetPath) == pool.end())
-			pool[assetPath].loadFromAsset(assetPath);
-
-		_assetPath = assetPath;
-	}
-
-	void update(float ds) {
-		std::cout << _delays.size() << std::endl;
-
-		for (size_t i = 0; i < _delays.size(); i++) {
-			_delays[i] -= ds;
-			if (_delays[i] <= 0)
-				getSound().play();
-		}
-
-		_delays.erase(std::remove_if(_delays.begin(), _delays.end(), isGarbage), _delays.end());
 	}
 };
 
@@ -1712,6 +1706,7 @@ class Board : public sb::Drawable, public sb::Transformable {
 	bool _isAutodropEnabled;
 	std::vector<Tetromino> _dyingTetrominoes;
 	SoundEffect _explosionSound;
+	SoundEffect _popSound;
 
 protected:
 
@@ -1955,6 +1950,7 @@ public:
 	{
 		_stripes.setScale(1, boardSize.y / (float)boardSize.x);
 		_explosionSound.loadFromAssetPool("Sounds/Explosion.wav");
+		_popSound.loadFromAssetPool("Sounds/Grab.wav");
 	}
 
 	inline bool isDead() const { return _isFull; }
@@ -2046,6 +2042,7 @@ public:
 
 	void popTetromino() {
 		_tetromino.getEffects().pop(_tetromino);
+		_popSound.play();
 	}
 
 	void dropTetromino() {
@@ -2105,6 +2102,7 @@ public:
 
 	void updateSounds(float ds) {
 		_explosionSound.update(ds);
+		_popSound.update(ds);
 	}
 
 	void update(float ds) {
@@ -3756,8 +3754,7 @@ void touchInputComplete(sb::Window& window, Board& board, float ds) {
 	}
 	if (sb::Input::isTouchDown(1))
 		board.driftTetrominoTo(sb::Input::getTouchPosition(window) + touchOffset);
-	if (getSwipe(window, ds).y > 0.05f * window.getInverseAspect()
-		|| isTouchGoingDown(window, board.getTetromino()))
+	if (getSwipe(window, ds).y > 0.05f * window.getInverseAspect())
 		board.spinTetromino();
 }
 
@@ -4456,7 +4453,7 @@ void demo81() {
 		 if (sb::Input::isKeyGoingDown(sb::KeyCode::s))
 			 emitter.die();
 
-		std::cout << (int)emitter.getState() << std::endl;
+		//std::cout << (int)emitter.getState() << std::endl;
 
 		window.clear(sb::Color(1, 1, 1, 1));
 		window.draw(emitter);
