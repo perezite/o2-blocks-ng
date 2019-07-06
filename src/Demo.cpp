@@ -541,7 +541,8 @@ std::map<char, sb::Color>& getBlockColors() {
 		{ 'o', createColor(240, 240, 0, alpha) },
 		{ 's', createColor(0, 240, 0, alpha) },
 		{ 't', createColor(160, 0, 240, alpha) },
-		{ 'z', createColor(240, 0, 0, alpha) }
+		{ 'z', createColor(240, 0, 0, alpha) },
+		{ 'm', createColor(0, 240, 240, alpha) }
 	};
 
 	return colors;
@@ -987,7 +988,7 @@ protected:
         else if (type == 'z')
             _blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(-1, 0), sb::Vector2i(0, -1), sb::Vector2i(1, -1) };
         else if (type == 'm')
-            _blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(0, 1) };
+            _blockPositions = { sb::Vector2i(0, 0), sb::Vector2i(1, 0) };
 
         createBlocks(_blockPositions, type);
     }
@@ -1636,6 +1637,34 @@ public:
 	}
 };
 
+class SoundEffect : public sb::Sound {
+	std::vector<float> _delays;
+
+protected:
+	static bool isGarbage(float delay) {
+		return delay <= 0;
+	}
+
+public:
+	inline void play() { Sound::play(); }
+
+	void play(float delay) {
+		_delays.push_back(delay);
+	}
+
+	void update(float ds) {
+		std::cout << _delays.size() << std::endl;
+
+		for (size_t i = 0; i < _delays.size(); i++) {
+			_delays[i] -= ds;
+			if (_delays[i] <= 0)
+				Sound::play();
+		}
+
+		_delays.erase(std::remove_if(_delays.begin(), _delays.end(), isGarbage), _delays.end());
+	}
+};
+
 class Board : public sb::Drawable, public sb::Transformable {
 	sb::DrawBatch _batch;
 	sb::Vector2i _boardSize;
@@ -1654,6 +1683,7 @@ class Board : public sb::Drawable, public sb::Transformable {
 	size_t _linesCleared;
 	bool _isAutodropEnabled;
 	std::vector<Tetromino> _dyingTetrominoes;
+	SoundEffect _explosionSound;
 
 protected:
 
@@ -1761,14 +1791,23 @@ protected:
 	}
 
 	void implodeLine(size_t y) {
+		bool hasImmediateExplosion = false;
+		bool hasDelayedExplosion = false;
 		for (size_t i = 0; i < _blocks.size(); i++) {
 			sb::Vector2i boardPos = worldToBoardPosition(_blocks[i].getPosition());
 			if (boardPos.y == y) {
 				bool isAboveOccupied = isOccupied(sb::Vector2i(boardPos.x, boardPos.y + 1));
+				hasImmediateExplosion = hasImmediateExplosion || isAboveOccupied;
+				hasDelayedExplosion = hasDelayedExplosion || !isAboveOccupied;
 				float duration = isAboveOccupied ? 0.01f : 0.8f;
 				_blocks[i].die(duration);
 			}
 		}
+
+		if (hasImmediateExplosion)
+			_explosionSound.play(0.01f);
+		if (hasDelayedExplosion)
+			_explosionSound.play(0.8f);
 	}
 	
 	void dropBlocksAboveLine(int y) {
@@ -1887,6 +1926,7 @@ public:
 		_stepIntervalInSeconds(0.5f), _secondsSinceLastStep(0), _isFull(false), _linesCleared(0), _isAutodropEnabled(true)
 	{
 		_stripes.setScale(1, boardSize.y / (float)boardSize.x);
+		_explosionSound.loadFromAsset("Sounds/Explosion.wav");
 	}
 
 	inline bool isDead() const { return _isFull; }
@@ -1920,7 +1960,7 @@ public:
 	inline void setStepInterval(float dropIntervalInSeconds) { _stepIntervalInSeconds = dropIntervalInSeconds; }
 
 	void die() {
-		std::cout << "You, sir, are a dead man!" << std::endl;
+		//std::cout << "You, sir, are a dead man!" << std::endl;
 		_hasTetromino = false;
 		_isFull = true;
 	}
@@ -2035,8 +2075,13 @@ public:
 		//std::cout << _dyingTetrominoes.size() << std::endl;
 	}
 
+	void updateSounds(float ds) {
+		_explosionSound.update(ds);
+	}
+
 	void update(float ds) {
 		updateEntities(ds);
+		updateSounds(ds);
 
 		if (!_isFull) {
 			step(_tetromino, ds);
@@ -4550,10 +4595,57 @@ void demo87() {
 	}
 }
 
-void demo() {
-	//complete();
+void demo88() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	SoundEffect rotate;
 
-	demo87();
+	rotate.loadFromAsset("Sounds/Rotate.wav");
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		rotate.update(ds);
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::r))
+			rotate.play(1);
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.display();
+	}
+}
+
+void demo89() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Board board(sb::Vector2i(2, 5));
+	
+	adjustCameraToBoard(window.getCamera(), board);
+	board.createTetromino('o');
+	board.enableAutodrop(false);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		board.update(ds);
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::Down))
+			board.dropTetromino();
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(board);
+		window.display();
+	}
+}
+
+void demo() {
+	complete();
+
+	//demo89();
+
+	//demo88();
+
+	//demo87();
 
 	//demo86();
 
