@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Asset.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Backdrop.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Body.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Box.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Camera.h" />
@@ -28,8 +29,10 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\DrawTarget.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Easing.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Game.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Grid.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Image.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Input.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Line.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Rect.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Logger.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\GL.h" />
@@ -61,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Asset.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Backdrop.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Box.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Camera.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Demo.cpp" />
@@ -68,7 +72,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\DrawStates.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Game.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\GL.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Grid.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Image.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Line.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Logger.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Music.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\ParticleSystem.cpp" />
