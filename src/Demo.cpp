@@ -598,6 +598,52 @@ public:
 	}
 };
 
+class SoundEffect {	
+	std::vector<float> _delays;
+	std::string _assetPath;
+
+protected:
+	static bool isGarbage(float delay) {
+		return delay <= 0;
+	}
+
+	static std::map<std::string, sb::Sound>& getSoundPool() {
+		static std::map<std::string, sb::Sound> soundPool;
+		return soundPool;
+	}
+
+	sb::Sound& getSound() {
+		return getSoundPool()[_assetPath];
+	}
+
+public:
+	inline void play() { getSound().play(); }
+
+	void play(float delay) {
+		_delays.push_back(delay);
+	}
+
+	void loadFromAssetPool(const std::string& assetPath) {
+		std::map<std::string, sb::Sound>& pool = getSoundPool();
+		if (pool.find(assetPath) == pool.end())
+			pool[assetPath].loadFromAsset(assetPath);
+
+		_assetPath = assetPath;
+	}
+
+	void update(float ds) {
+		std::cout << _delays.size() << std::endl;
+
+		for (size_t i = 0; i < _delays.size(); i++) {
+			_delays[i] -= ds;
+			if (_delays[i] <= 0)
+				getSound().play();
+		}
+
+		_delays.erase(std::remove_if(_delays.begin(), _delays.end(), isGarbage), _delays.end());
+	}
+};
+
 class BlockCollisionEffect : public sb::ParticleSystem {
 public: 
 	enum struct Position { Left, Top, Right, Bottom };
@@ -948,6 +994,7 @@ private:
 	TransformEffects _effects;
 	TransformEffects2 _effects2;
 	BubbleEffect _bubbleEffect;
+	SoundEffect _collisionSound;
 	State _state;
 
 protected:
@@ -1093,6 +1140,7 @@ protected:
 public:
     Tetromino(char type = 'i') : _effects2(*this), _bubbleEffect(256, getBlockColors()[type]), _state(State::Alive) {
         setType(type);
+		_collisionSound.loadFromAssetPool("Sounds/Collision.wav");
     }
 
 	inline State getState() const { return _state; }
@@ -1152,8 +1200,15 @@ public:
 		std::vector<size_t> bottomBlocks = getBottomBlocks();
 		BlockCollisionEffect::Position effectPosition = getBlockCollisionEffectPosition();
 
-		for (size_t i = 0; i < bottomBlocks.size(); i++)
-			_blocks[bottomBlocks[i]].getCollisionEffect().play(secondsDelay, effectPosition);
+		bool playSound = false;
+		for (size_t i = 0; i < bottomBlocks.size(); i++) {
+			BlockCollisionEffect& blockEffect = _blocks[bottomBlocks[i]].getCollisionEffect();
+			playSound = playSound || !blockEffect.isPlaying();
+			blockEffect.play(secondsDelay, effectPosition);
+		}
+
+		if (playSound)
+			_collisionSound.play(secondsDelay);
 	}
 
 	void update(float ds) {
@@ -1162,6 +1217,7 @@ public:
 
 		_effects.update(ds);
 		_bubbleEffect.update(*this, *this, ds);
+		_collisionSound.update(ds);
 
 		if (_state == State::Dying)
 			updateDying();
@@ -1637,34 +1693,6 @@ public:
 	}
 };
 
-class SoundEffect : public sb::Sound {
-	std::vector<float> _delays;
-
-protected:
-	static bool isGarbage(float delay) {
-		return delay <= 0;
-	}
-
-public:
-	inline void play() { Sound::play(); }
-
-	void play(float delay) {
-		_delays.push_back(delay);
-	}
-
-	void update(float ds) {
-		std::cout << _delays.size() << std::endl;
-
-		for (size_t i = 0; i < _delays.size(); i++) {
-			_delays[i] -= ds;
-			if (_delays[i] <= 0)
-				Sound::play();
-		}
-
-		_delays.erase(std::remove_if(_delays.begin(), _delays.end(), isGarbage), _delays.end());
-	}
-};
-
 class Board : public sb::Drawable, public sb::Transformable {
 	sb::DrawBatch _batch;
 	sb::Vector2i _boardSize;
@@ -1834,7 +1862,7 @@ protected:
 	void drop(Tetromino& tetromino) {
 		float effectSeconds = 0.2f;
 		driftBy(tetromino, sb::Vector2i(0, -1), effectSeconds);
-		if (isInFinalPosition(tetromino))
+		if (isInFinalPosition(tetromino)) 
 			tetromino.playCollisionEffect(effectSeconds * 0.7f);
 
 		if (isInvalid(tetromino)) {
@@ -1926,7 +1954,7 @@ public:
 		_stepIntervalInSeconds(0.5f), _secondsSinceLastStep(0), _isFull(false), _linesCleared(0), _isAutodropEnabled(true)
 	{
 		_stripes.setScale(1, boardSize.y / (float)boardSize.x);
-		_explosionSound.loadFromAsset("Sounds/Explosion.wav");
+		_explosionSound.loadFromAssetPool("Sounds/Explosion.wav");
 	}
 
 	inline bool isDead() const { return _isFull; }
@@ -4599,7 +4627,7 @@ void demo88() {
 	sb::Window window(getWindowSize(400, 3.f / 2.f));
 	SoundEffect rotate;
 
-	rotate.loadFromAsset("Sounds/Rotate.wav");
+	rotate.loadFromAssetPool("Sounds/Rotate.wav");
 
 	while (window.isOpen()) {
 		float ds = getDeltaSeconds();
@@ -4638,8 +4666,71 @@ void demo89() {
 	}
 }
 
+void demo90() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	SoundEffect collision;
+	SoundEffect explosion;
+	SoundEffect grab;
+	SoundEffect rotate;
+	sb::Music music;
+
+	collision.loadFromAssetPool("Sounds/Collision.wav");
+	explosion.loadFromAssetPool("Sounds/Explosion.wav");
+	grab.loadFromAssetPool("Sounds/Grab.wav");
+	rotate.loadFromAssetPool("Sounds/Rotate.wav");
+	music.loadFromAsset("Music/BackgroundMusic.ogg");
+	music.setLooping(true);
+	music.play();
+
+	while (window.isOpen()) {
+		sb::Input::update();
+		window.update();
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::c))
+			collision.play();
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::e))
+			explosion.play();
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::g))
+			grab.play();
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::r))
+			rotate.play();
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.display();
+	}
+}
+
+void demo91() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	Tetromino tetromino('z');
+
+	tetromino.setScale(0.1f);
+
+	while (window.isOpen()) {
+		float ds = getDeltaSeconds();
+		sb::Input::update();
+		window.update();
+		tetromino.update(ds);
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::c)) {
+			tetromino.playCollisionEffect(0.5f);
+		}
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.draw(tetromino);
+		tetromino.drawCollisionEffect(window);
+
+		window.display();
+	}
+}
+
+
 void demo() {
 	complete();
+
+	//demo91();
+
+	//demo90();
 
 	//demo89();
 
