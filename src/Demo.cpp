@@ -11,6 +11,7 @@
 #include "ParticleSystem.h"
 #include "Box.h"
 #include "Music.h"
+#include "Sound.h"
 #include <cstddef>
 #include <vector>
 #include <map>
@@ -4515,8 +4516,44 @@ void demo86() {
 	}
 }
 
+void demo87() {
+	sb::Window window(getWindowSize(400, 3.f / 2.f));
+	sb::Sound collision;
+	sb::Sound explosion;
+	sb::Sound grab;
+	sb::Sound rotate;
+	sb::Music music;
+
+	collision.loadFromAsset("Sounds/Collision.wav");
+	explosion.loadFromAsset("Sounds/Explosion.wav");
+	grab.loadFromAsset("Sounds/Grab.wav");
+	rotate.loadFromAsset("Sounds/Rotate.wav");
+	music.loadFromAsset("Music/BackgroundMusic.ogg");
+	music.setLooping(true);
+	music.play();
+
+	while (window.isOpen()) {
+		sb::Input::update();
+		window.update();
+
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::c))
+			collision.play();
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::e))
+			explosion.play();
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::g))
+			grab.play();
+		if (sb::Input::isKeyGoingDown(sb::KeyCode::r))
+			rotate.play();
+
+		window.clear(sb::Color(1, 1, 1, 1));
+		window.display();
+	}
+}
+
 void demo() {
-	complete();
+	//complete();
+
+	demo87();
 
 	//demo86();
 
