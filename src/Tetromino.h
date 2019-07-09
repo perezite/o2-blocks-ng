@@ -51,7 +51,7 @@ namespace blocks {
 		inline const sb::Color& getColor() const { return Block::getColor(_type); }
 		void setColor(const sb::Color& color);
 		void setType(char type);
-		inline void setLight(Light& light);
+		void setLight(Light& light);
 		inline const sb::IntRect& getBlockBounds() const { return _blockBounds; }
 		sb::FloatRect getBounds();
 		void die();

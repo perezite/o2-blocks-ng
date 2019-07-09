@@ -2042,20 +2042,6 @@ public:
 
 	inline void driftTetrominoBy(int x, int y) { driftTetrominoBy(sb::Vector2i(x, y)); }
 
-	//void playSpinSound() {
-	//	static sb::Stopwatch sw;
-	//	static float last = sw.getElapsedSeconds();
-	//	static float secondsToNextSound = 0;
-	//	float elapsed = sw.getElapsedSeconds() - last;
-	//	last = sw.getElapsedSeconds();
-	//	secondsToNextSound -= elapsed;
-	//	std::cout << secondsToNextSound << std::endl;
-	//	if (secondsToNextSound <= 0) {
-	//		_spinSound.play();
-	//		secondsToNextSound = 0.5f;
-	//	}
-	//}
-
 	void spinTetromino() {
 		_tetromino.getEffects().spinBy(-90 * sb::ToRadian, _tetromino, 0.75f);
 
@@ -2063,7 +2049,6 @@ public:
 			_tetromino.getEffects().spinBy(90 * sb::ToRadian, _tetromino);
 		else
 			_spinSound.play();
-			//playSpinSound();
 	}
 
 	void popTetromino() {

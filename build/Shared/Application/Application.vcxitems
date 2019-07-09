@@ -20,6 +20,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Backdrop.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Block.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\BlockExplosion.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Board.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Body.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Border.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Boundable.h" />
@@ -79,6 +80,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Block.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\BlockCollisionEffect.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\BlockExplosion.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Board.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Border.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Box.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\BubbleEffect.cpp" />

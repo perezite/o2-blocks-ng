@@ -4,8 +4,8 @@
 namespace blocks 
 {
 	Border::Border(float thickness, float height = 1, bool addThicknessToSize = false,
-		const sb::Color& innerColor = sb::Color::createFromRGB(236, 140, 105, 100),
-		const sb::Color& outerColor = sb::Color::createFromRGB(237, 110, 160, 100))
+		const sb::Color& innerColor,
+		const sb::Color& outerColor)
 		: _mesh(10, sb::PrimitiveType::TriangleStrip)
 	{
 		sb::Vector2f extent(0.5f, height / 2);
