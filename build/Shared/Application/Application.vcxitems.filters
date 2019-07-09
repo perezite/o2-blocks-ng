@@ -153,6 +153,12 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Line.h">
       <Filter>Blocks\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\StripedQuad.h">
+      <Filter>Blocks\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Border.h">
+      <Filter>Blocks\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Window.cpp">
@@ -249,6 +255,12 @@
       <Filter>Blocks</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Line.cpp">
+      <Filter>Blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\StripedQuad.cpp">
+      <Filter>Blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Border.cpp">
       <Filter>Blocks</Filter>
     </ClCompile>
   </ItemGroup>

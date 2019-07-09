@@ -10,7 +10,7 @@
 
 void game() {
 	sb::Window window(400, int(1.5f * 400));
-
+	
 	while (window.isOpen()) {
 		sb::Input::update();
 		window.update();

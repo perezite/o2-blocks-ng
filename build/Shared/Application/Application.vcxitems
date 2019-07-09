@@ -18,6 +18,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Asset.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Backdrop.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Body.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Border.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Box.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Camera.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Color.h" />
@@ -52,6 +53,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Sound.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Sprite.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Stopwatch.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\StripedQuad.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Texture.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TextureSheet.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Transform.h" />
@@ -65,6 +67,7 @@
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Asset.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Backdrop.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Border.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Box.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Camera.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Demo.cpp" />
@@ -81,6 +84,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Physics.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Sound.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Sprite.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\StripedQuad.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Texture.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\TextureSheet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Transformable.cpp" />
