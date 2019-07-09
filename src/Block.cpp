@@ -72,6 +72,23 @@ namespace blocks {
 		setType(type);
 	}
 
+	std::map<char, sb::Color>& Block::getColors()
+	{
+		static const int alpha = 200;
+		static std::map<char, sb::Color> colors = {
+			{ 'i', sb::Color::createFromRGB(0, 240, 240, alpha) },
+			{ 'j', sb::Color::createFromRGB(0, 0, 240, alpha) },
+			{ 'l', sb::Color::createFromRGB(240, 160, 0, alpha) },
+			{ 'o', sb::Color::createFromRGB(240, 240, 0, alpha) },
+			{ 's', sb::Color::createFromRGB(0, 240, 0, alpha) },
+			{ 't', sb::Color::createFromRGB(160, 0, 240, alpha) },
+			{ 'z', sb::Color::createFromRGB(240, 0, 0, alpha) },
+			{ 'm', sb::Color::createFromRGB(0, 240, 240, alpha) }
+		};
+
+		return colors;
+	}
+
 	void Block::setType(char type) {
 		type = tolower(type);
 		setTexture(type);

@@ -1,4 +1,5 @@
 #include "BlockExplosion.h"
+#include "Block.h"
 
 namespace blocks {
 	sb::Texture& BlockExplosion::getTexture() {
@@ -24,7 +25,7 @@ namespace blocks {
 
 	void BlockExplosion::setType(char type) {
 		type = tolower(type);
-		//setParticleColor(getBlockColor(type));
+		setParticleColor(Block::getColor(type));
 		SB_ERROR("Implement!");
 	}
 

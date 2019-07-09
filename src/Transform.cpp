@@ -1,4 +1,5 @@
 #include "Transform.h"
+#include "Math.h"
 
 namespace sb
 {
@@ -122,6 +123,18 @@ namespace sb
 	{
 		sb::Vector2f transformed = vector;
 		return transform.transform(transformed);
+	}
+
+	FloatRect operator*(const Transform& transform, const FloatRect& rect) {
+		std::vector<sb::Vector2f> edges(4);
+		edges[0] = transform * sb::Vector2f(rect.left, rect.bottom);
+		edges[1] = transform * sb::Vector2f(rect.left + rect.width, rect.bottom);
+		edges[2] = transform * sb::Vector2f(rect.left, rect.bottom + rect.height);
+		edges[3] = transform * sb::Vector2f(rect.left + rect.width, rect.bottom + rect.height);
+		
+		sb::Vector2f min, max;
+		computeBounds(edges, min, max);
+		return sb::FloatRect(min.x, min.y, max.x - min.x, max.y - min.y);
 	}
 
 	Mesh operator*(const Transform& transform, const Mesh& mesh)

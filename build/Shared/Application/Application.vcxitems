@@ -61,6 +61,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Sprite.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Stopwatch.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\StripedQuad.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Tetromino.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Texture.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TextureSheet.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Transform.h" />
@@ -98,6 +99,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\SoundEffect.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Sprite.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\StripedQuad.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Tetromino.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Texture.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\TextureSheet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Transformable.cpp" />

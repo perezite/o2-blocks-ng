@@ -33,8 +33,11 @@ namespace blocks
 		void updateLighting(const sb::Transform& transform);
 		void implode(float ds);
 		void explode(float ds);
+
 	public:
 		Block(char type = 'i');
+		static std::map<char, sb::Color>& getColors();
+		static inline sb::Color& getColor(char type) { return Block::getColors()[type]; }
 		inline const State& getState() const { return _state; }
 		inline TransformEffects& getEffects() { return _effects; }
 		inline const BlockCollisionEffect& getCollisionEffect() const { return _collisionEffect; }

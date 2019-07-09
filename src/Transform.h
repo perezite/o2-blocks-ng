@@ -1,5 +1,6 @@
 #pragma once
 #include "Vector2.h"
+#include "Rect.h"
 #include "Mesh.h"
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -51,6 +52,8 @@ namespace sb
 	const Vector2f& operator*=(Vector2f& vector, const Transform& transform);
 
 	Vector2f operator*(const Transform& transform, const Vector2f& vector);
+
+	FloatRect operator*(const Transform& transform, const FloatRect& vector);
 
 	Mesh operator *(const Transform& transform, const Mesh& mesh);
 }

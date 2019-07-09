@@ -61,4 +61,23 @@ namespace sb
 	inline float clamp(float t, float min, float max) {
 		return t > max ? max : t < min ? min : t;
 	}
+
+	template <class V>
+	void computeBounds(std::vector<V> v, V& lower, V& upper) {
+		lower = upper = V(v[0].x, v[0].y);
+
+		for (size_t i = 0; i < v.size(); i++) {
+			V& val = v[i];
+			if (val.x < lower.x)
+				lower.x = val.x;
+			if (val.x > upper.x)
+				upper.x = val.x;
+			if (val.y < lower.y)
+				lower.y = val.y;
+			if (val.y > upper.y)
+				upper.y = val.y;
+		}
+	}
+
+
 }
