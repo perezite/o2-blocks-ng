@@ -18,7 +18,6 @@ namespace blocks {
 	SoundEffect::SoundEffect() : _playbackIntervalSeconds(0), _secondsToNextPlayback(0)
 	{ }
 
-
 	void SoundEffect::play(float delaySeconds) {
 		_delays.push_back(delaySeconds);
 	}
