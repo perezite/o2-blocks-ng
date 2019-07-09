@@ -22,7 +22,7 @@ namespace blocks {
 		}
 	}
 
-	StripedQuad::StripedQuad(size_t numStripes = 1, float alpha = 0.04f) : _mesh(6 * numStripes, sb::PrimitiveType::TriangleStrip),
+	StripedQuad::StripedQuad(size_t numStripes, float alpha) : _mesh(6 * numStripes, sb::PrimitiveType::TriangleStrip),
 		_numStripes(numStripes), _alpha(alpha)
 	{
 		createMesh(sb::Vector2f(0.5f, 0.5f));

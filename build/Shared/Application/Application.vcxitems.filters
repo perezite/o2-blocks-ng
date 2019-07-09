@@ -159,6 +159,24 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Border.h">
       <Filter>Blocks\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Light.h">
+      <Filter>Blocks\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Animation.h">
+      <Filter>Blocks\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TransformEffects.h">
+      <Filter>Blocks\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\BubbleEffect.h">
+      <Filter>Blocks\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Boundable.h">
+      <Filter>Blocks\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\SoundEffect.h">
+      <Filter>Blocks\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Window.cpp">
@@ -261,6 +279,15 @@
       <Filter>Blocks</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Border.cpp">
+      <Filter>Blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\TransformEffects.cpp">
+      <Filter>Blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\BubbleEffect.cpp">
+      <Filter>Blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\SoundEffect.cpp">
       <Filter>Blocks</Filter>
     </ClCompile>
   </ItemGroup>

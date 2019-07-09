@@ -15,11 +15,14 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Animation.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Asset.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Backdrop.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Body.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Border.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Boundable.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Box.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\BubbleEffect.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Camera.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Color.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Demo.h" />
@@ -33,6 +36,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Grid.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Image.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Input.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Light.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Line.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Rect.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Logger.h" />
@@ -51,6 +55,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Shader.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Shape.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Sound.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\SoundEffect.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Sprite.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Stopwatch.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\StripedQuad.h" />
@@ -58,6 +63,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TextureSheet.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Transform.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Transformable.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TransformEffects.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Triangle.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Tween.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Vector2.h" />
@@ -69,6 +75,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Backdrop.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Border.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Box.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\BubbleEffect.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Camera.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Demo.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Disk.cpp" />
@@ -83,6 +90,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\ParticleSystem.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Physics.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Sound.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\SoundEffect.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Sprite.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\StripedQuad.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Texture.cpp" />
@@ -97,6 +105,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Shader.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Stopwatch.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Transform.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\TransformEffects.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Triangle.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Window.cpp" />
   </ItemGroup>
