@@ -18,6 +18,19 @@ void hideConsole() {
 	#endif
 }
 
+void instructions() {
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Controls", 
+		"Desktop:\n"
+		"Move: Left, Right, Down Arrows\n"
+		"Rotate: Up Arrow\n"
+		"Quickdrop: Spacebar\n\n"
+		"Mobile:\n"
+		"Move: Drag\n"
+		"Rotate: Swipe up\n",
+		NULL);
+
+}
+
 void version() {
 	#ifdef _DEBUG
 		std::string configuration = "Debug";	
@@ -29,11 +42,13 @@ void version() {
 }
 
 int main() {
-	version();
-	
 	#ifdef WIN32
 		hideConsole();
 	#endif
+
+	instructions();
+
+	version();
 
 	game::game();
 	
