@@ -6,9 +6,12 @@ namespace sb
 {
 	class Asset {
 	public:
+		static bool exists(const std::string& assetPath);
+
 		static std::string readAllText(const std::string& assetPath);
 
 		static std::string getFilePath(const std::string& assetPath);
+
 	protected:
 
 		static std::string getAssetFolderPath();

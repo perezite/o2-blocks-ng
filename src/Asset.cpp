@@ -10,6 +10,13 @@ namespace sb
 	const char Asset::PathSeparator = '/';
 	const std::string Asset::AssetFolderName = "Assets";
 
+	bool Asset::exists(const std::string & assetPath)
+	{
+		std::string filePath = getFilePath(assetPath);
+		SDL_RWops* file = SDL_RWFromFile(filePath.c_str(), "r");
+		return file != NULL;
+	}
+
 	std::string Asset::readAllText(const std::string & assetPath)
 	{
 		std::string filePath = getFilePath(assetPath);
