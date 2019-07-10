@@ -22,11 +22,9 @@ namespace blocks {
 		addBurst(0, 50);
 	}
 
-
 	void BlockExplosion::setType(char type) {
 		type = tolower(type);
 		setParticleColor(Block::getColor(type));
-		SB_ERROR("Implement!");
 	}
 
 	void BlockExplosion::update(float ds) {

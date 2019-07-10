@@ -15,9 +15,9 @@ void version() {
 int main() {
 	version();
 	
+	game::game();
+	
 	//demo();
-
-	game();
 	
 	return 0;
 }

@@ -143,8 +143,7 @@ namespace blocks {
 			_state = State::Garbage;
 	}
 
-	Tetromino::Tetromino(char type) : _bubbleEffect(256, sb::Color(1, 0, 0, 1)), _state(State::Alive) {
-		SB_ERROR("Complete initializer  _bubbleEffect(256, getBlockColors()[type])");
+	Tetromino::Tetromino(char type) : _bubbleEffect(256, Block::getColors()[type]), _state(State::Alive) {
 		setType(type);
 		_collisionSound.loadFromAssetPool("Sounds/Collision.wav");
 	}
