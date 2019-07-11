@@ -5,6 +5,6 @@ set Name=o2-blocks
 set Platform=android
 set Identifier=%Name%-%Version%-%Platform%
 
-copy "..\bin\Android\Application.apk" %Identifier%.apk
+copy "..\Android\Application.apk" %Identifier%.apk
 
 pause

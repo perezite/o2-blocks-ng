@@ -7,8 +7,8 @@ set Identifier=%Name%-%Version%-%Platform%
 
 mkdir %Identifier%
 
-xcopy /E /I ..\bin\Windows %Identifier%\Windows
-xcopy /E /I ..\bin\Assets %Identifier%\Assets
+xcopy /E /I ..\Windows %Identifier%\Windows
+xcopy /E /I ..\Assets %Identifier%\Assets
 
 del %Identifier%\Windows\*.ilk
 del %Identifier%\Windows\*.pdb
