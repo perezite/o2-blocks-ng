@@ -1,15 +1,7 @@
-#include "Window.h"
-#include "Input.h"
-
-using namespace sb;
+#include "Game.h"
 
 int main() {
-    Window window;
+    blocks::runGame();
 
-    while (window.isOpen()) {
-        Input::update();
-        window.update();
-        window.clear(Color(1, 1, 1, 1));
-        window.display();
-    }
+    return 0;
 }

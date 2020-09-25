@@ -1,0 +1,4 @@
+namespace blocks 
+{
+    void runGame();
+}
