@@ -132,62 +132,11 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Sound.h">
       <Filter>_Orbis2D\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Demo.h">
-      <Filter>Blocks\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Game.h">
-      <Filter>Blocks\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Rect.h">
       <Filter>_Orbis2D\Headers</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Box.h">
       <Filter>_Orbis2D\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Backdrop.h">
-      <Filter>Blocks\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Grid.h">
-      <Filter>Blocks\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Line.h">
-      <Filter>Blocks\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\StripedQuad.h">
-      <Filter>Blocks\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Border.h">
-      <Filter>Blocks\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Light.h">
-      <Filter>Blocks\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Animation.h">
-      <Filter>Blocks\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TransformEffects.h">
-      <Filter>Blocks\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\BubbleEffect.h">
-      <Filter>Blocks\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Boundable.h">
-      <Filter>Blocks\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\SoundEffect.h">
-      <Filter>Blocks\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\BlockExplosion.h">
-      <Filter>Blocks\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Block.h">
-      <Filter>Blocks\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Tetromino.h">
-      <Filter>Blocks\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Board.h">
-      <Filter>Blocks\Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -269,53 +218,8 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Main.cpp">
       <Filter>Blocks</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Demo.cpp">
-      <Filter>Blocks</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Game.cpp">
-      <Filter>Blocks</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Box.cpp">
       <Filter>_Orbis2D</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Backdrop.cpp">
-      <Filter>Blocks</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Grid.cpp">
-      <Filter>Blocks</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Line.cpp">
-      <Filter>Blocks</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\StripedQuad.cpp">
-      <Filter>Blocks</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Border.cpp">
-      <Filter>Blocks</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\TransformEffects.cpp">
-      <Filter>Blocks</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\BubbleEffect.cpp">
-      <Filter>Blocks</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\SoundEffect.cpp">
-      <Filter>Blocks</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\BlockExplosion.cpp">
-      <Filter>Blocks</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Block.cpp">
-      <Filter>Blocks</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\BlockCollisionEffect.cpp">
-      <Filter>Blocks</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Tetromino.cpp">
-      <Filter>Blocks</Filter>
-    </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Board.cpp">
-      <Filter>Blocks</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
