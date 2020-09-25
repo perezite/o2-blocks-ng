@@ -12,6 +12,6 @@ A blocks game for Windows and Android written in C++
 * Rotate: Up Arrow
 * Quickdrop: Spacebar
 
-###Mobile:
+### Mobile:
 * Move: Drag with finger
 * Rotate: Swipe up
