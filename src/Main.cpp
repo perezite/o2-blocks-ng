@@ -1,7 +1,9 @@
 #include "Game.h"
+#include "CameraDemo1.h"
 
 int main() {
-    blocks::runGame();
+    cameraDemo1::run();
+    // blocks::runGame();
 
     return 0;
 }

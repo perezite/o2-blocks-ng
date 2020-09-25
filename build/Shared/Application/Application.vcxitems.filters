@@ -19,6 +19,9 @@
     <Filter Include="Demos\01_Camera">
       <UniqueIdentifier>{c6ae5eef-7bcc-4d7b-a6fa-347a62dafb00}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Demos\01_Camera\Headers">
+      <UniqueIdentifier>{feff870e-0dc0-4e2a-a6a7-77c251447e7f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Color.h">
@@ -147,6 +150,12 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Game.h">
       <Filter>Blocks\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Backdrop.h">
+      <Filter>Blocks\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\CameraDemo1.h">
+      <Filter>Demos\01_Camera\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Window.cpp">
@@ -230,6 +239,12 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Main.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Game.cpp">
       <Filter>Blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Backdrop.cpp">
+      <Filter>Blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="E:\Indie\Development\Simulo\o2-blocks-ng\build\Shared\Application\..\..\..\src\CameraDemo1.cpp">
+      <Filter>Demos\01_Camera</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
