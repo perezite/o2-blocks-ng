@@ -4,11 +4,14 @@
 
 namespace sb 
 {
+    class Window;
+
 	class Camera
 	{
 	public:
-		Camera()
-			: m_width(1), m_aspectRatio(1), m_rotation(0), m_transformNeedsUpdate(true)
+		Camera(Window& window)
+			:   m_parentWindow(window), m_width(1), m_aspectRatio(1), 
+                m_rotation(0), m_transformNeedsUpdate(true)
 		{ }
 
 		Transform& getTransform();
@@ -22,6 +25,8 @@ namespace sb
 		inline float getInverseAspectRatio() const { return m_inverseAspectRatio; }
 
 		inline float getRotation() const { return m_rotation; }
+
+        void requestSize(float width, float height);
 
 		void setPosition(const sb::Vector2f& position);
 
@@ -41,7 +46,11 @@ namespace sb
 		void updateTransform();
 
 	private:
+        Window& m_parentWindow;
+
 		sb::Vector2f m_position;
+
+        sb::Vector2f m_actualSize;
 
 		float m_width;
 

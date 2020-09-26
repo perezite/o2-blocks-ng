@@ -7,7 +7,7 @@
 namespace sb 
 {
 	Window::Window(int width, int height) 
-		: m_isOpen(true)
+		: m_isOpen(true), m_camera(*this)
 	{
 		SB_ERROR_IF(SDL_Init(SDL_INIT_VIDEO) < 0, SDL_GetError());
 

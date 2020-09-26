@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include "Window.h"
 
 namespace sb 
 {
@@ -10,7 +11,22 @@ namespace sb
 		return m_transform;
 	}
 	
-	void Camera::setPosition(const sb::Vector2f & position)
+    void Camera::requestSize(float width, float height)
+    {
+        const float cameraAspect = width / height;
+        const Vector2f& windowResolution = m_parentWindow.getResolution();
+        const float windowAspect = windowResolution.x / windowResolution.y;
+
+        if (windowAspect > cameraAspect) {
+            float widthScale = windowAspect / cameraAspect;
+            m_actualSize = Vector2f(widthScale * width, height);
+        } else {
+            float heightScale = cameraAspect / windowAspect;
+            m_actualSize = Vector2f(width, heightScale * height);
+        }
+    }
+
+    void Camera::setPosition(const sb::Vector2f & position)
 	{
 		m_position = position;
 		m_transformNeedsUpdate = true;
@@ -46,7 +62,8 @@ namespace sb
 		float cf = cosf(-m_rotation);
 		float sf = sinf(-m_rotation);
 
-		sb::Vector2f inverseScale(2 / m_width, m_aspectRatio * 2 / m_width);
+		// sb::Vector2f inverseScale(2 / m_width, m_aspectRatio * 2 / m_width);
+        sb::Vector2f inverseScale(2 / m_actualSize.x, 2 / m_actualSize.y);
 		float a = cf * inverseScale.x;
 		float b = -sf * inverseScale.x;
 		float c = sf * inverseScale.y;

@@ -6,19 +6,9 @@
 
 using namespace sb;
 
-namespace
-{
-    using namespace blocks;
-
-    Backdrop backdrop;
-    Window window(400, 600);
-
-    Quad quad;
-}
-
 namespace blocks
 {
-    void start()
+    void start(Window& window)
     {
         // window.requestCameraSize(10, 18);
 
@@ -26,12 +16,12 @@ namespace blocks
         window.getCamera().setWidth(10);
     }
 
-    void update()
+    void update(Window& window, Backdrop& backdrop)
     {
         backdrop.update(window.getCamera());
     }
 
-    void draw()
+    void draw(Window& window, Backdrop& backdrop, Quad& quad)
     {
         window.draw(backdrop);
         window.draw(quad);
@@ -39,14 +29,18 @@ namespace blocks
 
     void runGame()
     {
-        start();
+        Window window(400, 600);
+        Backdrop backdrop;
+        Quad quad;
+
+        start(window);
 
         while (window.isOpen()) {
             Input::update();
             window.update();
-            update();
+            update(window, backdrop);
             window.clear(Color(1, 1, 1, 1));
-            draw();
+            draw(window, backdrop, quad);
             window.display();
         }
     }
