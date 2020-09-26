@@ -243,8 +243,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Backdrop.cpp">
       <Filter>Blocks</Filter>
     </ClCompile>
-    <ClCompile Include="E:\Indie\Development\Simulo\o2-blocks-ng\build\Shared\Application\..\..\..\src\CameraDemo1.cpp">
-      <Filter>Demos\01_Camera</Filter>
-    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\CameraDemo1.cpp" />
   </ItemGroup>
 </Project>
