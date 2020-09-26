@@ -35,12 +35,12 @@ namespace cameraDemo1
 
     void demo0()
     {
-        Window window(600, 400);
+        Window window(400, 600);
         Quad quad;
 
-        quad.setScale(190);
+        quad.setScale(1.9f);
         //window.getCamera().setWidth(400);
-        window.getCamera().requestSize(200, 200);
+        window.getCamera().requestSize(2, 2);
 
         while (window.isOpen())
         {
