@@ -11,10 +11,9 @@ namespace sb
 		return m_transform;
 	}
 	
-
-    void Camera::setPosition(const sb::Vector2f & position)
+    void Camera::setCenter(const sb::Vector2f& center)
 	{
-		m_position = position;
+		m_center = center;
 		m_transformNeedsUpdate = true;
 	}
 
@@ -50,8 +49,8 @@ namespace sb
 		float b = -sf * inverseScale.x;
 		float c = sf * inverseScale.y;
 		float d = cf * inverseScale.y;
-		float tx = -m_position.x;
-		float ty = -m_position.y;
+		float tx = -m_center.x;
+		float ty = -m_center.y;
 
 		m[0] = a;	m[3] = b;	m[6] = a * tx + b * ty;
 		m[1] = c;	m[4] = d;	m[7] = c * tx + d * ty;

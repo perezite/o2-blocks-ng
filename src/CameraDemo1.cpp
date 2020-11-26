@@ -8,47 +8,28 @@ using namespace std;
 
 namespace cameraDemo1
 {
-    void demo99()
-    {
-        /*
-            Window window(400, 800);
-            Quad quad;
-            
-            window.getCamera().requestSize(4, 6);
-            window.getCamera().setCenter(1, 1);
-            quad.setSize(3.9f, 7.9f);
-            quad.setPosition(1, 1);
-
-            Vector2f actualCameraSize = window.getCamera().getActualSize();
-            cout << actualCameraSize.x << " " << actualCameraSize.y << endl;
-
-            while (window.isOpen())
-            {
-                Input::update();
-                window.update();
-                window.clear(Color(1, 1, 1, 1));
-                window.draw(quad);
-                window.display();
-            }
-        */
-    }
-
     void demo0()
     {
         Window window(400, 600);
-        Quad quad;
+        Quad quad1;
+        Quad quad2;
 
-        quad.setScale(1, 1);
+        quad1.setScale(1, 1);
+        quad2.setScale(0.5f);
+        quad2.setPosition(-4, -4);
         window.getCamera().requestSize(10, 10);
+        window.getCamera().setCenter(-4, -4);
 
-        cout << window.getCamera().getWidth() << " " << window.getCamera().getHeight() << endl;
+        Vector2f actualCameraSize = window.getCamera().getSize();
+        cout << actualCameraSize.x << " " << actualCameraSize.y << endl;
 
         while (window.isOpen())
         {
             Input::update();
             window.update();
             window.clear(Color(1, 1, 1, 1));
-            window.draw(quad);
+            window.draw(quad1);
+            window.draw(quad2);
             window.display();
         }
     }

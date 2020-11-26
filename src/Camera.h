@@ -15,25 +15,29 @@ namespace sb
 
 		Transform& getTransform();
 
-		inline const sb::Vector2f& getPosition() const { return m_position; }
+		inline const sb::Vector2f& getCenter() const { return m_center; }
 
 		inline float getRotation() const { return m_rotation; }
 
-        inline float getWidth() const { return m_size.x; }
+        inline const sb::Vector2f& getSize() const { return m_size; }
 
-        inline float getHeight() const { return m_size.y; }
+        inline float getWidth() const { return getSize().x; }
+
+        inline float getHeight() const { return getSize().y; }
 
         inline float getAspectRatio() const { return getWidth() / getHeight(); }
 
         inline float getInverseAspectRatio() const { return getHeight() / getWidth(); }
 
-		void setPosition(const sb::Vector2f& position);
+        inline void setCenter(float x, float y) { setCenter(sb::Vector2f(x, y)); }
+
+		void setCenter(const sb::Vector2f& center);
 
 		void setRotation(float rotation);
 		
         void requestSize(float width, float height);
 
-		inline void translate(const sb::Vector2f& translation) { setPosition(getPosition() + translation); }
+		inline void translate(const sb::Vector2f& translation) { setCenter(getCenter() + translation); }
 
 		inline void rotate(float angle) { setRotation(getRotation() + angle); }
 
@@ -43,7 +47,7 @@ namespace sb
 	private:
         Window& m_parentWindow;
 
-		sb::Vector2f m_position;
+		sb::Vector2f m_center;
 
         sb::Vector2f m_size;
 
