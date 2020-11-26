@@ -11,42 +11,10 @@ namespace sb
 		return m_transform;
 	}
 	
-    void Camera::requestSize(float width, float height)
-    {
-        const float cameraAspect = width / height;
-        const Vector2f& windowResolution = m_parentWindow.getResolution();
-        const float windowAspect = windowResolution.x / windowResolution.y;
-
-        if (windowAspect > cameraAspect) {
-            float widthScale = windowAspect / cameraAspect;
-            m_actualSize = Vector2f(widthScale * width, height);
-        } else {
-            float heightScale = cameraAspect / windowAspect;
-            m_actualSize = Vector2f(width, heightScale * height);
-        }
-    }
 
     void Camera::setPosition(const sb::Vector2f & position)
 	{
 		m_position = position;
-		m_transformNeedsUpdate = true;
-	}
-
-	void Camera::setWidth(float width)
-	{
-		m_width = width;
-		m_transformNeedsUpdate = true;
-	}
-
-	void Camera::setHeight(float height)
-	{
-		setWidth(height * getAspectRatio());
-	}
-
-	void Camera::setAspectRatio(float aspect)
-	{
-		m_aspectRatio = aspect;
-		m_inverseAspectRatio = 1 / aspect;
 		m_transformNeedsUpdate = true;
 	}
 
@@ -56,14 +24,28 @@ namespace sb
 		m_transformNeedsUpdate = true;
 	}
 
+    void Camera::requestSize(float width, float height)
+    {
+        const float cameraAspect = width / height;
+        const Vector2i& windowResolution = m_parentWindow.getResolution();
+        const float windowAspect = float(windowResolution.x) / float(windowResolution.y);
+
+        if (windowAspect > cameraAspect) {
+            float widthScale = windowAspect / cameraAspect;
+            m_size = Vector2f(widthScale * width, height);
+        } else {
+            float heightScale = cameraAspect / windowAspect;
+            m_size = Vector2f(width, heightScale * height);
+        }
+    }
+
 	void Camera::updateTransform()
 	{
 		float* m = m_transform.getMatrix();
 		float cf = cosf(-m_rotation);
 		float sf = sinf(-m_rotation);
 
-		// sb::Vector2f inverseScale(2 / m_width, m_aspectRatio * 2 / m_width);
-        sb::Vector2f inverseScale(2 / m_actualSize.x, 2 / m_actualSize.y);
+        sb::Vector2f inverseScale(2 / m_size.x, 2 / m_size.y);
 		float a = cf * inverseScale.x;
 		float b = -sf * inverseScale.x;
 		float c = sf * inverseScale.y;

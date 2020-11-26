@@ -17,11 +17,7 @@ namespace sb
 
 		virtual ~Window();
 
-		inline const sb::Vector2f& getResolution() const { return m_resolution; }
-
-		inline const float getAspect() const { return m_camera.getAspectRatio(); }
-
-		inline const float getInverseAspect() const { return m_camera.getInverseAspectRatio(); }
+		inline const sb::Vector2i& getResolution() const { return m_resolution; }
 
 		inline bool isOpen() { return m_isOpen; }
 
@@ -48,7 +44,7 @@ namespace sb
 
 		Renderer* m_renderer;
 
-		Vector2f m_resolution;
+		Vector2i m_resolution;
 
 		Camera m_camera;
 	};

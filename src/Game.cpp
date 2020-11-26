@@ -11,9 +11,6 @@ namespace blocks
     void start(Window& window)
     {
         // window.requestCameraSize(10, 18);
-
-        window.getCamera().setHeight(18);
-        window.getCamera().setWidth(10);
     }
 
     void update(Window& window, Backdrop& backdrop)

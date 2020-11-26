@@ -10,34 +10,29 @@ namespace sb
 	{
 	public:
 		Camera(Window& window)
-			:   m_parentWindow(window), m_width(1), m_aspectRatio(1), 
-                m_rotation(0), m_transformNeedsUpdate(true)
+			: m_parentWindow(window), m_rotation(0), m_transformNeedsUpdate(true)
 		{ }
 
 		Transform& getTransform();
 
 		inline const sb::Vector2f& getPosition() const { return m_position; }
 
-		inline float getWidth() const { return m_width; }
-
-		inline float getAspectRatio() const { return m_aspectRatio; }
-
-		inline float getInverseAspectRatio() const { return m_inverseAspectRatio; }
-
 		inline float getRotation() const { return m_rotation; }
 
-        void requestSize(float width, float height);
+        inline float getWidth() const { return m_size.x; }
+
+        inline float getHeight() const { return m_size.y; }
+
+        inline float getAspectRatio() const { return getWidth() / getHeight(); }
+
+        inline float getInverseAspectRatio() const { return getHeight() / getWidth(); }
 
 		void setPosition(const sb::Vector2f& position);
 
-		void setWidth(float width);
-
-		void setHeight(float height);
-
-		void setAspectRatio(float aspect);
-
 		void setRotation(float rotation);
 		
+        void requestSize(float width, float height);
+
 		inline void translate(const sb::Vector2f& translation) { setPosition(getPosition() + translation); }
 
 		inline void rotate(float angle) { setRotation(getRotation() + angle); }
@@ -50,13 +45,7 @@ namespace sb
 
 		sb::Vector2f m_position;
 
-        sb::Vector2f m_actualSize;
-
-		float m_width;
-
-		float m_aspectRatio;
-
-		float m_inverseAspectRatio;
+        sb::Vector2f m_size;
 
 		float m_rotation;
 

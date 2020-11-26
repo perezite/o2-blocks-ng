@@ -38,9 +38,10 @@ namespace cameraDemo1
         Window window(400, 600);
         Quad quad;
 
-        quad.setScale(1.9f);
-        //window.getCamera().setWidth(400);
-        window.getCamera().requestSize(2, 2);
+        quad.setScale(1, 1);
+        window.getCamera().requestSize(10, 10);
+
+        cout << window.getCamera().getWidth() << " " << window.getCamera().getHeight() << endl;
 
         while (window.isOpen())
         {

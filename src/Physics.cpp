@@ -51,12 +51,12 @@ namespace sb {
 
 		if (left < -1)
 			force += (-1 - left) * sb::Vector2f(1, 0);
-		if (top > 1 * window.getInverseAspect())
-			force += (top - 1 * window.getInverseAspect()) * sb::Vector2f(0, -1);
+		if (top > 1 * window.getCamera().getInverseAspectRatio())
+			force += (top - 1 * window.getCamera().getInverseAspectRatio()) * sb::Vector2f(0, -1);
 		if (right > 1)
 			force += (right - 1) * sb::Vector2f(-1, 0);
-		if (bottom < -1 * window.getInverseAspect())
-			force += (-1 * window.getInverseAspect() - bottom) * sb::Vector2f(0, 1);
+		if (bottom < -1 * window.getCamera().getInverseAspectRatio())
+			force += (-1 * window.getCamera().getInverseAspectRatio() - bottom) * sb::Vector2f(0, 1);
 
 		return 1000.0f * force;
 	}
