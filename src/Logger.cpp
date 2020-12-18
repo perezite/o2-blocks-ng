@@ -44,13 +44,15 @@ namespace sb
 
 	void handleError(std::stringstream& stream) {
 		std::string error = stream.str();
+    
+        if (SDL_WasInit(SDL_INIT_VIDEO)) {
+            #if defined(WIN32) && defined(_DEBUG)
+                showDebugMessageBox(error);
+            #else	
+                SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "A problem occured", error.c_str(), NULL);
+            #endif	
+        }
 
-		#if defined(WIN32) && defined(_DEBUG)
-			showDebugMessageBox(error);
-		#else	
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "A problem occured", error.c_str(), NULL);
-		#endif	
-
-			exit(0);
+		exit(0);
 	}
 }
