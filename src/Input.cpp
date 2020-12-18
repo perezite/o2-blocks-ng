@@ -74,14 +74,14 @@ namespace sb
 	{
 		sb::Vector2f pixelPosition = getTouchPixelPosition(window);
 		float factor = window.getCamera().getWidth();
-		return factor * sb::Vector2f(pixelPosition.x / window.getResolution().x - 0.5f, 
-			pixelPosition.y * window.getCamera().getInverseAspectRatio() / window.getResolution().y - 0.5f * window.getCamera().getInverseAspectRatio());
+		return factor * sb::Vector2f(pixelPosition.x / window.getSize().x - 0.5f, 
+			pixelPosition.y * window.getCamera().getInverseAspectRatio() / window.getSize().y - 0.5f * window.getCamera().getInverseAspectRatio());
 	}
 
 	const sb::Vector2f Input::getTouchPixelPosition(const sb::Window& window)
 	{
 		#ifdef WIN32
-			sb::Vector2f pixelPosition(m_mousePosition.x, -m_mousePosition.y + window.getResolution().y);
+			sb::Vector2f pixelPosition(m_mousePosition.x, -m_mousePosition.y + window.getSize().y);
 		#elif defined(__ANDROID__)
 			float y = -m_fingerPosition.y + 1;
 			sb::Vector2f pixelPosition(window.getResolution().x * m_fingerPosition.x, window.getResolution().y * y);

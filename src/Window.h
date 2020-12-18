@@ -10,14 +10,14 @@ namespace sb
 	class Window : public DrawTarget
 	{
 	public:
-		Window(sb::Vector2i resolution) : Window(resolution.x, resolution.y)
+		Window(sb::Vector2i size) : Window(size.x, size.y)
 		{ }
 
 		Window(int width = 400, int height = 400);
 
 		virtual ~Window();
 
-		inline const sb::Vector2i& getResolution() const { return m_resolution; }
+		inline const sb::Vector2i& getSize() const { return m_size; }
 
 		inline bool isOpen() { return m_isOpen; }
 
@@ -44,7 +44,7 @@ namespace sb
 
 		Renderer* m_renderer;
 
-		Vector2i m_resolution;
+		Vector2i m_size;
 
 		Camera m_camera;
 	};

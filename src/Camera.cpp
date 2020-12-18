@@ -26,7 +26,7 @@ namespace sb
     void Camera::requestSize(float width, float height)
     {
         const float cameraAspect = width / height;
-        const Vector2i& windowResolution = m_parentWindow.getResolution();
+        const Vector2i& windowResolution = m_parentWindow.getSize();
         const float windowAspect = float(windowResolution.x) / float(windowResolution.y);
 
         if (windowAspect > cameraAspect) {

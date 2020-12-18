@@ -10,38 +10,50 @@ using namespace std;
 
 namespace blocks
 {
-    Backdrop backdrop;
-    Quad quad;
-
-    void start(Window& window)
+    struct BlocksGame
     {
-        window.getCamera().requestSize(10, 18);
-    }
+        Window window;
+        Backdrop backdrop;
+        Quad quad;
 
-    void update(Window& window)
-    {
-        backdrop.update(window.getCamera());
-    }
+        BlocksGame() : window(400, 600)
+        { }
 
-    void draw(Window& window)
-    {
-        window.draw(backdrop);
-        window.draw(quad);
-    }
+        void start()
+        {
+            // window.setSize(400, 600)
+            window.getCamera().requestSize(10, 18);
+        }
+
+        void update()
+        {
+            backdrop.update(window.getCamera());
+        }
+
+        void draw()
+        {
+            window.draw(backdrop);
+            window.draw(quad);
+        }
+
+        void run()
+        {
+            start();
+
+            while (window.isOpen()) {
+                Input::update();
+                window.update();
+                update();
+                window.clear(Color(1, 1, 1, 1));
+                draw();
+                window.display();
+            }
+        }
+    };
 
     void runGame()
     {
-        Window window(400, 600);
-
-        start(window);
-
-        while (window.isOpen()) {
-            Input::update();
-            window.update();
-            update(window);
-            window.clear(Color(1, 1, 1, 1));
-            draw(window);
-            window.display();
-        }
+        BlocksGame blocksGame;
+        blocksGame.run();  
     }
 }

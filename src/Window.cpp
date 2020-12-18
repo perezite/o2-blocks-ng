@@ -42,7 +42,7 @@ namespace sb
 			SDL_CHECK(m_glContext);
 		#endif
 
-		m_resolution = sb::Vector2i(width, height);
+		m_size = sb::Vector2i(width, height);
         m_camera.requestSize((float)width, (float)height);
 
 		// the renderer expects an opened opengl context, so make sure it is created in the proper place, i.e.: here!
