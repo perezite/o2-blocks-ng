@@ -2,8 +2,8 @@
 #include "CameraDemo1.h"
 
 int main() {
-    //cameraDemo1::run();
-     blocks::runGame();
+    cameraDemo1::run();
+     //blocks::runGame();
 
     return 0;
 }

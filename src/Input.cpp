@@ -84,7 +84,7 @@ namespace sb
 			sb::Vector2f pixelPosition(m_mousePosition.x, -m_mousePosition.y + window.getSize().y);
 		#elif defined(__ANDROID__)
 			float y = -m_fingerPosition.y + 1;
-			sb::Vector2f pixelPosition(window.getResolution().x * m_fingerPosition.x, window.getResolution().y * y);
+			sb::Vector2f pixelPosition(window.getSize().x * m_fingerPosition.x, window.getSize().y * y);
 		#else	
 			#error os not supported
 		#endif
