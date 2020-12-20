@@ -1,8 +1,8 @@
 #include "Window.h"
 #include "Input.h"
 #include "GL.h"
-#include "SDL.h"
 #include <SDL2/SDL_image.h>
+#include <iostream>
 
 namespace sb 
 {
@@ -21,7 +21,7 @@ namespace sb
 			SDL_CHECK(SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1) == 0);
 			SDL_CHECK(SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1) == 0);
 			SDL_CHECK(SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE) == 0);
-			m_sdlWindow = SDL_CreateWindow("Sandbox", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+			m_sdlWindow = SDL_CreateWindow("Sandbox", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 			SDL_CHECK(m_sdlWindow); 
 			m_glContext = SDL_GL_CreateContext(m_sdlWindow);
 			SDL_CHECK(m_glContext);
@@ -57,17 +57,24 @@ namespace sb
 		SDL_Quit();
 	}
 
+    Uint32 Window::getWindowId() const
+    {
+        return SDL_GetWindowID(m_sdlWindow);
+    }
+
     void Window::setSize(int width, int height)
     {
         SDL_SetWindowSize(m_sdlWindow, width, height);
-        SDL_GetWindowSize(m_sdlWindow, &m_size.x, &m_size.y);
-        m_camera.refreshSize();
+        onResize();
     }
 
     void Window::update()
 	{
 		if (Input::hasQuitEvent())
 			m_isOpen = false;
+
+        if (Input::isWindowResizing(*this))
+            onResize();
 	}
 
 	void Window::clear(const Color& clearColor)
@@ -91,5 +98,10 @@ namespace sb
 		SDL_GL_SwapWindow(m_sdlWindow);
 	}
 
-
+    void Window::onResize()
+    {
+        SDL_GetWindowSize(m_sdlWindow, &m_size.x, &m_size.y);
+        glViewport(0, 0, m_size.x, m_size.y);
+        m_camera.refreshSize();
+    }
 }

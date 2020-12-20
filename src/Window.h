@@ -4,6 +4,7 @@
 #include "Renderer.h"
 #include "DrawTarget.h"
 #include "Camera.h"
+#include "SDL.h"
 
 namespace sb
 {
@@ -25,6 +26,8 @@ namespace sb
 
 		inline Camera& getCamera() { return m_camera; }
 
+        Uint32 getWindowId() const;
+
         void setSize(int width, int height);
 
         inline void setSize(sb::Vector2i& size) { setSize(size.x, size.y); }
@@ -38,6 +41,9 @@ namespace sb
 			const DrawStates& states = DrawStates::getDefault());
 
 		void display();
+
+    protected:
+        void onResize();
 
 	private:
 		bool m_isOpen;

@@ -4,6 +4,7 @@
 #include "Window.h"
 #include "SDL.h"
 #include <set>
+#include <vector>
 
 namespace sb 
 {
@@ -24,6 +25,8 @@ namespace sb
 
 		inline static bool isTouchGoingDown(const int index) { return m_touchesGoingDown.count(index) > 0; }
 
+        static bool isWindowResizing(const sb::Window& window);
+
 		static const sb::Vector2f getTouchPosition(const sb::Window& window);
 
 	protected:
@@ -39,6 +42,8 @@ namespace sb
 		static std::set<SDL_FingerID> m_touchesDown;
 
 		static std::set<SDL_FingerID> m_touchesGoingDown;
+
+        static std::vector<Uint32> m_resizedWindows;
 
 		static sb::Vector2f m_mousePosition;
 

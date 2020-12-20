@@ -11,8 +11,10 @@ namespace sb
 
     Transform& Camera::getTransform()
 	{
-		if (m_transformNeedsUpdate)
+        if (m_transformNeedsUpdate) {
 			updateTransform();
+            // m_transformNeedsUpdate = false;
+        }
 
 		return m_transform;
 	}
@@ -31,8 +33,8 @@ namespace sb
 
     void Camera::requestSize(float width, float height)
     {
-        const Vector2i& windowResolution = m_parentWindow.getSize();
-        const float windowAspect = float(windowResolution.x) / float(windowResolution.y);
+        const Vector2i& windowSize = m_parentWindow.getSize();
+        const float windowAspect = float(windowSize.x) / float(windowSize.y);
         const float cameraAspect = width / height;
         m_requestedSize = Vector2f(width, height);
 

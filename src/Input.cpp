@@ -1,6 +1,7 @@
 #include "Input.h"
 #include "SDL.h"
 #include <iostream>
+#include <algorithm>
 
 namespace sb
 {
@@ -9,6 +10,7 @@ namespace sb
 	std::set<KeyCode> Input::m_keysGoingDown;
 	std::set<SDL_FingerID> Input::m_touchesDown;
 	std::set<SDL_FingerID> Input::m_touchesGoingDown;
+    std::vector<Uint32> Input::m_resizedWindows;
 	sb::Vector2f Input::m_mousePosition;
 	sb::Vector2f Input::m_fingerPosition;
 	bool Input::m_insideWindow;
@@ -18,6 +20,7 @@ namespace sb
 		SDL_Event event;
 		m_keysGoingDown.clear();
 		m_touchesGoingDown.clear();
+        m_resizedWindows.clear();
 
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
@@ -63,14 +66,23 @@ namespace sb
 							m_touchesDown.clear();
 							m_touchesGoingDown.clear();
 							break;
+                        case SDL_WINDOWEVENT_RESIZED:
+                            m_resizedWindows.push_back(event.window.windowID);
+                            break;
 					}
 
-					break;
+				break;
 			}
 		}
 	}
 
-	const sb::Vector2f Input::getTouchPosition(const sb::Window& window)
+    bool Input::isWindowResizing(const sb::Window& window)
+    {
+        return std::find(m_resizedWindows.begin(), m_resizedWindows.end(), window.getWindowId()) !=
+            m_resizedWindows.end();
+    }
+
+    const sb::Vector2f Input::getTouchPosition(const sb::Window& window)
 	{
 		sb::Vector2f pixelPosition = getTouchPixelPosition(window);
 		float factor = window.getCamera().getWidth();

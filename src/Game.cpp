@@ -16,12 +16,9 @@ namespace blocks
         Backdrop backdrop;
         Quad quad;
 
-        BlocksGame() : window(400, 600)
-        { }
-
         void start()
         {
-            // window.setSize(400, 600)
+            window.setSize(400, 600);
             window.getCamera().requestSize(10, 18);
         }
 
