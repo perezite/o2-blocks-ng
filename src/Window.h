@@ -25,6 +25,10 @@ namespace sb
 
 		inline Camera& getCamera() { return m_camera; }
 
+        void setSize(int width, int height);
+
+        inline void setSize(sb::Vector2i& size) { setSize(size.x, size.y); }
+
 		void update();
 
 		void clear(const Color& clearColor = Color(0, 0, 0, 1));

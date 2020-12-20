@@ -9,9 +9,7 @@ namespace sb
 	class Camera
 	{
 	public:
-		Camera(Window& window)
-			: m_parentWindow(window), m_rotation(0), m_transformNeedsUpdate(true)
-		{ }
+        Camera(Window& window);
 
 		Transform& getTransform();
 
@@ -21,10 +19,12 @@ namespace sb
 
         inline const sb::Vector2f& getSize() const { return m_size; }
 
+        inline const sb::Vector2f& getRequestedSize() const { return m_requestedSize; }
+
         inline float getWidth() const { return getSize().x; }
 
         inline float getHeight() const { return getSize().y; }
-
+        
         inline float getAspectRatio() const { return getWidth() / getHeight(); }
 
         inline float getInverseAspectRatio() const { return getHeight() / getWidth(); }
@@ -34,8 +34,12 @@ namespace sb
 		void setCenter(const sb::Vector2f& center);
 
 		void setRotation(float rotation);
-		
+	
         void requestSize(float width, float height);
+
+        inline void requestSize(const sb::Vector2f& size) { requestSize(size.x, size.y); }
+
+        void refreshSize();
 
 		inline void translate(const sb::Vector2f& translation) { setCenter(getCenter() + translation); }
 
@@ -50,6 +54,8 @@ namespace sb
 		sb::Vector2f m_center;
 
         sb::Vector2f m_size;
+
+        sb::Vector2f m_requestedSize;
 
 		float m_rotation;
 

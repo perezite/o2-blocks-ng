@@ -57,7 +57,14 @@ namespace sb
 		SDL_Quit();
 	}
 
-	void Window::update()
+    void Window::setSize(int width, int height)
+    {
+        SDL_SetWindowSize(m_sdlWindow, width, height);
+        SDL_GetWindowSize(m_sdlWindow, &m_size.x, &m_size.y);
+        m_camera.refreshSize();
+    }
+
+    void Window::update()
 	{
 		if (Input::hasQuitEvent())
 			m_isOpen = false;
