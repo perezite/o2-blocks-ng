@@ -68,6 +68,14 @@ namespace sb
         onResize();
     }
 
+    void Window::setFramerateLimit(int framerateLimit)
+    {
+        if (framerateLimit == 0)
+            m_minimumMsPerFrame = 0;
+        else
+            m_minimumMsPerFrame = 1000.0f / framerateLimit;
+    }
+
     void Window::update()
 	{
 		if (Input::hasQuitEvent())
@@ -96,6 +104,8 @@ namespace sb
 	void Window::display()
 	{
 		SDL_GL_SwapWindow(m_sdlWindow);
+
+        limitFramerate();
 	}
 
     void Window::onResize()
@@ -103,5 +113,15 @@ namespace sb
         SDL_GetWindowSize(m_sdlWindow, &m_size.x, &m_size.y);
         glViewport(0, 0, m_size.x, m_size.y);
         m_camera.refreshSize();
+    }
+
+    void Window::limitFramerate()
+    {
+        if (m_minimumMsPerFrame != 0) {
+            float delay = m_minimumMsPerFrame - m_stopwatch.getElapsedMs();
+            if (delay > 0)
+                SDL_Delay(round(delay));
+            m_stopwatch.reset();
+        }
     }
 }

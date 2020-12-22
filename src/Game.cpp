@@ -10,6 +10,11 @@ using namespace std;
 
 namespace blocks
 {
+    namespace configuration
+    {
+        bool printFramerate = true;
+    }
+
     struct BlocksGame
     {
         Window window;
@@ -19,6 +24,7 @@ namespace blocks
         void start()
         {
             window.setSize(400, 600);
+            window.setFramerateLimit(100);
             window.getCamera().requestSize(10, 18);
         }
 
@@ -33,6 +39,27 @@ namespace blocks
             window.draw(quad);
         }
 
+        void printFramerate()
+        {
+            static Stopwatch stopwatch;
+            static int counter = 0;
+            counter++;
+
+            if (counter == 100) {
+                float elapsedMs = stopwatch.getElapsedMs();
+                stopwatch.reset();
+                float framerate = (1000.0f * counter) / elapsedMs;
+                counter = 0;
+                cout << "fps: " << int(framerate) << endl;
+            }
+        }
+
+        void stats()
+        {
+            if (configuration::printFramerate)
+                printFramerate();
+        }
+
         void run()
         {
             start();
@@ -44,6 +71,7 @@ namespace blocks
                 window.clear(Color(1, 1, 1, 1));
                 draw();
                 window.display();
+                stats();
             }
         }
     };

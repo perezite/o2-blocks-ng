@@ -4,6 +4,7 @@
 #include "Renderer.h"
 #include "DrawTarget.h"
 #include "Camera.h"
+#include "Stopwatch.h"
 #include "SDL.h"
 
 namespace sb
@@ -32,6 +33,8 @@ namespace sb
 
         inline void setSize(sb::Vector2i& size) { setSize(size.x, size.y); }
 
+        void setFramerateLimit(int framerateLimit);
+
 		void update();
 
 		void clear(const Color& clearColor = Color(0, 0, 0, 1));
@@ -45,6 +48,8 @@ namespace sb
     protected:
         void onResize();
 
+        void limitFramerate();
+
 	private:
 		bool m_isOpen;
 
@@ -56,6 +61,11 @@ namespace sb
 
 		Vector2i m_size;
 
+        Stopwatch m_stopwatch;
+
+        float m_minimumMsPerFrame;
+
 		Camera m_camera;
+
 	};
 }
