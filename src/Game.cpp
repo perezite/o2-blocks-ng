@@ -54,7 +54,7 @@ namespace blocks
             }
         }
 
-        void stats()
+        void printStats()
         {
             if (configuration::printFramerate)
                 printFramerate();
@@ -71,7 +71,7 @@ namespace blocks
                 window.clear(Color(1, 1, 1, 1));
                 draw();
                 window.display();
-                stats();
+                printStats();
             }
         }
     };

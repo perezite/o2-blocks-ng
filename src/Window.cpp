@@ -104,7 +104,6 @@ namespace sb
 	void Window::display()
 	{
 		SDL_GL_SwapWindow(m_sdlWindow);
-
         limitFramerate();
 	}
 
@@ -120,7 +119,7 @@ namespace sb
         if (m_minimumMsPerFrame != 0) {
             float delay = m_minimumMsPerFrame - m_stopwatch.getElapsedMs();
             if (delay > 0)
-                SDL_Delay(round(delay));
+                SDL_Delay(delay);
             m_stopwatch.reset();
         }
     }
