@@ -119,7 +119,7 @@ namespace sb
         if (m_minimumMsPerFrame != 0) {
             float delay = m_minimumMsPerFrame - m_stopwatch.getElapsedMs();
             if (delay > 0)
-                SDL_Delay(delay);
+                SDL_Delay((int)delay);
             m_stopwatch.reset();
         }
     }

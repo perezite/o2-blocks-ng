@@ -13,7 +13,7 @@ namespace sb
 	{
         if (m_transformNeedsUpdate) {
 			updateTransform();
-            // m_transformNeedsUpdate = false;
+            m_transformNeedsUpdate = false;
         }
 
 		return m_transform;

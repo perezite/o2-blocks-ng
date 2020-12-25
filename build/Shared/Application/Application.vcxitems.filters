@@ -156,6 +156,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\CameraDemo1.h">
       <Filter>Demos\01_Camera\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Block.h">
+      <Filter>Blocks\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Window.cpp">
@@ -245,6 +248,9 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\CameraDemo1.cpp">
       <Filter>Demos\01_Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Block.cpp">
+      <Filter>Blocks</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

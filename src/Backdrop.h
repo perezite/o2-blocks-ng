@@ -1,8 +1,9 @@
+#pragma once
+
 #include "Drawable.h"
 #include "Transformable.h"
 #include "Camera.h"
 #include "Mesh.h"
-
 
 namespace blocks
 {
