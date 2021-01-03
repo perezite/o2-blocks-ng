@@ -1,10 +1,8 @@
 #include "Game.h"
 #include "Window.h"
 #include "Input.h"
-#include "Backdrop.h"
-#include "Quad.h"
 #include "Logger.h"
-#include "Block.h"
+#include "Board.h"
 #include <iostream>
 
 using namespace sb;
@@ -47,8 +45,7 @@ namespace blocks
     struct BlocksGame
     {
         Window window;
-        Backdrop backdrop;
-        Block block;
+        Board board;
 
         void start()
         {
@@ -56,19 +53,7 @@ namespace blocks
             window.setFramerateLimit(65);
             window.getCamera().requestSize(10, 18);
             window.getCamera().setCenter(.5f * window.getCamera().getSize());
-            block.setType('i');
-        }
-
-        void update()
-        {
-            backdrop.update(window.getCamera());
-            //block.update();
-        }
-
-        void draw()
-        {
-            window.draw(backdrop);
-            window.draw(block);
+            board.start();
         }
 
         void run()
@@ -78,9 +63,9 @@ namespace blocks
             while (window.isOpen()) {
                 Input::update();
                 window.update();
-                update();
-                window.clear(Color(1, 1, 1, 1));
-                draw();
+                board.update(window);
+                window.clear(Color(1, 1, 1, 1));    
+                board.draw(window);
                 window.display();
                 printStats();
             }
