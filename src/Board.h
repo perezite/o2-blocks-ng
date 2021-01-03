@@ -12,6 +12,7 @@ namespace blocks
     {
         Backdrop _backdrop;
         Block _block;
+        // Tetromino _tetromino;
 
     public:
         void start();
