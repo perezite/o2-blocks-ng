@@ -10,13 +10,40 @@
 using namespace sb;
 using namespace std;
 
-namespace blocks
+namespace configuration
 {
-    namespace configuration
+    bool printFramerate = true;
+}
+
+namespace 
+{
+    void printFramerate()
     {
-        bool printFramerate = true;
+        if (!configuration::printFramerate)
+            return;
+
+        static Stopwatch stopwatch;
+        static int counter = 0;
+        counter++;
+
+        if (counter == 100) {
+            float elapsedMs = stopwatch.getElapsedMs();
+            stopwatch.reset();
+            float framerate = (1000.0f * counter) / elapsedMs;
+            counter = 0;
+            SB_MESSAGE("fps: " << int(framerate));
+        }
     }
 
+    void printStats()
+    {
+        if (configuration::printFramerate)
+            printFramerate();
+    }
+}
+
+namespace blocks
+{
     struct BlocksGame
     {
         Window window;
@@ -42,27 +69,6 @@ namespace blocks
         {
             window.draw(backdrop);
             window.draw(block);
-        }
-
-        void printFramerate()
-        {
-            static Stopwatch stopwatch;
-            static int counter = 0;
-            counter++;
-
-            if (counter == 100) {
-                float elapsedMs = stopwatch.getElapsedMs();
-                stopwatch.reset();
-                float framerate = (1000.0f * counter) / elapsedMs;
-                counter = 0;
-                SB_MESSAGE("fps: " << int(framerate));
-            }
-        }
-
-        void printStats()
-        {
-            if (configuration::printFramerate)
-                printFramerate();
         }
 
         void run()
