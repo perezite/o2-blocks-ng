@@ -35,14 +35,15 @@ namespace sb
 
 	void logError(std::stringstream& stream) {
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", stream.str().c_str());
-		handleError(stream);
+		displayError(stream);
+        exit(1);
 	}
 
 	void logWarning(std::stringstream& stream) {
 		SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "%s", stream.str().c_str());
 	}
 
-	void handleError(std::stringstream& stream) {
+	void displayError(std::stringstream& stream) {
 		std::string error = stream.str();
     
         if (SDL_WasInit(SDL_INIT_VIDEO)) {
@@ -52,7 +53,5 @@ namespace sb
                 SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "A problem occured", error.c_str(), NULL);
             #endif	
         }
-
-		exit(0);
 	}
 }

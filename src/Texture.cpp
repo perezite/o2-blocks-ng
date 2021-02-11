@@ -37,7 +37,6 @@ namespace sb
 		createEmptyTexture(m_internalSize, sb::Color(0, 0, 0, 0));
 		GL_CHECK(glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, image.getWidth(), 
 			image.getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, image.getPixels()));
-
 	}
 
 	void Texture::createEmpty(const sb::Vector2i& size, const Color& color) {

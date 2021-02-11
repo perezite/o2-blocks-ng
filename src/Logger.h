@@ -11,7 +11,7 @@ namespace sb {
 
 	void logWarning(std::stringstream& stream);
 
-	void handleError(std::stringstream& stream);
+	void displayError(std::stringstream& stream);
 }
 
 #define SB_MESSAGE(stream) do {						\

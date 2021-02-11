@@ -7,11 +7,9 @@ namespace blocks
 {
     class Block : public sb::Sprite
     {
-
-    protected:
-        sb::Texture& getBlockTextureSheet();
-
     public:
+        Block();
+
         void setType(char type);
     };
 }

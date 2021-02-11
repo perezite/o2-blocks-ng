@@ -1,32 +1,32 @@
 #include "Block.h"
 #include "Rect.h"
 #include "Logger.h"
+#include "AssetStore.h"
 
 using namespace sb;
 
 namespace
 {
-    const sb::Vector2i BlocksTexturesSize(128);
+    const sb::Vector2i BlocksTextureSheetSize(128);
 
     IntRect getBlockTextureArea(unsigned int x, unsigned int y)
     {
-        return IntRect(x * BlocksTexturesSize.x, y * BlocksTexturesSize.y, 
-            BlocksTexturesSize.x, BlocksTexturesSize.y);
+        return IntRect(x * BlocksTextureSheetSize.x, y * BlocksTextureSheetSize.y, 
+            BlocksTextureSheetSize.x, BlocksTextureSheetSize.y);
     }
 }
 
 namespace blocks
 {
-    sb::Texture& Block::getBlockTextureSheet()
-    {
-        static sb::Texture blockTextureSheet("Textures/Blocks.png");
-        return blockTextureSheet;
-    }
+    Block::Block()
+    { }
 
     void Block::setType(char type)
     {
+        Texture& textureSheet = AssetStore::getInstance().getBlockTextureSheet();
+
         if (type == 'i')
-            setTexture(getBlockTextureSheet(), getBlockTextureArea(1, 2));
+            setTexture(textureSheet, getBlockTextureArea(1, 2));
         else
             SB_ERROR("Invalid tetromino type " << type);
     }
