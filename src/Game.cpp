@@ -17,11 +17,8 @@ namespace
 {
     void printFramerate()
     {
-        if (!configuration::printFramerate)
-            return;
-
         static Stopwatch stopwatch;
-        static int counter = 0;
+        static size_t counter = 0;
         counter++;
 
         if (counter == 100) {
@@ -45,6 +42,7 @@ namespace blocks
     struct BlocksGame
     {
         Window window;
+        Backdrop backdrop;
         Board board;
 
         void start()
@@ -56,16 +54,28 @@ namespace blocks
             board.start();
         }
 
+        void update()
+        {
+            Input::update();
+            window.update();
+            backdrop.update(window.getCamera());
+            board.update(window);
+        }
+
+        void draw()
+        {
+            window.draw(backdrop);
+            window.draw(board);
+        }
+
         void run()
         {
             start();
 
             while (window.isOpen()) {
-                Input::update();
-                window.update();
-                board.update(window);
-                window.clear(Color(1, 1, 1, 1));    
-                board.draw(window);
+                update();
+                window.clear(Color(1, 1, 1, 1));   
+                draw();
                 window.display();
                 printStats();
             }

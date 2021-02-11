@@ -14,12 +14,10 @@ namespace blocks
 
     void Board::update(Window& window)
     {
-        _backdrop.update(window.getCamera());
     }
 
     void Board::draw(DrawTarget& target, DrawStates drawStates)
     {
-        target.draw(_backdrop);
         target.draw(_block);
     }
 }
