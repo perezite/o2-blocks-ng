@@ -4,6 +4,10 @@
 	#include <Windows.h>
 #endif
 
+#if defined(WIN32) && defined(_DEBUG)
+    #define WIN32_DEBUG
+#endif
+
 namespace 
 {
 	#ifdef WIN32
@@ -29,13 +33,35 @@ namespace
 
 namespace sb
 {
+    void displayError(std::stringstream& stream) {
+        std::string error = stream.str();
+
+        #ifdef WIN32_DEBUG
+            showDebugMessageBox(error);
+        #else	
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "A problem occured", error.c_str(), NULL);
+        #endif	
+    }
+
+    void handleErrorWithoutSdl()
+    {
+        #ifdef WIN32_DEBUG
+            __debugbreak();
+        #endif
+    }
+
 	void logMessage(std::stringstream& stream) {
 		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "%s", stream.str().c_str());
 	}
 
 	void logError(std::stringstream& stream) {
 		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%s", stream.str().c_str());
-		displayError(stream);
+
+        if (SDL_WasInit(SDL_INIT_VIDEO))
+            displayError(stream);
+        else
+            handleErrorWithoutSdl();
+
         exit(1);
 	}
 
@@ -43,15 +69,4 @@ namespace sb
 		SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "%s", stream.str().c_str());
 	}
 
-	void displayError(std::stringstream& stream) {
-		std::string error = stream.str();
-    
-        if (SDL_WasInit(SDL_INIT_VIDEO)) {
-            #if defined(WIN32) && defined(_DEBUG)
-                showDebugMessageBox(error);
-            #else	
-                SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "A problem occured", error.c_str(), NULL);
-            #endif	
-        }
-	}
 }

@@ -3,6 +3,7 @@
 #include "Input.h"
 #include "Logger.h"
 #include "Board.h"
+#include "Backdrop.h"
 #include "GameAssets.h"
 #include <iostream>
 

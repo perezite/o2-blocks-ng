@@ -2,9 +2,9 @@
 
 #include "Drawable.h"
 #include "Transformable.h"
-#include "Backdrop.h"
 #include "Tetromino.h"
 #include "GameAssets.h"
+#include "Window.h"
 #include "Block.h"
 
 namespace blocks 
@@ -12,7 +12,7 @@ namespace blocks
     class Board : public sb::Drawable, public sb::Transformable
     {
         Block _block;
-        // Tetromino _tetromino;
+        Tetromino _tetromino;
 
     public:
         Board(GameAssets& assets) 
