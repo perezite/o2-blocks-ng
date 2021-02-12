@@ -1,7 +1,7 @@
 #include "Block.h"
 #include "Rect.h"
 #include "Logger.h"
-#include "AssetStore.h"
+#include "GameAssets.h"
 
 using namespace sb;
 
@@ -18,15 +18,10 @@ namespace
 
 namespace blocks
 {
-    Block::Block()
-    { }
-
     void Block::setType(char type)
     {
-        Texture& textureSheet = AssetStore::getInstance().getBlockTextureSheet();
-
         if (type == 'i')
-            setTexture(textureSheet, getBlockTextureArea(1, 2));
+            setTexture(_assets.blockTextures, getBlockTextureArea(1, 2));
         else
             SB_ERROR("Invalid tetromino type " << type);
     }

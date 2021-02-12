@@ -165,7 +165,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Board.h">
       <Filter>Blocks\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\AssetStore.h">
+    <ClInclude Include="E:\Indie\Development\Simulo\o2-blocks-ng\build\Shared\Application\..\..\..\src\GameAssets.h">
       <Filter>Blocks\Headers</Filter>
     </ClInclude>
   </ItemGroup>
@@ -267,7 +267,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Board.cpp">
       <Filter>Blocks</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\AssetStore.cpp">
+    <ClCompile Include="E:\Indie\Development\Simulo\o2-blocks-ng\build\Shared\Application\..\..\..\src\GameAssets.cpp">
       <Filter>Blocks</Filter>
     </ClCompile>
   </ItemGroup>

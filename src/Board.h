@@ -4,6 +4,7 @@
 #include "Transformable.h"
 #include "Backdrop.h"
 #include "Tetromino.h"
+#include "GameAssets.h"
 #include "Block.h"
 
 namespace blocks 
@@ -14,6 +15,10 @@ namespace blocks
         // Tetromino _tetromino;
 
     public:
+        Board(GameAssets& assets) 
+            : _block(assets)
+        { }
+
         void start();
 
         void update(sb::Window& window);

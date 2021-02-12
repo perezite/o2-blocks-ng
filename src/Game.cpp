@@ -3,7 +3,7 @@
 #include "Input.h"
 #include "Logger.h"
 #include "Board.h"
-#include "AssetStore.h"
+#include "GameAssets.h"
 #include <iostream>
 
 using namespace sb;
@@ -40,17 +40,16 @@ namespace
 
 namespace blocks
 {
-    class MyAssetStore
-    {
-
-    };
-
     struct BlocksGame
     {
         Window window;
+        GameAssets gameAssets;
         Backdrop backdrop;
         Board board;
-        MyAssetStore assets;
+
+        BlocksGame()
+            : board(gameAssets)
+        { }
 
         void start()
         {
@@ -58,7 +57,7 @@ namespace blocks
             window.setFramerateLimit(65);
             window.getCamera().requestSize(10, 18);
             window.getCamera().setCenter(.5f * window.getCamera().getSize());
-            board.start(assets);
+            board.start();
         }
 
         void update()
