@@ -2,17 +2,18 @@
 
 #include "Sprite.h"
 #include "Rect.h"
+#include "Texture.h"
 #include "GameAssets.h"
 
 namespace blocks
 {
     class Block : public sb::Sprite
     {
-        GameAssets& _assets;
+        sb::Texture& _blockTextures;
 
     public:
-        Block(GameAssets& assets) :
-            _assets(assets)
+        Block(sb::Texture& blockTextures) :
+            _blockTextures(blockTextures)
         { }
 
         void setType(char type);

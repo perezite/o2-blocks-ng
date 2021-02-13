@@ -38,7 +38,6 @@ namespace sb
 			m_mesh[i].color = color;
 	}
 
-
 	void Sprite::draw(DrawTarget& target, DrawStates states)
 	{
 		states.transform *= getTransform();

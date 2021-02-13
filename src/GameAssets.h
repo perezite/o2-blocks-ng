@@ -10,5 +10,7 @@ namespace blocks
         GameAssets();
 
         sb::Texture blockTextures;
+
+        sb::Texture squareTextures;
     };
 }

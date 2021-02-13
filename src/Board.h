@@ -15,8 +15,9 @@ namespace blocks
         Tetromino _tetromino;
 
     public:
-        Board(GameAssets& assets) 
-            : _block(assets)
+        Board(GameAssets& assets) : 
+            _block(assets.blockTextures),
+            _tetromino(assets.squareTextures)
         { }
 
         void start();
