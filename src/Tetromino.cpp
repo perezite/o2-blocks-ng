@@ -17,10 +17,10 @@ namespace
             SquareTextureSize.x, SquareTextureSize.y);
     }
 
-    void test(const sb::Vector2i (&source)[4], sb::Vector2i(&destination)[4]) 
-    {
-        copy(begin(source), end(source), begin(destination));
-    }
+    //void test(const sb::Vector2i (&source)[4], sb::Vector2i(&destination)[4]) 
+    //{
+    //    copy(begin(source), end(source), begin(destination));
+    //}
 }
 
 namespace blocks
