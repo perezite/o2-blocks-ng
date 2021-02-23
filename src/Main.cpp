@@ -2,8 +2,15 @@
 #include "Logger.h"
 #include "CameraDemo1.h"
 
+// TODO: 
+// - Draft Tetromino
+//   - Collision
+//   - Rotation
+//   - Autodrop
+//   - Hard Drop
+//   - Annealing
+//   - Respawn
 
-// TODO: Draft Tetromino
 int main() {
     blocks::runGame();
 

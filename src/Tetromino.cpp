@@ -1,6 +1,8 @@
 #include "Tetromino.h"
 #include "DrawTarget.h"
 #include "Rect.h"
+#include "Memory.h"
+#include "Input.h"
 #include <algorithm>
 #include <iterator>
 
@@ -16,25 +18,26 @@ namespace
         return IntRect(x * SquareTextureSize.x, y * SquareTextureSize.y,
             SquareTextureSize.x, SquareTextureSize.y);
     }
-
-    //void test(const sb::Vector2i (&source)[4], sb::Vector2i(&destination)[4]) 
-    //{
-    //    copy(begin(source), end(source), begin(destination));
-    //}
 }
 
 namespace blocks
 {
-    void Tetromino::setSquarePositions(const sb::Vector2i(&squarePositions)[4])
-    {
-        copy(begin(squarePositions), end(squarePositions), begin(_squarePositions));
-    }
-
     Tetromino::Tetromino(Texture& squareTextures) :
         _squareTextures(squareTextures),
         _squareSprite(squareTextures)
     {
         setType('t');
+    }
+
+    void Tetromino::setType(char type)
+    {
+        if (type == 't') {
+            _squareSprite.setTexture(_squareTextures, getSquareTextureArea(0, 0));
+            Vector2i newSquarePositions[4] = { Vector2i(0, 0), Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, 1) };
+            copyAll(newSquarePositions, _squarePositions);
+        }
+        else
+            SB_ERROR("Invalid tetromino type " << type);
     }
 
     void Tetromino::draw(sb::DrawTarget& target, sb::DrawStates drawStates)
@@ -48,13 +51,13 @@ namespace blocks
         }
     }
 
-    void Tetromino::setType(char type)
+    void Tetromino::update()
     {
-        if (type == 't') {
-            _squareSprite.setTexture(_squareTextures, getSquareTextureArea(0, 0));
-            setSquarePositions( { Vector2i(0, 0), Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, 1) } );
-        }
-        else
-            SB_ERROR("Invalid tetromino type " << type);
+        if (Input::isKeyGoingDown(KeyCode::Left))
+            translate(-1,  0);
+        if (Input::isKeyGoingDown(KeyCode::Right))
+            translate(+1,  0);
+        if (Input::isKeyGoingDown(KeyCode::Down))
+            translate( 0, -1);
     }
 }

@@ -12,7 +12,7 @@ using namespace std;
 
 namespace configuration
 {
-    bool printFramerate = true;
+    bool printFramerate = false;
 }
 
 namespace 

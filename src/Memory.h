@@ -34,4 +34,10 @@ namespace sb
 		for (std::size_t i = 0; i < toDelete.size(); i++)
 			delete toDelete[i];
 	}
+
+	template <class T>
+	void copyAll(const T& source, T& destination)
+	{
+		std::copy(begin(source), end(source), begin(destination));
+	}
 }

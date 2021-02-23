@@ -15,14 +15,13 @@ namespace blocks
 
         sb::Vector2i _squarePositions[4];
 
-    protected: 
-        void setSquarePositions(const sb::Vector2i(&squarePositions)[4]);
-
     public:
         Tetromino(sb::Texture& squareTextures);
 
+        void setType(char type);
+
         virtual void draw(sb::DrawTarget& target, sb::DrawStates drawStates = sb::DrawStates::getDefault());
 
-        void setType(char type);
+        void update();
     };
 }
