@@ -38,6 +38,6 @@ namespace sb
 	template <class T>
 	void copyAll(const T& source, T& destination)
 	{
-		std::copy(begin(source), end(source), begin(destination));
+		std::copy(std::begin(source), std::end(source), std::begin(destination));
 	}
 }
