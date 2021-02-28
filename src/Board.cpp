@@ -8,7 +8,8 @@ using namespace sb;
 namespace blocks
 {
     Board::Board(GameAssets& assets) :
-        _tetromino(assets.squareTextures)
+        _tetromino(assets.squareTextures),
+        _collider(*this)
     { 
         _blocks.push_back(Block(assets.blockTextures));
         _blocks[0].setType('i');
@@ -18,15 +19,23 @@ namespace blocks
 
     void Board::start() { }
 
+    void Board::updateCollider(Transform transform)
+    {
+        _collider.updateCollider(transform, _blocks);
+    }
+
     void Board::update(Window& window)
     {
         _tetromino.update();
     }
 
-    void Board::draw(DrawTarget& target, DrawStates drawStates)
+    void Board::draw(DrawTarget& target, DrawStates states)
     {
+        states.transform *= getTransform();
+
+        target.draw(_tetromino, states);
+
         for (size_t i = 0; i < _blocks.size(); i++)
-            target.draw(_blocks[i]);
-        target.draw(_tetromino);
+            target.draw(_blocks[i], states);
     }
 }

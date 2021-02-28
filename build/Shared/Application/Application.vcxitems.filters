@@ -168,6 +168,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\GameAssets.h">
       <Filter>Blocks\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\BoardCollider.h">
+      <Filter>Blocks\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Window.cpp">
@@ -268,6 +271,9 @@
       <Filter>Blocks</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\GameAssets.cpp">
+      <Filter>Blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\BoardCollider.cpp">
       <Filter>Blocks</Filter>
     </ClCompile>
   </ItemGroup>

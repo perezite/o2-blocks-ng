@@ -2,6 +2,7 @@
 
 #include "Drawable.h"
 #include "Transformable.h"
+#include "BoardCollider.h"
 #include "Tetromino.h"
 #include "GameAssets.h"
 #include "Window.h"
@@ -14,11 +15,14 @@ namespace blocks
     {
         Tetromino _tetromino;
         std::vector<Block> _blocks;
+        BoardCollider _collider;
 
     public:
         Board(GameAssets& assets);
 
         void start();
+
+        void updateCollider(sb::Transform transform);
 
         void update(sb::Window& window);
 
