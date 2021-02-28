@@ -11,12 +11,10 @@ namespace blocks
 
     class BoardCollider 
     {
-        Board& _board;
         std::vector<sb::Vector2i> globalPositions;
 
     public:
-        BoardCollider(Board& board)
-            : _board(board)
+        BoardCollider()
         { }
 
         void updateCollider(const sb::Transform& globalBoardTransform, const std::vector<Block>& boardBlocks);

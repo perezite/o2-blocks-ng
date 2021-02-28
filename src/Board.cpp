@@ -8,8 +8,7 @@ using namespace sb;
 namespace blocks
 {
     Board::Board(GameAssets& assets) :
-        _tetromino(assets.squareTextures),
-        _collider(*this)
+        _tetromino(assets.squareTextures)
     { 
         _blocks.push_back(Block(assets.blockTextures));
         _blocks[0].setType('i');
