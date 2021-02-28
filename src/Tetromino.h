@@ -15,6 +15,9 @@ namespace blocks
 
         sb::Vector2i _squarePositions[4];
 
+    protected:
+        void setSquares(const sb::Vector2i(&squarePositions)[4], size_t texPosX, size_t texPosY);
+
     public:
         Tetromino(sb::Texture& squareTextures);
 

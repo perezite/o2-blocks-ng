@@ -106,6 +106,7 @@ namespace sb
 		return Vector2<T>(vector.x / scalar, vector.y / scalar);
 	}
 
-	typedef Vector2<float>	Vector2f;
-	typedef Vector2<int>	Vector2i;
+	typedef Vector2<float>			Vector2f;
+	typedef Vector2<int>			Vector2i;
+	typedef Vector2<unsigned int>	Vector2ui;
 }

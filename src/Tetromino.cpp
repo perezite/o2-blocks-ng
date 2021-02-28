@@ -11,10 +11,11 @@ using namespace std;
 
 namespace
 {
-    const sb::Vector2i SquareTextureSize(128);
+    const sb::Vector2ui SquareTextureSize(128);
 
-    IntRect getSquareTextureArea(unsigned int x, unsigned int y)
-    {
+    const sb::Vector2i TShapeSquarePositions[4] = { Vector2i(0, 0), Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, 1) };
+
+    IntRect getSquareTextureArea(size_t x, size_t y) {
         return IntRect(x * SquareTextureSize.x, y * SquareTextureSize.y,
             SquareTextureSize.x, SquareTextureSize.y);
     }
@@ -22,6 +23,12 @@ namespace
 
 namespace blocks
 {
+    void Tetromino::setSquares(const sb::Vector2i(&squarePositions)[4], size_t texPosX, size_t texPosY)
+    {
+        _squareSprite.setTexture(_squareTextures, getSquareTextureArea(texPosX, texPosY));
+        copyAll(TShapeSquarePositions, _squarePositions);
+    }
+
     Tetromino::Tetromino(Texture& squareTextures) :
         _squareTextures(squareTextures),
         _squareSprite(squareTextures)
@@ -31,11 +38,8 @@ namespace blocks
 
     void Tetromino::setType(char type)
     {
-        if (type == 't') {
-            _squareSprite.setTexture(_squareTextures, getSquareTextureArea(0, 0));
-            Vector2i newSquarePositions[4] = { Vector2i(0, 0), Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, 1) };
-            copyAll(newSquarePositions, _squarePositions);
-        }
+        if (type == 't')
+            setSquares(TShapeSquarePositions, 0, 0);
         else
             SB_ERROR("Invalid tetromino type " << type);
     }
@@ -44,8 +48,7 @@ namespace blocks
     {
         drawStates.transform *= getTransform();
 
-        for (size_t i = 0; i < 4; i++)
-        {
+        for (size_t i = 0; i < 4; i++) {
             _squareSprite.setPosition((float)_squarePositions[i].x, (float)_squarePositions[i].y);
             target.draw(_squareSprite, drawStates);
         }

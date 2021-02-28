@@ -4,7 +4,6 @@
 
 // TODO: 
 // - Draft Tetromino
-//   - Fix Android segfault upon first start after install
 //   - Collision
 //   - Rotation
 //   - Autodrop
