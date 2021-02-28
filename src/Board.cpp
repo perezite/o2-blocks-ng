@@ -7,12 +7,16 @@ using namespace sb;
 
 namespace blocks
 {
-    void Board::start()
-    {
-        _block.setType('i');
-        _block.setPosition(3, 14);
+    Board::Board(GameAssets& assets) :
+        _tetromino(assets.squareTextures)
+    { 
+        _blocks.push_back(Block(assets.blockTextures));
+        _blocks[0].setType('i');
+        _blocks[0].setPosition(3, 14);
         _tetromino.setPosition(5, 16);
     }
+
+    void Board::start() { }
 
     void Board::update(Window& window)
     {
@@ -21,7 +25,8 @@ namespace blocks
 
     void Board::draw(DrawTarget& target, DrawStates drawStates)
     {
-        target.draw(_block);
+        for (size_t i = 0; i < _blocks.size(); i++)
+            target.draw(_blocks[i]);
         target.draw(_tetromino);
     }
 }

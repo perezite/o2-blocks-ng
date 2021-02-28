@@ -6,19 +6,17 @@
 #include "GameAssets.h"
 #include "Window.h"
 #include "Block.h"
+#include <vector>
 
 namespace blocks 
 {
     class Board : public sb::Drawable, public sb::Transformable
     {
-        Block _block;
         Tetromino _tetromino;
+        std::vector<Block> _blocks;
 
     public:
-        Board(GameAssets& assets) : 
-            _block(assets.blockTextures),
-            _tetromino(assets.squareTextures)
-        { }
+        Board(GameAssets& assets);
 
         void start();
 
