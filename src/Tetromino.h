@@ -4,6 +4,7 @@
 #include "Sprite.h"
 #include "Drawable.h"
 #include "Transformable.h"
+#include "BlockyCollider.h"
 
 namespace blocks 
 {
@@ -13,10 +14,12 @@ namespace blocks
 
         sb::Sprite _squareSprite;
 
-        sb::Vector2i _squarePositions[4];
+        std::vector<sb::Vector2i> _squarePositions;
+
+        BlockyCollider _collider;
 
     protected:
-        void setSquares(const sb::Vector2i(&squarePositions)[4], size_t texPosX, size_t texPosY);
+        void setSquares(const std::vector<sb::Vector2i>& squarePositions, size_t texPosX, size_t texPosY);
 
     public:
         Tetromino(sb::Texture& squareTextures);
@@ -24,6 +27,8 @@ namespace blocks
         void setType(char type);
 
         virtual void draw(sb::DrawTarget& target, sb::DrawStates drawStates = sb::DrawStates::getDefault());
+
+        void updateColliders(sb::Transform transform);
 
         void update();
     };

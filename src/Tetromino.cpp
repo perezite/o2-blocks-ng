@@ -13,7 +13,7 @@ namespace
 {
     const sb::Vector2ui SquareTextureSize(128);
 
-    const sb::Vector2i TShapeSquarePositions[4] = { Vector2i(0, 0), Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, 1) };
+    const std::vector<sb::Vector2i> TShapeSquarePositions = { Vector2i(0, 0), Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, 1) };
 
     IntRect getSquareTextureArea(size_t x, size_t y) {
         return IntRect(x * SquareTextureSize.x, y * SquareTextureSize.y,
@@ -23,10 +23,11 @@ namespace
 
 namespace blocks
 {
-    void Tetromino::setSquares(const sb::Vector2i(&squarePositions)[4], size_t texPosX, size_t texPosY)
+    void Tetromino::setSquares(const std::vector<sb::Vector2i>& squarePositions, size_t texPosX, size_t texPosY)
     {
         _squareSprite.setTexture(_squareTextures, getSquareTextureArea(texPosX, texPosY));
-        copyAll(TShapeSquarePositions, _squarePositions);
+        _squarePositions.clear();
+        _squarePositions.assign(TShapeSquarePositions.begin(), TShapeSquarePositions.end());
     }
 
     Tetromino::Tetromino(Texture& squareTextures) :
@@ -52,6 +53,12 @@ namespace blocks
             _squareSprite.setPosition((float)_squarePositions[i].x, (float)_squarePositions[i].y);
             target.draw(_squareSprite, drawStates);
         }
+    }
+
+    void Tetromino::updateColliders(sb::Transform transform)
+    {
+        transform *= getTransform();
+        _collider.update(transform, _squarePositions);
     }
 
     void Tetromino::update()

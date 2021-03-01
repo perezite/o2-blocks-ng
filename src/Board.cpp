@@ -18,9 +18,10 @@ namespace blocks
 
     void Board::start() { }
 
-    void Board::updateCollider(Transform transform)
+    void Board::updateColliders(Transform transform)
     {
-        _collider.updateCollider(transform, _blocks);
+        transform *= getTransform();
+        _collider.update(transform, _blocks);
     }
 
     void Board::update(Window& window)

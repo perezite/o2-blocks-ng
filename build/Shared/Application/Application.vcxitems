@@ -16,7 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Asset.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\BoardCollider.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\BlockyCollider.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\GameAssets.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Backdrop.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Block.h" />
@@ -67,7 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Asset.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\BoardCollider.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\BlockyCollider.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\GameAssets.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Backdrop.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Block.cpp" />
