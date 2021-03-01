@@ -22,6 +22,7 @@ namespace blocks
     {
         transform *= getTransform();
         _collider.update(transform, _blocks);
+        _tetromino.updateColliders(transform);
     }
 
     void Board::update(Window& window)

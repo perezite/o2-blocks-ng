@@ -24,7 +24,8 @@ namespace blocks
 
         template <class T>
         void update(const sb::Transform& globalTransform, const std::vector<T>& entities) {
-            std::vector<sb::Vector2i> positions(entities.size());
+            std::vector<sb::Vector2i> positions;
+            positions.reserve(entities.size());
             for (size_t i = 0; i < entities.size(); i++) {
                 const sb::Vector2f& entityPos = entities[i].getPosition();
                 sb::Vector2i position = sb::Vector2i((int)entityPos.x, (int)entityPos.y);
