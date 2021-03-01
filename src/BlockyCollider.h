@@ -15,6 +15,11 @@ namespace blocks
 
         std::vector<sb::Vector2i> _globalPositions;
 
+    protected:
+        bool hasCollisions(const std::vector<sb::Vector2i>& leftPositions, const std::vector<sb::Vector2i>& rightPositions);
+
+        void displacePositions(const std::vector<sb::Vector2i>& oldPositions, const sb::Vector2i& displacement, std::vector<sb::Vector2i>& newPositions);
+
     public:
         BlockyCollider();
 
@@ -34,5 +39,7 @@ namespace blocks
 
             update(globalTransform, positions);
         }
+
+        bool wouldCollide(const sb::Vector2i& displacement);
     };
 }

@@ -21,6 +21,8 @@ namespace blocks
     protected:
         void setSquares(const std::vector<sb::Vector2i>& squarePositions, size_t texPosX, size_t texPosY);
 
+        void tryMove(int x, int y);
+
     public:
         Tetromino(sb::Texture& squareTextures);
 

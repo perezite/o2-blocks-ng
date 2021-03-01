@@ -168,9 +168,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\GameAssets.h">
       <Filter>Blocks\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Data\Indie\Development\o2-blocks-ng\build\Shared\Application\..\..\..\src\BlockyCollider.h">
-      <Filter>Blocks\Headers</Filter>
-    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\BlockyCollider.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Window.cpp">
@@ -273,8 +271,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\GameAssets.cpp">
       <Filter>Blocks</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Data\Indie\Development\o2-blocks-ng\build\Shared\Application\..\..\..\src\BlockyCollider.cpp">
-      <Filter>Blocks</Filter>
-    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\BlockyCollider.cpp" />
   </ItemGroup>
 </Project>

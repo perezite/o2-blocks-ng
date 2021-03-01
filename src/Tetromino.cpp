@@ -30,6 +30,12 @@ namespace blocks
         _squarePositions.assign(TShapeSquarePositions.begin(), TShapeSquarePositions.end());
     }
 
+    void Tetromino::tryMove(int x, int y)
+    {
+        if (!_collider.wouldCollide(sb::Vector2i(x, y)))
+            translate((float)x, (float)y);
+    }
+
     Tetromino::Tetromino(Texture& squareTextures) :
         _squareTextures(squareTextures),
         _squareSprite(squareTextures)
@@ -64,10 +70,12 @@ namespace blocks
     void Tetromino::update()
     {
         if (Input::isKeyGoingDown(KeyCode::Left))
-            translate(-1,  0);
+            tryMove(-1,  0);
         if (Input::isKeyGoingDown(KeyCode::Right))
-            translate(+1,  0);
+            tryMove(+1,  0);
+        if (Input::isKeyGoingDown(KeyCode::Up))
+            tryMove( 0,  1);
         if (Input::isKeyGoingDown(KeyCode::Down))
-            translate( 0, -1);
+            tryMove( 0, -1);
     }
 }
