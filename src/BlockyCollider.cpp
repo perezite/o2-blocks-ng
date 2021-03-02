@@ -7,9 +7,9 @@ using namespace sb;
 
 namespace blocks
 {
-    std::vector<BlockyCollider*> BlockyCollider::Colliders;
+    vector<BlockyCollider*> BlockyCollider::Colliders;
 
-    bool BlockyCollider::hasCollisions(const std::vector<sb::Vector2i>& leftPositions, const std::vector<sb::Vector2i>& rightPositions)
+    bool BlockyCollider::hasCollisions(const vector<Vector2i>& leftPositions, const vector<Vector2i>& rightPositions)
     {
         for (size_t i = 0; i < leftPositions.size(); i++) {
             for (size_t j = 0; j < rightPositions.size(); j++) {
@@ -21,7 +21,7 @@ namespace blocks
         return false;
     }
 
-    void BlockyCollider::displacePositions(const std::vector<sb::Vector2i>& oldPositions, const sb::Vector2i& displacement, std::vector<sb::Vector2i>& newPositions)
+    void BlockyCollider::displacePositions(const vector<Vector2i>& oldPositions, const Vector2i& displacement, vector<Vector2i>& newPositions)
     {
         newPositions.clear();
         newPositions.reserve(oldPositions.size());
@@ -36,10 +36,10 @@ namespace blocks
 
     BlockyCollider::~BlockyCollider()
     {
-        Colliders.erase(std::remove(Colliders.begin(), Colliders.end(), this), Colliders.end());
+        Colliders.erase(remove(Colliders.begin(), Colliders.end(), this), Colliders.end());
     }
 
-    void BlockyCollider::update(const sb::Transform& globalTransform, const vector<Vector2i>& positions)
+    void BlockyCollider::update(const Transform& globalTransform, const vector<Vector2i>& positions)
     {
         _globalPositions.clear();
 
@@ -49,7 +49,7 @@ namespace blocks
         }
     }
     
-    bool BlockyCollider::wouldCollide(const sb::Vector2i& displacement)
+    bool BlockyCollider::wouldCollide(const Vector2i& displacement)
     {
         vector<Vector2i> newPositions;
         displacePositions(_globalPositions, displacement, newPositions);
