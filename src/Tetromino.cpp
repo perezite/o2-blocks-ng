@@ -11,9 +11,9 @@ using namespace std;
 
 namespace
 {
-    const sb::Vector2ui SquareTextureSize(128);
+    const Vector2ui SquareTextureSize(128);
 
-    const std::vector<sb::Vector2i> TShapeSquarePositions = { Vector2i(0, 0), Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, 1) };
+    const vector<Vector2i> TShapeSquarePositions = { Vector2i(0, 0), Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, 1) };
 
     IntRect getSquareTextureArea(size_t x, size_t y) {
         return IntRect(x * SquareTextureSize.x, y * SquareTextureSize.y,
@@ -23,7 +23,7 @@ namespace
 
 namespace blocks
 {
-    void Tetromino::setSquares(const std::vector<sb::Vector2i>& squarePositions, size_t texPosX, size_t texPosY)
+    void Tetromino::setSquares(const vector<Vector2i>& squarePositions, size_t texPosX, size_t texPosY)
     {
         _squareSprite.setTexture(_squareTextures, getSquareTextureArea(texPosX, texPosY));
         _squarePositions.clear();
@@ -32,7 +32,7 @@ namespace blocks
 
     void Tetromino::tryMove(int x, int y)
     {
-        if (!_collider.wouldCollide(sb::Vector2i(x, y)))
+        if (!_collider.wouldCollide(Vector2i(x, y)))
             translate((float)x, (float)y);
     }
 
@@ -51,7 +51,7 @@ namespace blocks
             SB_ERROR("Invalid tetromino type " << type);
     }
 
-    void Tetromino::draw(sb::DrawTarget& target, sb::DrawStates drawStates)
+    void Tetromino::draw(DrawTarget& target, DrawStates drawStates)
     {
         drawStates.transform *= getTransform();
 
@@ -61,7 +61,7 @@ namespace blocks
         }
     }
 
-    void Tetromino::updateColliders(sb::Transform transform)
+    void Tetromino::updateColliders(Transform transform)
     {
         transform *= getTransform();
         _collider.update(transform, _squarePositions);
@@ -74,7 +74,7 @@ namespace blocks
         if (Input::isKeyGoingDown(KeyCode::Right))
             tryMove(+1,  0);
         if (Input::isKeyGoingDown(KeyCode::Up))
-            tryMove( 0,  1);
+            tryMove( 0, +1);
         if (Input::isKeyGoingDown(KeyCode::Down))
             tryMove( 0, -1);
     }
