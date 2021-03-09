@@ -291,15 +291,23 @@ namespace sceneDemo1
         }
     }
 
-    // https://stackoverflow.com/questions/2631585/c-how-to-require-that-one-template-type-is-derived-from-the-other
+
+    // https://stackoverflow.com/questions/2631585/c-how-to-require-that-one-template-type-is-derived-from-the-other  
     template <typename B, typename D>
     struct is_base_of // check if B is a base of D
     {
         typedef char yes[1];
         typedef char no[2];
 
-        static yes& test(B*) {};
-        static no& test(...) {};
+#ifdef __GNUC__
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wreturn-type"
+#endif
+        static yes& test(B*) { }
+        static no& test(...) { }
+#ifdef __GNUC__
+    #pragma GCC diagnostic pop
+#endif
 
         static D* get(void) {};
 
@@ -323,6 +331,7 @@ namespace sceneDemo1
         test6<test1>();
         const bool test2 = is_base_of<Entity5, Sprite>::value;
         test6<test2>();
+        test6<is_base_of<Entity5, Sprite>::value>();
         cin.get();
     }
 
