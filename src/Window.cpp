@@ -49,6 +49,7 @@ namespace sb
 		m_renderer = new Renderer();		
 		
 		GL_CHECK(glDisable(GL_DEPTH_TEST));
+		setSize(width, height);
 	}
 
 	Window::~Window()

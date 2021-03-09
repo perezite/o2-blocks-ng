@@ -19,8 +19,8 @@
     <Filter Include="Demos\01_Camera">
       <UniqueIdentifier>{c6ae5eef-7bcc-4d7b-a6fa-347a62dafb00}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Demos\01_Camera\Headers">
-      <UniqueIdentifier>{feff870e-0dc0-4e2a-a6a7-77c251447e7f}</UniqueIdentifier>
+    <Filter Include="Demos\02_Scene">
+      <UniqueIdentifier>{839305d8-6d54-41bf-85f4-142b2a95b18e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -153,9 +153,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Backdrop.h">
       <Filter>Blocks\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\CameraDemo1.h">
-      <Filter>Demos\01_Camera\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Block.h">
       <Filter>Blocks\Headers</Filter>
     </ClInclude>
@@ -170,6 +167,12 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\BlockyCollider.h">
       <Filter>Blocks\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\SceneDemo1.h">
+      <Filter>Demos\02_Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\CameraDemo1.h">
+      <Filter>Demos\01_Camera</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -275,6 +278,9 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\BlockyCollider.cpp">
       <Filter>Blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\SceneDemo1.cpp">
+      <Filter>Demos\02_Scene</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
