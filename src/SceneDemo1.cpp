@@ -224,6 +224,7 @@ namespace sceneDemo1
         virtual void drawSelf(DrawTarget& target, DrawStates states) = 0;
         
         virtual void draw(DrawTarget& target, DrawStates states) {
+            auto temp = getTransform();
             states.transform *= getTransform();
             drawSelf(target, states);
         }
@@ -265,24 +266,28 @@ namespace sceneDemo1
             for (size_t i = 0; i < _entities.size(); i++)
                 target.draw(_entities[i], states);
         }
+
+        void update() {
+            for (size_t i = 0; i < _entities.size(); i++)
+                _entities[i]->update();
+        }
     };
 
     void demo5() {
         Window window;
         Assets assets;
         Scene5 scene;
-        SpriteEntity5 entity = scene.create<SpriteEntity5>(assets.greenBlock);
+        SpriteEntity5& entity = scene.create<SpriteEntity5>(assets.greenBlock);
 
         window.setFramerateLimit(65);
-        entity.setPosition(-100);
         entity.setScale(100);
 
         while (window.isOpen()) {
             Input::update();
             window.update();
-            entity.update();
+            scene.update();
             window.clear(Color(1, 1, 1, 1));
-            window.draw(entity);
+            window.draw(scene);
             window.display();
         }
     }
