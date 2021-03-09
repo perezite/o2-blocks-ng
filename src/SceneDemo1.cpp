@@ -18,9 +18,13 @@ namespace sceneDemo1
 {
     struct Assets {
         Texture greenBlock;
+        Texture yellowBlock;
+
 
         Assets()
-            : greenBlock("Textures/GreenBlock.png")
+            :   greenBlock("Textures/GreenBlock.png"),
+                yellowBlock("Textures/YellowBlock.png")
+
         { }
 
     };
@@ -83,7 +87,7 @@ namespace sceneDemo1
         vector<Drawable*> _drawables;
     protected:
         template <class T>
-        inline T& add(T* entity) {
+        inline T& addDrawable(T* entity) {
             _drawables.push_back(entity);
             return *entity; 
         }
@@ -93,7 +97,7 @@ namespace sceneDemo1
         }
 
         template <class T, class Arg1> 
-        inline T& createDrawable(Arg1& arg1) { return add<T>(new T(arg1)); }
+        inline T& createDrawable(Arg1& arg1) { return addDrawable<T>(new T(arg1)); }
 
         virtual void draw(DrawTarget& target, DrawStates states = DrawStates::getDefault()) {
             for (size_t i = 0; i < _drawables.size(); i++)
@@ -120,112 +124,172 @@ namespace sceneDemo1
         }
     }
 
-    template <class T> 
-    class BaseCtor {
-    public:
-        virtual T* createConcretely() const = 0;
+    template <class T>
+    class Entity3 : public T {
+    public: 
+        Entity3() { }
 
-        T* create() const {
-            return createConcretely();
+        template <class Arg1> 
+        Entity3(Arg1& arg1) : T(arg1) { }
+
+        template <class Arg1>
+        Entity3(const Arg1& arg1) : T(arg1) { }
+
+        virtual void update() {
+            cout << "not implemented";
         }
     };
 
-    template <class T, class Arg1>
-    class Ctor1_3 : public BaseCtor<T> {
-        Arg1& _arg1;
-    public:
-        Ctor1_3(Arg1& arg1)
-            : _arg1(arg1)
+    class MyEntity3 : public Entity3<Sprite> {
+    public: 
+        MyEntity3() { }
+
+        MyEntity3(Texture& tex)
+            : Entity3<Sprite>(tex)
         { }
 
-        virtual T* createConcretely() const {
-            return new T(_arg1);
+        virtual void update() {
+            rotate(0.01f);
         }
     };
-
-    template <class T>
-    T& test3(const BaseCtor<T>& ctor) {
-        return *ctor.create();
-    }
 
     void demo3() {
         Window window;
         Assets assets;
+        Entity3<Sprite> sprite(assets.greenBlock);
+        MyEntity3 entity(assets.yellowBlock);
 
-        /*MyEntity1& myEntity1 = */test3<MyEntity1>(Ctor1_3<MyEntity1, Texture>(assets.greenBlock));
+        window.setFramerateLimit(65);
+        sprite.setScale(100);
+        entity.setPosition(-100);
+        entity.setScale(100);
+
+        while (window.isOpen()) {
+            Input::update();
+            window.update();
+            sprite.update();
+            entity.update();
+            window.clear(Color(1, 1, 1, 1));
+            window.draw(sprite);
+            window.draw(entity);
+            window.display();
+        }
     }
 
-    class MyClass4 {
+    class Scene4 : public Drawable {
+        vector<Drawable*> _drawables;
+    protected:
+        template <class T>
+        inline T& addDrawable(T* entity) {
+            _drawables.push_back(entity);
+            return *entity;
+        }
     public:
-        MyClass4(int val)
-        {
-            cout << val << endl;
+        virtual ~Scene4() {
+            deleteAll(_drawables);
+        }
+
+        template <class T, class Arg1>
+        inline T& createDrawable(Arg1& arg1) { return addDrawable<T>(new T(arg1)); }
+
+        virtual void draw(DrawTarget& target, DrawStates states = DrawStates::getDefault()) {
+            for (size_t i = 0; i < _drawables.size(); i++)
+                target.draw(_drawables[i], states);
         }
     };
-
-    class BaseArgs4 {
-
-    };
-
-    template <class Arg1, class Arg2>
-    class Args4 : public BaseArgs4 {
-        Arg1* _arg1;
-        Arg2* _arg2;
-
-    public:
-        inline Arg1& getArg1() { return _arg1; }
-
-        inline Arg2& getArg2() { return _arg2; }
-
-        Args4(Arg1& arg1) : _arg1(&arg1), _arg2(NULL) { };
-
-        Args4(Arg1& arg1, Arg2& arg2) : _arg1(&arg1), _arg2(&arg2) { };
-    };
-
-    template <class Arg1> 
-    Args4<Arg1, void*> createArgs(Arg1& arg1) { return Args4<Arg1, void*>(arg1); }
-
-    template <class T>
-    class Ctor4 {
-    public:
-        T* create(BaseArgs4& args) {
-            return new T();
-        }
-    };
-
-    template <class T>
-    void test4(BaseArgs4& args) {
-        T* instance = Ctor4<T>().create(args);
-    }
 
     void demo4() {
-        //int test = 42;
-        //test4<MyClass4>(createArgs(test));
+        Window window;
+        Assets assets;
+        Scene2 scene;
+        // scene.create<MyEntity3>(assets.yellowBlock)
+        //MyEntity3 entity(assets.yellowBlock);
 
-        //Args4<int, void*> args = createArgs(test);
-        //Args args = createArgs()
+        window.setFramerateLimit(65);
+        //entity.setPosition(-100);
+        //entity.setScale(100);
+
+        while (window.isOpen()) {
+            Input::update();
+            window.update();
+            //entity.update();
+            window.clear(Color(1, 1, 1, 1));
+            //window.draw(entity);
+            window.display();
+        }
     }
 
+    class Entity5 : public Drawable, public Transformable {
+    public:
+        virtual void drawSelf(DrawTarget& target, DrawStates states) = 0;
+        
+        virtual void draw(DrawTarget& target, DrawStates states) {
+            states.transform *= getTransform();
+            drawSelf(target, states);
+        }
 
-    template <class T>
-    T& test5(const BaseCtor<T>& ctor) {
-        return *ctor.create();
-    }
+        virtual void update() { }
+    };
 
-    template <class T, class Arg1>
-    BaseCtor<T> createCtor(Arg1& arg1) { return Ctor1_3<T, Arg1>(arg1); }
+    class SpriteEntity5 : public Entity5 {
+        Sprite _sprite;
+    public:
+        SpriteEntity5(Texture& tex) : _sprite(tex) { }
+        
+        virtual void drawSelf(DrawTarget& target, DrawStates states) {
+            target.draw(_sprite, states);
+        }
+
+        virtual void update() {
+            rotate(0.01f);
+        }
+    };
+
+    class Scene5 : public Drawable {
+        vector<Entity5*> _entities;
+    protected:
+        template<class T>
+        inline T& addEntity(T* entity) {
+            _entities.push_back(entity);
+            return *entity;
+        }
+    public:
+        virtual ~Scene5() {
+            deleteAll(_entities);
+        }
+
+        template <class T, class Arg1>
+        inline T& create(Arg1& arg1) { return addEntity<T>(new T(arg1)); }
+
+        virtual void draw(DrawTarget& target, DrawStates states = DrawStates::getDefault()) {
+            for (size_t i = 0; i < _entities.size(); i++)
+                target.draw(_entities[i], states);
+        }
+    };
 
     void demo5() {
         Window window;
         Assets assets;
+        Scene5 scene;
+        SpriteEntity5 entity = scene.create<SpriteEntity5>(assets.greenBlock);
 
-        test5<MyEntity1>(Ctor1_3<MyEntity1, Texture>(assets.greenBlock));
-        //auto temp = Ctor1_3<MyEntity1, Texture>(assets.greenBlock);
+        window.setFramerateLimit(65);
+        entity.setPosition(-100);
+        entity.setScale(100);
+
+        while (window.isOpen()) {
+            Input::update();
+            window.update();
+            entity.update();
+            window.clear(Color(1, 1, 1, 1));
+            window.draw(entity);
+            window.display();
+        }
     }
 
     void run()
     {
-        //demo5();
+        demo5();
         //demo4();
         //demo3();
         //demo2();
