@@ -40,4 +40,10 @@ namespace sb
 	{
 		std::copy(std::begin(source), std::end(source), std::begin(destination));
 	}
+
+	template <class T> 
+	void deleteAll(std::vector<T>& vec) {
+		for (size_t i = 0; i < vec.size(); i++)
+			delete vec[i];
+	}
 }
