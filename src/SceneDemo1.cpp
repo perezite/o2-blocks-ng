@@ -8,6 +8,8 @@
 #include "Quad.h"
 #include "Memory.h"
 #include <vector>
+#include <iostream>
+#include <string>
 
 using namespace std;
 using namespace sb;
@@ -129,10 +131,10 @@ namespace sceneDemo1
     };
 
     template <class T, class Arg1>
-    class Ctor1 : public BaseCtor<T> {
+    class Ctor1_3 : public BaseCtor<T> {
         Arg1& _arg1;
     public:
-        Ctor1(Arg1& arg1)
+        Ctor1_3(Arg1& arg1)
             : _arg1(arg1)
         { }
 
@@ -150,13 +152,54 @@ namespace sceneDemo1
         Window window;
         Assets assets;
 
-        MyEntity1& myEntity1 = test3<MyEntity1>(Ctor1<MyEntity1, Texture>(assets.greenBlock));
+        /*MyEntity1& myEntity1 = */test3<MyEntity1>(Ctor1_3<MyEntity1, Texture>(assets.greenBlock));
+    }
 
+    class MyClass4 {
+    public:
+        MyClass4(int val)
+        {
+            cout << val << endl;
+        }
+    };
+
+    class BaseArgs4 {
+
+    };
+
+    template <class Arg1, class Arg2>
+    class Args4 {
+        Arg1* _arg1;
+        Arg2* _arg2;
+
+    public:
+        inline Arg1& getArg1() { return _arg1; }
+
+        inline Arg2& getArg2() { return _arg2; }
+
+        Args4(Arg1& arg1) : _arg1(&arg1), _arg2(NULL) { };
+
+        Args4(Arg1& arg1, Arg2& arg2) : _arg1(&arg1), _arg2(&arg2) { };
+    };
+
+    template <class Arg1> 
+    Args4<Arg1, void*> createArgs(Arg1& arg1) { return Args4<Arg1, void*>(arg1); }
+
+    template <class T>
+    void test4(BaseArgs4& args) {
+
+    }
+
+    void demo4() {
+        int test = 42;
+        Args4<int, void*> args = createArgs(test);
+        //Args args = createArgs()
     }
 
     void run()
     {
-        demo3();
+        demo4();
+        //demo3();
         //demo2();
         //demo1();
     }
