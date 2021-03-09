@@ -291,9 +291,45 @@ namespace sceneDemo1
         }
     }
 
+    // https://stackoverflow.com/questions/2631585/c-how-to-require-that-one-template-type-is-derived-from-the-other
+    template <typename B, typename D>
+    struct is_base_of // check if B is a base of D
+    {
+        typedef char yes[1];
+        typedef char no[2];
+
+        static yes& test(B*) {};
+        static no& test(...) {};
+
+        static D* get(void) {};
+
+        static const bool value = (sizeof(test(get())) == sizeof(yes));
+    };
+
+    template <bool> void test6();
+
+    template <>
+    void test6<true>() {
+        cout << "true" << endl;
+    }
+
+    template <>
+    void test6<false>() {
+        cout << "false" << endl;
+    }
+
+    void demo6() {
+        const bool test1 = is_base_of<Entity5, SpriteEntity5>::value;
+        test6<test1>();
+        const bool test2 = is_base_of<Entity5, Sprite>::value;
+        test6<test2>();
+        cin.get();
+    }
+
     void run()
     {
-        demo5();
+        demo6();
+        //demo5();
         //demo4();
         //demo3();
         //demo2();
