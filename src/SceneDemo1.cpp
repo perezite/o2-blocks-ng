@@ -224,7 +224,6 @@ namespace sceneDemo1
         virtual void drawSelf(DrawTarget& target, DrawStates states) = 0;
         
         virtual void draw(DrawTarget& target, DrawStates states) {
-            auto temp = getTransform();
             states.transform *= getTransform();
             drawSelf(target, states);
         }
@@ -277,9 +276,9 @@ namespace sceneDemo1
         Window window;
         Assets assets;
         Scene5 scene;
-        SpriteEntity5& entity = scene.create<SpriteEntity5>(assets.greenBlock);
-
+        
         window.setFramerateLimit(65);
+        SpriteEntity5& entity = scene.create<SpriteEntity5>(assets.greenBlock);
         entity.setScale(100);
 
         while (window.isOpen()) {
