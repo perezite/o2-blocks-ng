@@ -168,7 +168,7 @@ namespace sceneDemo1
     };
 
     template <class Arg1, class Arg2>
-    class Args4 {
+    class Args4 : public BaseArgs4 {
         Arg1* _arg1;
         Arg2* _arg2;
 
@@ -186,19 +186,47 @@ namespace sceneDemo1
     Args4<Arg1, void*> createArgs(Arg1& arg1) { return Args4<Arg1, void*>(arg1); }
 
     template <class T>
-    void test4(BaseArgs4& args) {
+    class Ctor4 {
+    public:
+        T* create(BaseArgs4& args) {
+            return new T();
+        }
+    };
 
+    template <class T>
+    void test4(BaseArgs4& args) {
+        T* instance = Ctor4<T>().create(args);
     }
 
     void demo4() {
-        int test = 42;
-        Args4<int, void*> args = createArgs(test);
+        //int test = 42;
+        //test4<MyClass4>(createArgs(test));
+
+        //Args4<int, void*> args = createArgs(test);
         //Args args = createArgs()
+    }
+
+
+    template <class T>
+    T& test5(const BaseCtor<T>& ctor) {
+        return *ctor.create();
+    }
+
+    template <class T, class Arg1>
+    BaseCtor<T> createCtor(Arg1& arg1) { return Ctor1_3<T, Arg1>(arg1); }
+
+    void demo5() {
+        Window window;
+        Assets assets;
+
+        test5<MyEntity1>(Ctor1_3<MyEntity1, Texture>(assets.greenBlock));
+        //auto temp = Ctor1_3<MyEntity1, Texture>(assets.greenBlock);
     }
 
     void run()
     {
-        demo4();
+        //demo5();
+        //demo4();
         //demo3();
         //demo2();
         //demo1();
