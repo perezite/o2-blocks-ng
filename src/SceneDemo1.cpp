@@ -413,14 +413,14 @@ namespace sceneDemo1
 
     namespace impl {
         template <class T>
-        class WrappedDrawable : public Entity5 {
+        class WrappedDrawable8 : public Entity5 {
             T* _drawable;
         public:
-            virtual ~WrappedDrawable() {
+            virtual ~WrappedDrawable8() {
                 delete _drawable;
             }
 
-            WrappedDrawable(T* drawable)
+            WrappedDrawable8(T* drawable)
                 : _drawable(drawable)
             { }
 
@@ -431,18 +431,18 @@ namespace sceneDemo1
             }
         };
 
-        template <class T, bool>
-        struct Wrapper;
+        template <class T, bool isEntity>
+        struct Wrapper8;
 
         template <class T>
-        struct Wrapper<T, true> {
+        struct Wrapper8<T, true> {
             static Entity5* wrap(T* element) { return element; }
         };
 
         template <class T>
-        struct Wrapper<T, false> {
+        struct Wrapper8<T, false> {
             static Entity5* wrap(T* element) {
-                Entity5* wrappedElem = new WrappedDrawable<T>(element);
+                Entity5* wrappedElem = new WrappedDrawable8<T>(element);
                 return wrappedElem;
             }
         };
@@ -455,7 +455,7 @@ namespace sceneDemo1
         template<class T>
         inline T& add(T* element) {
             const bool isEntity = is_base_of6<Entity5, T>::value;
-            Entity5* wrappedElem = impl::Wrapper<T, isEntity>::wrap(element);
+            Entity5* wrappedElem = impl::Wrapper8<T, isEntity>::wrap(element);
             _entities.push_back(wrappedElem);
 
             return *element;
@@ -501,7 +501,6 @@ namespace sceneDemo1
             window.display();
         }
     }
-
 
     void run()
     {
