@@ -392,7 +392,7 @@ namespace sceneDemo1
     void demo7() {
         Window window;
         Assets assets;
-         Scene7 scene;
+        Scene7 scene;
 
         window.setFramerateLimit(65);
         SpriteEntity5& spriteEntity = scene.create<SpriteEntity5>(assets.greenBlock);
@@ -411,9 +411,102 @@ namespace sceneDemo1
         }
     }
 
+    namespace impl {
+        template <class T>
+        class WrappedDrawable : public Entity5 {
+            T* _drawable;
+        public:
+            virtual ~WrappedDrawable() {
+                delete _drawable;
+            }
+
+            WrappedDrawable(T* drawable)
+                : _drawable(drawable)
+            { }
+
+            virtual void drawSelf(DrawTarget& target, DrawStates states) { }
+
+            virtual void draw(DrawTarget& target, DrawStates states) {
+                _drawable->draw(target, states);
+            }
+        };
+
+        template <class T, bool>
+        struct Wrapper;
+
+        template <class T>
+        struct Wrapper<T, true> {
+            static Entity5* wrap(T* element) { return element; }
+        };
+
+        template <class T>
+        struct Wrapper<T, false> {
+            static Entity5* wrap(T* element) {
+                Entity5* wrappedElem = new WrappedDrawable<T>(element);
+                return wrappedElem;
+            }
+        };
+    }
+
+    class Scene8 : public Drawable {
+        vector<Entity5*> _entities;
+
+    protected:
+        template<class T>
+        inline T& add(T* element) {
+            const bool isEntity = is_base_of6<Entity5, T>::value;
+            Entity5* wrappedElem = impl::Wrapper<T, isEntity>::wrap(element);
+            _entities.push_back(wrappedElem);
+
+            return *element;
+        }
+
+    public:
+        virtual ~Scene8() {
+            deleteAll(_entities);
+        }
+
+        template <class T, class Arg1>
+        inline T& create(Arg1& arg1) { return add<T>(new T(arg1)); }
+
+        virtual void draw(DrawTarget& target, DrawStates states = DrawStates::getDefault()) {
+            for (size_t i = 0; i < _entities.size(); i++)
+                target.draw(_entities[i], states);
+        }
+
+        void update() {
+            for (size_t i = 0; i < _entities.size(); i++)
+                _entities[i]->update();
+        }
+    };
+
+    void demo8() {
+        Window window;
+        Assets assets;
+        Scene8 scene;
+
+        window.setFramerateLimit(65);
+        SpriteEntity5& spriteEntity = scene.create<SpriteEntity5>(assets.greenBlock);
+        Sprite& sprite = scene.create<Sprite>(assets.yellowBlock);
+        spriteEntity.setScale(100);
+        sprite.setScale(100);
+        sprite.setPosition(-100);
+
+        while (window.isOpen()) {
+            Input::update();
+            window.update();
+            scene.update();
+            window.clear(Color(1, 1, 1, 1));
+            window.draw(scene);
+            window.display();
+        }
+    }
+
+
     void run()
     {
-        demo7();
+        demo8();
+        //demo7();
         //demo6();
         //demo5();
         //demo4();
