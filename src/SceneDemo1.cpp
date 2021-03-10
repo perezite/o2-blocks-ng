@@ -291,10 +291,9 @@ namespace sceneDemo1
         }
     }
 
-
     // https://stackoverflow.com/questions/2631585/c-how-to-require-that-one-template-type-is-derived-from-the-other  
     template <typename B, typename D>
-    struct is_base_of // check if B is a base of D
+    struct is_base_of6 // check if B is a base of D
     {
         typedef char yes[1];
         typedef char no[2];
@@ -309,7 +308,7 @@ namespace sceneDemo1
     #pragma GCC diagnostic pop
 #endif
 
-        static D* get(void) {};
+        static D* get(void) { };
 
         static const bool value = (sizeof(test(get())) == sizeof(yes));
     };
@@ -327,17 +326,95 @@ namespace sceneDemo1
     }
 
     void demo6() {
-        const bool test1 = is_base_of<Entity5, SpriteEntity5>::value;
+        const bool test1 = is_base_of6<Entity5, SpriteEntity5>::value;
         test6<test1>();
-        const bool test2 = is_base_of<Entity5, Sprite>::value;
+        const bool test2 = is_base_of6<Entity5, Sprite>::value;
         test6<test2>();
-        test6<is_base_of<Entity5, Sprite>::value>();
+        test6<is_base_of6<Entity5, Sprite>::value>();
         cin.get();
+    }
+
+    class Scene7 : public Drawable {
+        vector<Entity5*> _entities;
+        vector<Drawable*> _drawables;
+
+    protected:
+        template <class T, bool>
+        struct elementAdder;
+
+        template <class T>
+        struct elementAdder<T, true> {
+            inline T& add(T* entity, Scene7& scene) {
+                scene._entities.push_back(entity);
+                return *entity;
+            }
+        };
+
+        template <class T>
+        struct elementAdder<T, false> {
+            inline T& add(T* drawable, Scene7& scene) {
+                scene._drawables.push_back(drawable);
+                return *drawable;
+            }
+        };
+
+        template<class T>
+        inline T& add(T* entity) {
+            const bool isEntity = is_base_of6<Entity5, T>::value;
+            return elementAdder<T, isEntity>().add(entity, *this);
+        }
+
+        template <class T>
+        void draw(vector<T*> elements, DrawTarget& target, DrawStates states) {
+            for (size_t i = 0; i < elements.size(); i++)
+                target.draw(elements[i], states);
+        }
+    public:
+        virtual ~Scene7() {
+            deleteAll(_entities);
+            deleteAll(_drawables);
+        }
+
+        template <class T, class Arg1>
+        inline T& create(Arg1& arg1) { return add<T>(new T(arg1)); }
+
+        virtual void draw(DrawTarget& target, DrawStates states = DrawStates::getDefault()) {
+            draw(_entities, target, states);
+            draw(_drawables, target, states);
+        }
+
+        void update() {
+            for (size_t i = 0; i < _entities.size(); i++)
+                _entities[i]->update();
+        }
+    };
+
+    void demo7() {
+        Window window;
+        Assets assets;
+         Scene7 scene;
+
+        window.setFramerateLimit(65);
+        SpriteEntity5& spriteEntity = scene.create<SpriteEntity5>(assets.greenBlock);
+        Sprite& sprite = scene.create<Sprite>(assets.yellowBlock);
+        spriteEntity.setScale(100);
+        sprite.setScale(100);
+        sprite.setPosition(-100);
+
+        while (window.isOpen()) {
+            Input::update();
+            window.update();
+            scene.update();
+            window.clear(Color(1, 1, 1, 1));
+            window.draw(scene);
+            window.display();
+        }
     }
 
     void run()
     {
-        demo6();
+        demo7();
+        //demo6();
         //demo5();
         //demo4();
         //demo3();
