@@ -502,9 +502,121 @@ namespace sceneDemo1
         }
     }
 
+    class BaseEntity9 : public Drawable, public Transformable {
+    public:
+        virtual void drawSelf(DrawTarget& target, DrawStates states) = 0;
+
+        virtual void draw(DrawTarget& target, DrawStates states) {
+            states.transform *= getTransform();
+            drawSelf(target, states);
+        }
+
+        virtual void update() { }
+    };
+
+    template <class T>
+    class Entity9 : public BaseEntity9 {
+        Drawable* _drawable;
+
+    public:
+        template <class Arg1>
+        static inline Entity9<T>* create(Arg1& arg1) { 
+            Drawable* drawable = new T(arg1);
+            return new Entity9<T>(drawable);
+        }
+
+        virtual ~Entity9() {
+            delete _drawable;
+        }
+
+        virtual void drawSelf(DrawTarget& target, DrawStates states) { }
+
+        virtual void draw(DrawTarget& target, DrawStates states) {
+            states.transform *= getTransform();
+            _drawable->draw(target, states);
+        }
+
+    protected:
+        Entity9(Drawable* drawable) : _drawable(drawable)
+        { }
+    };
+
+    class Scene9 : public Drawable {
+        vector<BaseEntity9*> _entities;
+
+    protected:
+        template <class T>
+        inline T& add(T* entity) {
+            _entities.push_back(entity);
+            return *entity;
+        }
+
+    public:
+        virtual ~Scene9() {
+            deleteAll(_entities);
+        }
+
+        template <class TEntity, class Arg1>
+        inline TEntity& create(Arg1& arg1) {
+            return add(new TEntity(arg1));
+        }
+
+        template <class TDrawable, class Arg1>
+        inline Entity9<TDrawable>& createDrawableEntity(Arg1& arg1) {
+            return add(Entity9<TDrawable>::create(arg1));
+        }
+
+        virtual void draw(DrawTarget& target, DrawStates states = DrawStates::getDefault()) {
+            for (size_t i = 0; i < _entities.size(); i++)
+                target.draw(_entities[i], states);
+        }
+
+        void update() {
+            for (size_t i = 0; i < _entities.size(); i++)
+                _entities[i]->update();
+        }
+    };
+
+    class SpriteEntity9 : public BaseEntity9 {
+        Sprite _sprite;
+    public:
+        SpriteEntity9(Texture& tex) : _sprite(tex) { }
+
+        virtual void drawSelf(DrawTarget& target, DrawStates states) {
+            target.draw(_sprite, states);
+        }
+
+        virtual void update() {
+            rotate(0.01f);
+        }
+    };
+
+    void demo9() {
+        Window window;
+        Assets assets;
+        Scene9 scene;
+
+        window.setFramerateLimit(65);
+        SpriteEntity9& spriteEntity = scene.create<SpriteEntity9>(assets.greenBlock);
+        Entity9<Sprite>& sprite = scene.createDrawableEntity<Sprite>(assets.yellowBlock);
+        spriteEntity.setScale(100);
+        sprite.setScale(100);
+        sprite.setPosition(-100);
+
+        while (window.isOpen()) {
+            Input::update();
+            window.update();
+            scene.update();
+            window.clear(Color(1, 1, 1, 1));
+            window.draw(scene);
+            window.display();
+        }
+    }
+
     void run()
     {
-        demo8();
+        demo9();
+        //demo8();
         //demo7();
         //demo6();
         //demo5();
