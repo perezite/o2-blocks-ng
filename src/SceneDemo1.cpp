@@ -777,6 +777,8 @@ namespace sceneDemo1
         auto myArgs = argList13(42);
         /*auto myClass = */myArgs.construct<MyClass>();
         /*auto myClass2 =*/ create<MyClass>(argList13(42));
+
+        // scene.create<SpriteEntity>(args(assets.yellowBlock));
     }
 
     void run()
