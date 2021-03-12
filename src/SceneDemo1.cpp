@@ -519,12 +519,6 @@ namespace sceneDemo1
         Drawable* _drawable;
 
     public:
-        template <class Arg1>
-        static inline Entity9<T>* create(Arg1& arg1) { 
-            Drawable* drawable = new T(arg1);
-            return new Entity9<T>(drawable);
-        }
-
         virtual ~Entity9() {
             delete _drawable;
         }
@@ -536,9 +530,10 @@ namespace sceneDemo1
             _drawable->draw(target, states);
         }
 
-    protected:
         Entity9(Drawable* drawable) : _drawable(drawable)
         { }
+
+        friend class Scene9;
     };
 
     class Scene9 : public Drawable {
@@ -555,15 +550,16 @@ namespace sceneDemo1
         virtual ~Scene9() {
             deleteAll(_entities);
         }
-
+        
         template <class TEntity, class Arg1>
         inline TEntity& create(Arg1& arg1) {
             return add(new TEntity(arg1));
         }
 
         template <class TDrawable, class Arg1>
-        inline Entity9<TDrawable>& createDrawableEntity(Arg1& arg1) {
-            return add(Entity9<TDrawable>::create(arg1));
+        inline Entity9<TDrawable>& createAsEntity(Arg1& arg1) {
+            TDrawable* drawable = new TDrawable(arg1);
+            return create<Entity9<TDrawable>>(drawable);
         }
 
         virtual void draw(DrawTarget& target, DrawStates states = DrawStates::getDefault()) {
@@ -598,10 +594,10 @@ namespace sceneDemo1
 
         window.setFramerateLimit(65);
         SpriteEntity9& spriteEntity = scene.create<SpriteEntity9>(assets.greenBlock);
-        Entity9<Sprite>& sprite = scene.createDrawableEntity<Sprite>(assets.yellowBlock);
+        Entity9<Sprite>& spriteAsEntity = scene.createAsEntity<Sprite>(assets.yellowBlock);
         spriteEntity.setScale(100);
-        sprite.setScale(100);
-        sprite.setPosition(-100);
+        spriteAsEntity.setScale(100);
+        spriteAsEntity.setPosition(-100);
 
         while (window.isOpen()) {
             Input::update();
@@ -613,9 +609,183 @@ namespace sceneDemo1
         }
     }
 
+    template <template <class T> class TEntity>
+    void create10() {
+        //Texture tex;
+        //auto test = new Entity9<Sprite>(tex);
+        // auto test = new TEntity<TDrawable>(tex);
+    }
+
+    //template <class SomeType, template <class> class OtherType> class NestedTemplateClass
+    //{
+    //   
+    //};
+
+    void demo10() {
+        vector<int> vec;
+
+        //print_container(vec);
+
+        create10<Entity9>();
+
+
+        // func2<Sprite, Entity9<Sprite>>();
+
+        //test<Entity9<Sprite>>();
+
+
+        // Assets assets;
+        // Scene10 scene;
+
+        // SpriteEntity10& entity = scene.create<SpriteEntity>(assets);
+        // Entity10<Sprite>& sprite = scene.create<Entity10<Sprite>>(assets);
+    }
+
+    template <class T>
+    class Creatable11 {
+    public:
+        template <class Arg1>
+        static T* create(const Arg1& arg1) { return new T(arg1); }
+    };
+
+    class MyClass11 : public Creatable11<MyClass11> {
+    public:
+        MyClass11(int test) { }
+    };
+
+    class BaseEntity11 : public Creatable11<BaseEntity11> {
+
+    };
+
+    template <class TDrawable>
+    class Entity11 : public BaseEntity11 {
+
+    };
+
+    void demo11() {
+        MyClass11::create(42);
+    }
+
+    template <class T, class Arg1>
+    T& create12(Arg1& arg1) {
+        return *(new T(arg1));
+    }
+
+    void demo12() {
+        Assets assets;
+       /* SpriteEntity9& entity = */create12<SpriteEntity9>(assets.yellowBlock);
+        Sprite* sprite = new Sprite(assets.greenBlock);
+        /*Entity9<Sprite>& spriteAsEntity = */create12<Entity9<Sprite>>(sprite);
+    }
+
+    template <class TVal>
+    class Arg13 {
+        TVal _val;
+        TVal& _valRef;
+        bool _isRef;
+    public:
+        Arg13(TVal& val) : _valRef(val), _isRef(true)
+        { }
+
+        Arg13(const TVal& val) : _val(val), _valRef(_val), _isRef(false)
+        {
+
+        }
+
+        TVal& get() { return _isRef ? _valRef : _val; }
+    };
+
+    template <class TArg1>
+    class ArgList1_13 {
+        Arg13<TArg1> _arg1;
+
+    public:
+        ArgList1_13(const Arg13<TArg1>& arg1) : _arg1(arg1)
+        { }
+
+        template <class T>
+        T* construct() {
+            return new T(_arg1.get());
+        }
+    };
+
+    template <class T>
+    Arg13<T> args13(T& t) {
+        return Arg13<T>(t);
+    }
+
+    template <class T>
+    class IntArg {
+        T _val;
+
+    public:
+        IntArg(T val) : _val(val)
+        { }
+    };
+
+    template <class T>
+    void testOne13(Arg13<T> arg) {
+
+    }
+
+    template <class T>
+    void testTwo13(T arg) {
+
+    }
+
+    template <class T>
+    void testThree(IntArg<T> arg) {
+
+    }
+
+    class MyClass {
+    public: 
+        MyClass(int val) {
+
+        }
+    };
+
+    template <class TArg1>
+    ArgList1_13<TArg1> argList13(TArg1& arg1) {
+        return ArgList1_13<TArg1>(arg1);
+    }
+
+    template <class TArg1>
+    ArgList1_13<TArg1> argList13(const TArg1& arg1) {
+        return ArgList1_13<TArg1>(arg1);
+    }
+
+    template <class TEntity, class TArgList>
+    TEntity& create(TArgList argList) {
+        TEntity* entity = argList.template construct<TEntity>();        // https://stackoverflow.com/questions/3786360/confusing-template-error
+        return *entity;
+    }
+
+    void demo13() {
+        testOne13<int>(42);
+        testTwo13(42);
+        testThree<int>(42);
+
+        int temp = 42;
+        Arg13<int> test(temp);
+
+        /*auto test2 = */args13(temp);
+
+        ArgList1_13<int> argList(42);
+        argList.construct<MyClass>();
+
+        auto myArgs = argList13(42);
+        /*auto myClass = */myArgs.construct<MyClass>();
+        /*auto myClass2 =*/ create<MyClass>(argList13(42));
+    }
+
     void run()
     {
-        demo9();
+        demo13();
+        //demo12();
+        //demo11();
+        //demo10();
+        //demo9();
         //demo8();
         //demo7();
         //demo6();
