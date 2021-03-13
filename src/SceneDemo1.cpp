@@ -1061,7 +1061,7 @@ namespace sceneDemo1
 
     template <class T, class TArg>
     void create19(const TArg& arg) {
-        new T((TArg&)arg);
+        new T((TArg&)arg);      // remove the constness. The value can then be used for const and non-const parameters
     }
 
     void demo19() {
@@ -1069,14 +1069,79 @@ namespace sceneDemo1
         int temp = 43;
         create19<Class19b>(temp);
         const int temp2 = 44;
-        create19<Class19b>(temp2);
+        create19<Class19c>(temp2);
+
+        cin.get();
+    }
+
+    class Texture20 {
+        string _name;
+
+    public:
+        Texture20(const string& name) : _name(name) {
+            cout << "Texture " << _name << " created" << endl;
+        }
+
+        Texture20(const Texture20& other) : _name(other._name) {
+            cout << "Texture " << _name << " copied" << endl;
+        }
+
+        inline const string& getName() const { return _name; }
+    };
+
+    class Sprite20a {
+    public:
+        Sprite20a(Texture20 texture) { 
+            cout << "Sprite20a created with " << texture.getName() << endl;
+        }
+    };
+
+    class Sprite20b {
+    public:
+        Sprite20b(Texture20& texture) {
+            cout << "Sprite20b created with " << texture.getName() << endl;
+        }
+    };
+
+    class Sprite20c {
+    public:
+        Sprite20c(const Texture20& texture) {
+            cout << "Sprite20c created with " << texture.getName() << endl;
+        }
+    };
+
+    class Sprite20d {
+    public:
+        Sprite20d(Texture20* texture) {
+            cout << "Sprite20d created with " << texture->getName() << endl;
+        }
+    };
+
+    class Sprite20e {
+    public:
+        Sprite20e(const Texture20* texture) {
+            cout << "Sprite20e created with " << texture->getName() << endl;
+        }
+    };
+
+    void demo20() {
+        create19<Sprite20a>(Texture20("texture A"));
+        Texture20 textureA("texture B");
+        create19<Sprite20b>(textureA);
+        const Texture20 textureC("texture C");
+        create19<Sprite20c>(textureC);
+        Texture20* textureD = new Texture20("texture D");
+        create19<Sprite20d>(textureD);
+        const Texture20* textureE = new Texture20("texture E");
+        create19<Sprite20e>(textureE);
 
         cin.get();
     }
 
     void run()
     {
-        demo19();
+        demo20();
+        //demo19();
         //demo18();
         //demo17();
         //demo16();
