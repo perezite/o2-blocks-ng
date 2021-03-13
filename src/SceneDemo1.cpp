@@ -1138,9 +1138,133 @@ namespace sceneDemo1
         cin.get();
     }
 
+    class Entity21 : public Drawable, public Transformable {
+    public:
+        virtual ~Entity21() { }
+
+        void draw(DrawTarget& target, DrawStates drawStates = DrawStates::getDefault()) {
+            drawStates.transform *= getTransform();
+            drawSelf(target, drawStates);
+        }
+
+        virtual void drawSelf(DrawTarget& target, DrawStates drawStates) { }
+
+        void update() {
+            updateSelf();
+        }
+
+        virtual void updateSelf() { }
+    };
+
+    template <class TDrawable>
+    class DrawableEntity21 : public Entity21 {
+        Drawable* _drawable;
+
+    public:
+        virtual ~DrawableEntity21() {
+            delete _drawable;
+        }
+
+        DrawableEntity21(TDrawable* ownedDrawable) : _drawable(ownedDrawable) 
+        { }
+
+        virtual void drawSelf(DrawTarget& target, DrawStates drawStates) { 
+            _drawable->draw(target, drawStates);
+        }
+
+        virtual void updateSelf() {
+            cout << "DrawableEntity21::updateSelf()" << endl;
+        }
+    };
+
+    class Scene21 : public Drawable {
+        vector<Entity21*> _entities;
+
+    public:
+        virtual ~Scene21() {
+            deleteAll(_entities);
+        }
+
+        template <class TEntity, class TArg>
+        void createEntity(const TArg& arg) {
+            TEntity* entity = new TEntity((TArg&)arg);
+            _entities.push_back(entity);
+        }
+
+        template <class TDrawable, class TArg>
+        void createDrawableEntity(const TArg& arg) {
+            TDrawable* drawable = new TDrawable((TArg&)arg);
+            DrawableEntity21<TDrawable>* entity = new DrawableEntity21<TDrawable>(drawable);
+            _entities.push_back(entity);
+        }
+
+        virtual void draw(DrawTarget& target, DrawStates drawStates = DrawStates::getDefault()) {
+            for (size_t i = 0; i < _entities.size(); i++)
+                _entities[i]->draw(target);
+        }
+
+        void update() {
+            for (size_t i = 0; i < _entities.size(); i++)
+                _entities[i]->update();
+        }
+    };
+
+    class Texture21 {
+        string _path;
+    public:
+        Texture21(const string& path) : _path(path)
+        { }
+
+        inline const string& getPath() { return _path; }
+    };
+
+    class SpriteEntity21 : public Entity21 {
+        Texture21& _texture;
+    public:
+        SpriteEntity21(Texture21& texture) : _texture(texture)
+        { }
+
+        virtual void drawSelf(DrawTarget& target, DrawStates drawStates) {
+            cout << "SpriteEntity21::drawSelf() with texture " << _texture.getPath() << endl;
+        }
+
+        virtual void updateSelf() {
+            cout << "SpriteEntity::updateSelf()" << endl;
+        }
+    };
+
+    class Sprite21 : public Drawable {
+        Texture21& _texture;
+    public:
+        Sprite21(Texture21& texture) : _texture(texture)
+        { }
+
+        virtual void draw(DrawTarget& target, DrawStates drawStates) {
+            cout << "Sprite21::draw() with texture " << _texture.getPath() << endl;
+        }
+    };
+
+    void demo21() {
+        //Texture21 texture42("path 1");
+
+        //DrawableEntity<Sprite21> test(texture42);
+
+        Window window;
+        Scene21 scene;
+        Texture21 texture1("path 1");
+        Texture21 texture2("path 2");
+        scene.createEntity<SpriteEntity21>(texture1);
+        scene.createDrawableEntity<Sprite21>(texture2);
+        scene.update();
+        scene.draw(window);
+
+        cin.get();
+    }
+
     void run()
     {
-        demo20();
+        demo21();
+        //demo20();
         //demo19();
         //demo18();
         //demo17();
