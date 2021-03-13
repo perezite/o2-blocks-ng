@@ -1245,10 +1245,6 @@ namespace sceneDemo1
     };
 
     void demo21() {
-        //Texture21 texture42("path 1");
-
-        //DrawableEntity<Sprite21> test(texture42);
-
         Window window;
         Scene21 scene;
         Texture21 texture1("path 1");
@@ -1261,9 +1257,86 @@ namespace sceneDemo1
         cin.get();
     }
 
+    class Entity22;
+    class Node22 {
+        vector<Entity22*> _children;
+
+    public:
+        virtual ~Node22() {
+            deleteAll(_children);
+        }
+
+        inline vector<Entity22*>& getChildren() { return _children; }
+
+        template <class TEntity, class TArg>
+        TEntity& createChild(const TArg& arg) {
+            TEntity* entity = new TEntity((TArg&)arg);
+            _children.push_back(entity);
+            return *entity;
+        }
+    };
+
+    class Entity22 : public Node22, public Drawable, public Transformable {
+    public:
+        virtual ~Entity22() { }
+
+        void draw(DrawTarget& target, DrawStates states = DrawStates::getDefault()) {
+            states.transform *= getTransform();
+            drawSelf(target, states);
+
+            for (size_t i = 0; i < getChildren().size(); i++) 
+                getChildren()[i]->draw(target, states);
+        }
+
+        virtual void drawSelf(DrawTarget& target, DrawStates drawStates) { }
+    };
+
+    class Scene22 : public Node22, public Drawable {
+    public:
+        virtual void draw(DrawTarget& target, DrawStates drawStates = DrawStates::getDefault()) {
+            for (size_t i = 0; i < getChildren().size(); i++)
+                getChildren()[i]->draw(target);
+        }
+    };
+
+    class MyEntity22 : public Entity22 {
+        size_t _depth;
+
+    public:
+        MyEntity22(size_t depth) : _depth(depth) {
+            if (depth == 0) {
+                createChild<MyEntity22>(1).setPosition(3, 4);   // expected global: 4, 6
+                createChild<MyEntity22>(1).setPosition(5, 6);   // expected global: 6, 8
+            }
+        }
+
+        Vector2f getGlobalPosition(const Transform& transform) {
+            return Vector2f(transform.getMatrix()[6], transform.getMatrix()[7]);
+        }
+
+        void drawSelf(DrawTarget& target, DrawStates states = DrawStates::getDefault()) {
+            Vector2f globalPosition = getGlobalPosition(states.transform);
+            cout << "MyEntity22: " << " depth: " << _depth  << " position: " << globalPosition.x << " " << globalPosition.y << endl;
+        }
+    };
+
+    class DummyDrawTarget22 : public DrawTarget {
+        virtual void draw(const std::vector<Vertex>& vertices, const PrimitiveType& primitiveType, const DrawStates& states) { }
+    };
+
+    void demo22() {
+        DummyDrawTarget22 drawTarget;
+        Scene22 scene;
+        scene.createChild<MyEntity22>(0).setPosition(1, 2);
+        scene.draw(drawTarget);
+
+        cin.get();
+    }
+
     void run()
     {
-        demo21();
+        demo22();
+        //demo21();
         //demo20();
         //demo19();
         //demo18();
