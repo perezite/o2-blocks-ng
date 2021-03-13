@@ -884,6 +884,13 @@ namespace sceneDemo1
         }
     };
 
+    class ThirdClass15 {
+    public:
+        ThirdClass15(const int& val) {
+            cout << val << endl;
+        }
+    };
+
     template <class TVal>
     class BaseArg15 {
     protected:
@@ -958,12 +965,41 @@ namespace sceneDemo1
         ArgList15<int> secondArgs((Arg15<int>(test)));
         secondArgs.construct<SecondClass15>();
 
+        const int test2 = 44;
+        ArgList15<int> thirdArgs((Arg15<int>(test2)));
+        thirdArgs.construct<ThirdClass15>();
+
         cin.get();
     }
 
+
+    template <class TArg1>
+    ArgList15<TArg1> args16(const TArg1& arg1) {
+        return ArgList15<TArg1>(Arg15<TArg1>(arg1));
+    }
+
+    void demo16() {
+        ArgList15<int> firstArgs = args16(42);
+        firstArgs.construct<FirstClass15>();
+
+        //ArgList15<int> firstArgs = args16(42);
+        //firstArgs.construct<FirstClass15>();
+
+        // int test = 42;
+        // ArgList15<int> secondArgs = args16(test);
+        //secondArgs.construct<SecondClass15>();
+
+        // const int test = 42;
+        // ArgList15<int> thirdArgs = args16(test);
+        //secondArgs.construct<ThirdClass15>();
+
+        cin.get();
+    }
+   
     void run()
     {
-        demo15();
+        demo16();
+        //demo15();
         //demo14();
         //demo13();
         //demo12();
