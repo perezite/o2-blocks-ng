@@ -996,9 +996,90 @@ namespace sceneDemo1
         cin.get();
     }
    
+    class Class17 {
+    public:
+        Class17() {
+            cout << "created" << endl;
+        }
+
+        Class17(const Class17& other) {
+            cout << "copied" << endl;
+         }
+    };
+
+    template <class T>
+    void create17(const T& t) {
+    }
+
+    void demo17() {
+        create17(Class17());
+
+        Class17 test;
+        create17(test);
+
+        const Class17 test2;
+        create17(test2);
+
+        cin.get();
+    }
+
+    void test18b(int& test) {
+        cout << test << endl;
+    }
+
+    void test18(const int& test) {
+        int& myTest = (int&)test;
+        test18b(myTest);
+    }
+
+    void demo18() {
+        int test = 42;
+        test18(test);
+        cin.get();
+    }
+
+    class Class19a {
+    public:
+        Class19a(int val) { 
+            cout << val << endl;
+        }
+    };
+
+    class Class19b {
+    public:
+        Class19b(int& val) { 
+            cout << val << endl;
+        }
+    };
+
+    class Class19c {
+    public:
+        Class19c(const int& val) { 
+            cout << val << endl;
+        }
+    };
+
+    template <class T, class TArg>
+    void create19(const TArg& arg) {
+        new T((TArg&)arg);
+    }
+
+    void demo19() {
+        create19<Class19a>(42);
+        int temp = 43;
+        create19<Class19b>(temp);
+        const int temp2 = 44;
+        create19<Class19b>(temp2);
+
+        cin.get();
+    }
+
     void run()
     {
-        demo16();
+        demo19();
+        //demo18();
+        //demo17();
+        //demo16();
         //demo15();
         //demo14();
         //demo13();
