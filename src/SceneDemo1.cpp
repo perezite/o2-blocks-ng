@@ -788,13 +788,27 @@ namespace sceneDemo1
     }
 
     template <class TVal>
-    class BaseArg {
+    class BaseArg14 {
     protected:
         const TVal* _data;
 
+        bool _isRef;
+
     public:
-        BaseArg(const TVal* data) : _data(data)
+        virtual ~BaseArg14() {
+            if (!_isRef)
+                safeDelete(_data);
+        }
+
+        BaseArg14(const TVal* data, bool isRef) : _data(data), _isRef(isRef)
         { }
+
+        BaseArg14(const BaseArg14& other) : _data(other._data), _isRef(other._isRef) {
+            if (!_isRef) {
+                _data = (TVal*)malloc(sizeof(TVal));
+                memcpy((void*)_data, other._data, sizeof(TVal));
+            }
+        }
 
         inline const TVal& get() const {
             return *_data;
@@ -802,28 +816,21 @@ namespace sceneDemo1
     };
 
     template <class TVal>
-    class Arg14 : public BaseArg<TVal> {
-        typedef BaseArg<TVal> base;
-
-        bool _isRef;
+    class Arg14 : public BaseArg14<TVal> {
+        typedef BaseArg14<TVal> base;
 
     public:
-        virtual ~Arg14() { 
-            if (!_isRef)
-                safeDelete(base::_data); 
-        }
+        Arg14(const TVal& val) : base(new TVal(val), false) { }
 
-        Arg14(const TVal& val) : base(new TVal(val)), _isRef(false) { }
-
-        Arg14(TVal& val) : base(&val), _isRef(true) { }
+        Arg14(TVal& val) : base(&val, true) { }
     };
 
     template <class TVal>
-    class ConstArg14 : public BaseArg<TVal> {
-        typedef BaseArg<TVal> base;
+    class ConstArg14 : public BaseArg14<TVal> {
+        typedef BaseArg14<TVal> base;
 
     public:
-        ConstArg14(const TVal& val) : base(&val) { }
+        ConstArg14(const TVal& val) : base(&val, true) { }
     };
 
     template <class TArg1>
@@ -851,7 +858,6 @@ namespace sceneDemo1
     }
 
     void demo14() {
-
         Arg14<int> test(42);
         int temp = 43;
         Arg14<int> test2(temp);
@@ -864,8 +870,95 @@ namespace sceneDemo1
         cin.get();
     }
 
-    void demo15() {
+    class FirstClass15 {
+    public:
+        FirstClass15(int val) { 
+            cout << val << endl;
+        }
+    };
 
+    class SecondClass15 {
+    public:
+        SecondClass15(const int& val) {
+            cout << val << endl;
+        }
+    };
+
+    template <class TVal>
+    class BaseArg15 {
+    protected:
+        const TVal* _data;
+
+        bool _isRef;
+
+    public:
+        virtual ~BaseArg15() {
+            if (!_isRef)
+                safeDelete(_data);
+        }
+
+        BaseArg15(const TVal* data, bool isRef) : _data(data), _isRef(isRef)
+        { }
+
+        BaseArg15(const BaseArg15& other) : _data(other._data), _isRef(other._isRef) {
+            if (!_isRef) {
+                _data = (TVal*)malloc(sizeof(TVal));
+                memcpy((void*)_data, other._data, sizeof(TVal));
+            }
+        }
+
+        inline const TVal& get() const {
+            return *_data;
+        }
+    };
+
+    template <class TVal>
+    class Arg15 : public BaseArg15<TVal> {
+        typedef BaseArg15<TVal> base;
+
+    public:
+        Arg15(const TVal& val) : base(new TVal(val), false) { }
+
+        Arg15(TVal& val) : base(&val, true) { }
+    };
+
+    template <class TVal>
+    class ConstArg15 : public BaseArg15<TVal> {
+        typedef BaseArg15<TVal> base;
+
+    public:
+        ConstArg15(const TVal& val) : base(&val, true) { }
+    };
+
+    template <class TArg1>
+    class ArgList15 {
+        const BaseArg15<TArg1>* _arg1;
+
+    public:
+        virtual ~ArgList15() {
+            safeDelete(_arg1);
+        }
+
+        ArgList15(const Arg15<TArg1>& arg1) : _arg1(new Arg15<TArg1>(arg1)) {
+        }
+
+        ArgList15(const ConstArg15<TArg1>& arg1) : _arg1(new ConstArg15<TArg1>(arg1)) { }
+
+        template <class T>
+        T* construct() const {
+            return new T(_arg1->get());
+        }
+    };
+
+    void demo15() {
+        ArgList15<int> firstArgs(Arg15<int>(42));
+        firstArgs.construct<FirstClass15>();
+
+        //int test = 43;
+        //ArgList15<int> secondArgs((Arg15<int>(test)));
+        //secondArgs.construct<SecondClass15>();
+
+        cin.get();
     }
 
     void run()
