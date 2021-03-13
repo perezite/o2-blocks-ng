@@ -879,7 +879,7 @@ namespace sceneDemo1
 
     class SecondClass15 {
     public:
-        SecondClass15(const int& val) {
+        SecondClass15(int& val) {
             cout << val << endl;
         }
     };
@@ -887,7 +887,7 @@ namespace sceneDemo1
     template <class TVal>
     class BaseArg15 {
     protected:
-        const TVal* _data;
+        TVal* _data;
 
         bool _isRef;
 
@@ -897,7 +897,7 @@ namespace sceneDemo1
                 safeDelete(_data);
         }
 
-        BaseArg15(const TVal* data, bool isRef) : _data(data), _isRef(isRef)
+        BaseArg15(TVal* data, bool isRef) : _data(data), _isRef(isRef)
         { }
 
         BaseArg15(const BaseArg15& other) : _data(other._data), _isRef(other._isRef) {
@@ -907,7 +907,7 @@ namespace sceneDemo1
             }
         }
 
-        inline const TVal& get() const {
+        inline TVal& get() const {
             return *_data;
         }
     };
@@ -954,9 +954,9 @@ namespace sceneDemo1
         ArgList15<int> firstArgs(Arg15<int>(42));
         firstArgs.construct<FirstClass15>();
 
-        //int test = 43;
-        //ArgList15<int> secondArgs((Arg15<int>(test)));
-        //secondArgs.construct<SecondClass15>();
+        int test = 43;
+        ArgList15<int> secondArgs((Arg15<int>(test)));
+        secondArgs.construct<SecondClass15>();
 
         cin.get();
     }
