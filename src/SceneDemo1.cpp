@@ -781,18 +781,49 @@ namespace sceneDemo1
         // scene.create<SpriteEntity>(args(assets.yellowBlock));
     }
 
+    template <class T>
+    void safeDelete(T* t) {
+        if (t)
+            delete t;
+    }
+
     template <class TVal>
-    class Arg14 {
-        TVal _val;
+    class BaseArg {
+    protected:
+        const TVal* _data;
 
     public:
-        Arg14(const TVal& val) : _val(val)
-        { 
+        BaseArg(const TVal* data) : _data(data)
+        { }
+
+        inline const TVal& get() const {
+            return *_data;
+        }
+    };
+
+    template <class TVal>
+    class Arg14 : public BaseArg<TVal> {
+        typedef BaseArg<TVal> base;
+
+        bool _isRef;
+
+    public:
+        virtual ~Arg14() { 
+            if (!_isRef)
+                safeDelete(base::_data); 
         }
 
-        const TVal& get() const { 
-            return _val; 
-        }
+        Arg14(const TVal& val) : base(new TVal(val)), _isRef(false) { }
+
+        Arg14(TVal& val) : base(&val), _isRef(true) { }
+    };
+
+    template <class TVal>
+    class ConstArg14 : public BaseArg<TVal> {
+        typedef BaseArg<TVal> base;
+
+    public:
+        ConstArg14(const TVal& val) : base(&val) { }
     };
 
     template <class TArg1>
@@ -819,21 +850,28 @@ namespace sceneDemo1
         argList.template construct<T>();
     }
 
-    class FirstClass14 {
-    public:
-        FirstClass14(int val)
-        { }
-    };
-
     void demo14() {
-        create14<FirstClass14>(args14(42));
-        // create14<SecondClass14>(args14(test));
-        // create14<ThirdClass14>(args14(test2));
+
+        Arg14<int> test(42);
+        int temp = 43;
+        Arg14<int> test2(temp);
+        const int temp2 = 44;
+        ConstArg14<int> test3(temp2);
+
+        cout << test.get() << endl;
+        cout << test2.get() << endl;
+        cout << test3.get() << endl;
+        cin.get();
+    }
+
+    void demo15() {
+
     }
 
     void run()
     {
-        demo14();
+        demo15();
+        //demo14();
         //demo13();
         //demo12();
         //demo11();
