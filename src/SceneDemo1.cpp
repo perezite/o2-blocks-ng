@@ -781,9 +781,60 @@ namespace sceneDemo1
         // scene.create<SpriteEntity>(args(assets.yellowBlock));
     }
 
+    template <class TVal>
+    class Arg14 {
+        TVal _val;
+
+    public:
+        Arg14(const TVal& val) : _val(val)
+        { 
+        }
+
+        const TVal& get() const { 
+            return _val; 
+        }
+    };
+
+    template <class TArg1>
+    class ArgList1_14 {
+        const Arg14<TArg1> _arg1;
+
+    public:
+        ArgList1_14(const Arg14<TArg1>& arg1) : _arg1(arg1)
+        { }
+
+        template <class T>
+        T* construct() const {
+            return new T(_arg1.get());
+        }
+    };
+
+    template <class TArg1>
+    ArgList1_14<TArg1> args14(const TArg1& arg1) {
+        return ArgList1_14<TArg1>(arg1);
+    }
+
+    template <class T, class TArgList>
+    void create14(const TArgList& argList) {
+        argList.template construct<T>();
+    }
+
+    class FirstClass14 {
+    public:
+        FirstClass14(int val)
+        { }
+    };
+
+    void demo14() {
+        create14<FirstClass14>(args14(42));
+        // create14<SecondClass14>(args14(test));
+        // create14<ThirdClass14>(args14(test2));
+    }
+
     void run()
     {
-        demo13();
+        demo14();
+        //demo13();
         //demo12();
         //demo11();
         //demo10();
