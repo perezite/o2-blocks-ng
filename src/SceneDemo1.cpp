@@ -1335,7 +1335,9 @@ namespace sceneDemo1
     }
 
     class Entity23;
+    template <class TDrawable> class DrawableEntity23;
     class Component23;
+
     class Node23 {
         vector<Entity23*> _children;
         vector<Component23*> _components;
@@ -1379,14 +1381,27 @@ namespace sceneDemo1
             return add(entity);
         }
 
+        // 0 args
+        template <class TDrawable>
+        DrawableEntity23<TDrawable>& createDrawableEntity() {
+            TDrawable* drawable = new TDrawable();
+            return create<DrawableEntity23<TDrawable>>(drawable);
+        }
+
         // 1 arg
         template <class TEntity, class TArg>
         TEntity& create(const TArg& arg) {
             TEntity* entity = new TEntity((TArg&)arg);
             return add(entity);
         }
-    };
 
+        // 1 arg
+        template <class TDrawable, class TArg>
+        DrawableEntity23<TDrawable>& createDrawableEntity(const TArg& arg) {
+            TDrawable* drawable = new TDrawable(arg);
+            return create<DrawableEntity23<TDrawable>>(drawable);
+        }
+    };
 
     class Component23 : public Node23, public Drawable, public Transformable {
     public:
@@ -1416,6 +1431,23 @@ namespace sceneDemo1
         virtual void drawSelf(DrawTarget& target, DrawStates drawStates) { }
     };
 
+    template <class TDrawable>
+    class DrawableEntity23 : public Entity23 {
+        Drawable* _drawable;
+
+    public:
+        virtual ~DrawableEntity23() {
+            delete _drawable;
+        }
+
+        DrawableEntity23(TDrawable* ownedDrawable) : _drawable(ownedDrawable)
+        { }
+
+        virtual void drawSelf(DrawTarget& target, DrawStates drawStates) {
+            _drawable->draw(target, drawStates);
+        }
+    };
+
     class Scene23 : public Node23, public Drawable {
     public:
         virtual void draw(DrawTarget& target, DrawStates drawStates = DrawStates::getDefault()) {
@@ -1442,11 +1474,24 @@ namespace sceneDemo1
         }
     };
 
+    class MyDrawable23 : public Drawable {
+        int _val;
+
+    public:
+        MyDrawable23(int val) : _val(val)
+        { }
+
+        virtual void draw(DrawTarget& target, DrawStates drawStates) {
+            cout << "MyComponent23::draw(), _val = " << _val << endl;
+        }
+    };
+
     void demo23() {
         DummyDrawTarget22 drawTarget;
         Scene23 scene;
         MyEntity23& entity = scene.create<MyEntity23>();
         entity.create<MyComponent23>(42);
+        entity.createDrawableEntity<MyDrawable23>(43);
         scene.draw(drawTarget);
 
         cin.get();
@@ -1461,6 +1506,7 @@ namespace sceneDemo1
         //demo19();
         //demo18();
         //demo17();
+        //demo9();
         //demo16();
         //demo15();
         //demo14();
@@ -1468,7 +1514,6 @@ namespace sceneDemo1
         //demo12();
         //demo11();
         //demo10();
-        //demo9();
         //demo8();
         //demo7();
         //demo6();
