@@ -1364,9 +1364,9 @@ namespace sceneDemo1
         inline vector<Component23*>& getComponents() { return _components; }
 
         // 0 args
-        template <class TEntity>
-        TEntity& create() {
-            TEntity* entity = new TEntity();
+        template <class TElem>
+        TElem& create() {
+            TElem* entity = new TElem();
             return add(entity);
         }
 
@@ -1378,9 +1378,9 @@ namespace sceneDemo1
         }
 
         // 1 arg
-        template <class TEntity, class TArg>
-        TEntity& create(const TArg& arg) {
-            TEntity* entity = new TEntity((TArg&)arg);
+        template <class TElem, class TArg>
+        TElem& create(const TArg& arg) {
+            TElem* entity = new TElem((TArg&)arg);
             return add(entity);
         }
 
@@ -1402,8 +1402,6 @@ namespace sceneDemo1
         virtual void drawSelf(DrawTarget& target, DrawStates drawStates) { }
 
         virtual void updateSelf() { }
-
-        friend class Node23;
     };
 
     class Entity23 : public Node23, public Drawable, public Transformable {
@@ -1436,6 +1434,19 @@ namespace sceneDemo1
         virtual void updateSelf() { }
     };
 
+    class Scene23 : public Node23, public Drawable {
+    public:
+        virtual void draw(DrawTarget& target, DrawStates drawStates = DrawStates::getDefault()) {
+            for (size_t i = 0; i < getChildren().size(); i++)
+                getChildren()[i]->draw(target);
+        }
+
+        void update() {
+            for (size_t i = 0; i < getChildren().size(); i++)
+                getChildren()[i]->update();
+        }
+    };
+
     template <class TDrawable>
     class DrawableEntity23 : public Entity23 {
         Drawable* _drawable;
@@ -1450,19 +1461,6 @@ namespace sceneDemo1
 
         virtual void drawSelf(DrawTarget& target, DrawStates drawStates) {
             _drawable->draw(target, drawStates);
-        }
-    };
-
-    class Scene23 : public Node23, public Drawable {
-    public:
-        virtual void draw(DrawTarget& target, DrawStates drawStates = DrawStates::getDefault()) {
-            for (size_t i = 0; i < getChildren().size(); i++)
-                getChildren()[i]->draw(target);
-        }
-
-        void update() {
-            for (size_t i = 0; i < getChildren().size(); i++)
-                getChildren()[i]->update();
         }
     };
 
@@ -1513,6 +1511,7 @@ namespace sceneDemo1
         Rotator100(float omega) : _omega(omega) { }
 
         void updateSelf() { 
+            cout << getComponents().size() << endl;
             getParent().rotate(_omega);
         }
     };
@@ -1535,7 +1534,8 @@ namespace sceneDemo1
 
         window.setFramerateLimit(65);
         window.getCamera().setCenter(200);
-        DrawableEntity23<Sprite>& sprite = scene.createDrawableEntity<Sprite>(assets.yellowBlock);
+        DrawableEntity23<Sprite>& sprite = 
+            scene.createDrawableEntity<Sprite>(assets.yellowBlock);
         sprite.setScale(100);
         sprite.setPosition(200);
         sprite.create<Rotator100>(0.1f);
