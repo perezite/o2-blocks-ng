@@ -5,6 +5,7 @@
 #include "BlockyCollider.h"
 #include "Tetromino.h"
 #include "GameAssets.h"
+#include "DrawBatch.h"
 #include "Window.h"
 #include "Block.h"
 #include <vector>
@@ -14,11 +15,14 @@ namespace blocks
     class Board : public sb::Drawable, public sb::Transformable
     {
         Tetromino _tetromino;
-        std::vector<Block> _blocks;
+        std::vector<Block*> _blocks;
         BlockyCollider _collider;
+        sb::DrawBatch _batch;
 
     public:
         Board(GameAssets& assets);
+
+        virtual ~Board();
 
         void start();
 

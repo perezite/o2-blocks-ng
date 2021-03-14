@@ -6,7 +6,7 @@
 #include "Transformable.h"
 #include "BlockyCollider.h"
 
-namespace blocks 
+namespace blocks
 {
     class Tetromino : public sb::Drawable, public sb::Transformable
     {
