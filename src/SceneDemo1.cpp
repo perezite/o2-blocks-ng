@@ -36,7 +36,8 @@ namespace sceneDemo1
 
         window.setFramerateLimit(65);
         window.getCamera().setCenter(200);
-        // scene.createDrawable<Sprite>(assets.greenBlock);
+        // Entity<Sprite>& sprite = scene.createDrawable<Sprite>(assets.greenBlock);
+        // sprite.addComponent<Rotator>(0.1f);
         // scene.create<MyEntity>(assets.greenBlock);
 
         while (window.isOpen()) {
