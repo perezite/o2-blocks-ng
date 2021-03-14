@@ -12,9 +12,10 @@
 //   - Annealing
 //   - Respawn
 
+using namespace blocks;
+
 int main() {
-    // blocks::runGame();
-    sceneDemo1::run();
+    blocks::runGame();
 
     return 0;
 }

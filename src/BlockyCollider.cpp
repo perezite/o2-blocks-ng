@@ -9,7 +9,7 @@ namespace blocks
 {
     vector<BlockyCollider*> BlockyCollider::Colliders;
 
-    bool BlockyCollider::hasCollisions(const vector<Vector2i>& leftPositions, 
+    bool BlockyCollider::hasCollision(const vector<Vector2i>& leftPositions, 
         const vector<Vector2i>& rightPositions)
     {
         for (size_t i = 0; i < leftPositions.size(); i++) {
@@ -22,7 +22,7 @@ namespace blocks
         return false;
     }
 
-    void BlockyCollider::displacePositions(const vector<Vector2i>& oldPositions, 
+    void BlockyCollider::movePositions(const vector<Vector2i>& oldPositions, 
         const Vector2i& displacement, vector<Vector2i>& newPositions)
     {
         newPositions.clear();
@@ -54,13 +54,13 @@ namespace blocks
     
     bool BlockyCollider::wouldCollide(const Vector2i& displacement)
     {
-        vector<Vector2i> newPositions;
-        displacePositions(_globalPositions, displacement, newPositions);
+        vector<Vector2i> movedPositions;
+        movePositions(_globalPositions, displacement, movedPositions);
 
         for (size_t i = 0; i < Colliders.size(); i++) {
             if (Colliders[i] != this) {
-                bool hasCollisions = this->hasCollisions(newPositions, Colliders[i]->_globalPositions);
-                if (hasCollisions)
+                bool hasCollision = this->hasCollision(movedPositions, Colliders[i]->_globalPositions);
+                if (hasCollision)
                     return true;
             }
         }

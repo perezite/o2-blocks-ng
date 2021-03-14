@@ -41,14 +41,15 @@ namespace
 
 namespace blocks
 {
-    struct BlocksGame
+    class Scene
     {
         Window window;
         GameAssets gameAssets;
         Backdrop backdrop;
         Board board;
 
-        BlocksGame()
+    public:
+        Scene()
             : board(gameAssets)
         { }
 
@@ -92,7 +93,7 @@ namespace blocks
 
     void runGame()
     {
-        BlocksGame blocksGame;
-        blocksGame.run();
+        Scene scene;
+        scene.run();
     }
 }
