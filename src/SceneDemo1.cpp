@@ -1333,9 +1333,124 @@ namespace sceneDemo1
         cin.get();
     }
 
+    class Entity23;
+    class Component23;
+    class Node23 {
+        vector<Entity23*> _children;
+        vector<Component23*> _components;
+
+    protected:
+        template <class TElem, bool isEntity> struct adder { };
+
+        template <class TElem> struct adder <TElem, true> { 
+            static TElem& add(Node23& that, TElem* elem) {
+                that._children.push_back(elem);
+                return *elem;
+            }
+        };
+
+        template <class TElem> struct adder <TElem, false> {
+            static TElem& add(Node23& that, TElem* elem) {
+                that._components.push_back(elem);
+                return *elem;
+            }
+        };
+
+        template <class TElem>
+        TElem& add(TElem* elem) {
+            const bool isEntity = is_base_of6<Entity23, TElem>::value;
+            return adder<TElem, isEntity>::add(*this, elem);
+        }
+
+    public:
+        virtual ~Node23() {
+            deleteAll(_children);
+        }
+
+        inline vector<Entity23*>& getChildren() { return _children; }
+
+        inline vector<Component23*>& getComponents() { return _components; }
+
+        // 0 args
+        template <class TEntity>
+        TEntity& create() {
+            TEntity* entity = new TEntity();
+            return add(entity);
+        }
+
+        // 1 arg
+        template <class TEntity, class TArg>
+        TEntity& create(const TArg& arg) {
+            TEntity* entity = new TEntity((TArg&)arg);
+            return add(entity);
+        }
+    };
+
+
+    class Component23 : public Node23, public Drawable, public Transformable {
+    public:
+        void draw(DrawTarget& target, DrawStates states = DrawStates::getDefault()) {
+            states.transform *= getTransform();
+            drawSelf(target, states);
+        }
+
+        virtual void drawSelf(DrawTarget& target, DrawStates drawStates) { }
+    };
+
+    class Entity23 : public Node23, public Drawable, public Transformable {
+    public:
+        virtual ~Entity23() { }
+
+        void draw(DrawTarget& target, DrawStates states = DrawStates::getDefault()) {
+            states.transform *= getTransform();
+            drawSelf(target, states);
+
+            for (size_t i = 0; i < getChildren().size(); i++)
+                getChildren()[i]->draw(target, states);
+
+            for (size_t i = 0; i < getComponents().size(); i++)
+                getComponents()[i]->draw(target, states);
+        }
+
+        virtual void drawSelf(DrawTarget& target, DrawStates drawStates) { }
+    };
+
+    class Scene23 : public Node23, public Drawable {
+    public:
+        virtual void draw(DrawTarget& target, DrawStates drawStates = DrawStates::getDefault()) {
+            for (size_t i = 0; i < getChildren().size(); i++)
+                getChildren()[i]->draw(target);
+        }
+    };
+
+    class MyEntity23 : public Entity23 { 
+    public:
+        virtual void drawSelf(DrawTarget& target, DrawStates drawStates) {
+            cout << "MyEntity23::draw()" << endl;
+        }
+    };
+
+    class MyComponent23 : public Component23 {
+    public:
+        virtual void drawSelf(DrawTarget& target, DrawStates drawStates) {
+            cout << "MyComponent23::draw()" << endl;
+        }
+    };
+
+    void demo23() {
+        DummyDrawTarget22 drawTarget;
+        Scene23 scene;
+        MyEntity23& entity = scene.create<MyEntity23>();
+        entity.create<MyComponent23>();
+        scene.draw(drawTarget);
+
+        cin.get();
+    }
+
     void run()
     {
-        demo22();
+        demo23();
+        //demo22();
         //demo21();
         //demo20();
         //demo19();
