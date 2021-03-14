@@ -29,27 +29,6 @@ namespace sceneDemo1
 
     };
 
-    void demo100() {
-        Window window;
-        Assets assets;
-        // Scene scene;
-
-        window.setFramerateLimit(65);
-        window.getCamera().setCenter(200);
-        // Entity<Sprite>& sprite = scene.createDrawable<Sprite>(assets.greenBlock);
-        // sprite.addComponent<Rotator>(0.1f);
-        // scene.create<MyEntity>(assets.greenBlock);
-
-        while (window.isOpen()) {
-            Input::update();
-            window.update();
-            // scene.update();
-            window.clear(Color(1, 1, 1, 1));
-            // window.draw(scene);
-            window.display();
-        }
-    }
-
     class MyEntity1 : public Drawable, public Transformable
     {
         Sprite _sprite;
@@ -1339,10 +1318,13 @@ namespace sceneDemo1
     class Component23;
 
     class Node23 {
+        Node23* _parent;
         vector<Entity23*> _children;
         vector<Component23*> _components;
 
     protected:
+        inline void setParent(Node23& parent) { _parent = &parent; }
+
         template <class TElem, bool isEntity> struct adder { };
 
         template <class TElem> struct adder <TElem, true> { 
@@ -1362,13 +1344,20 @@ namespace sceneDemo1
         template <class TElem>
         TElem& add(TElem* elem) {
             const bool isEntity = is_base_of6<Entity23, TElem>::value;
-            return adder<TElem, isEntity>::add(*this, elem);
+            TElem& addedElem = adder<TElem, isEntity>::add(*this, elem);
+            addedElem.setParent(*this);
+            return addedElem;
         }
 
     public:
         virtual ~Node23() {
             deleteAll(_children);
         }
+
+        Node23() : _parent(NULL) { 
+        }
+
+        inline Entity23& getParent() { return (Entity23&)(*_parent); }
 
         inline vector<Entity23*>& getChildren() { return _children; }
 
@@ -1398,7 +1387,7 @@ namespace sceneDemo1
         // 1 arg
         template <class TDrawable, class TArg>
         DrawableEntity23<TDrawable>& createDrawableEntity(const TArg& arg) {
-            TDrawable* drawable = new TDrawable(arg);
+            TDrawable* drawable = new TDrawable((TArg&)arg);
             return create<DrawableEntity23<TDrawable>>(drawable);
         }
     };
@@ -1411,6 +1400,10 @@ namespace sceneDemo1
         }
 
         virtual void drawSelf(DrawTarget& target, DrawStates drawStates) { }
+
+        virtual void updateSelf() { }
+
+        friend class Node23;
     };
 
     class Entity23 : public Node23, public Drawable, public Transformable {
@@ -1429,6 +1422,18 @@ namespace sceneDemo1
         }
 
         virtual void drawSelf(DrawTarget& target, DrawStates drawStates) { }
+
+        void update() {
+            updateSelf();
+
+            for (size_t i = 0; i < getChildren().size(); i++)
+                getChildren()[i]->update();
+
+            for (size_t i = 0; i < getComponents().size(); i++)
+                getComponents()[i]->updateSelf();
+        }
+
+        virtual void updateSelf() { }
     };
 
     template <class TDrawable>
@@ -1453,6 +1458,11 @@ namespace sceneDemo1
         virtual void draw(DrawTarget& target, DrawStates drawStates = DrawStates::getDefault()) {
             for (size_t i = 0; i < getChildren().size(); i++)
                 getChildren()[i]->draw(target);
+        }
+
+        void update() {
+            for (size_t i = 0; i < getChildren().size(); i++)
+                getChildren()[i]->update();
         }
     };
 
@@ -1497,9 +1507,56 @@ namespace sceneDemo1
         cin.get();
     }
 
+    class Rotator100 : public Component23 {
+        float _omega;
+    public:
+        Rotator100(float omega) : _omega(omega) { }
+
+        void updateSelf() { 
+            getParent().rotate(_omega);
+        }
+    };
+
+    class MyEntity100 : public Entity23 {
+        Sprite _sprite;
+
+    public:
+        MyEntity100(Texture& texture) : _sprite(texture) { }
+
+        virtual void drawSelf(DrawTarget& target, DrawStates drawStates) {
+            target.draw(_sprite, drawStates);
+        }
+    };
+
+    void demo100() {
+        Window window;
+        Assets assets;
+        Scene23 scene;
+
+        window.setFramerateLimit(65);
+        window.getCamera().setCenter(200);
+        DrawableEntity23<Sprite>& sprite = scene.createDrawableEntity<Sprite>(assets.yellowBlock);
+        sprite.setScale(100);
+        sprite.setPosition(200);
+        sprite.create<Rotator100>(0.1f);
+        Entity23& entity = scene.create<MyEntity100>(assets.greenBlock);
+        entity.setScale(100);
+        entity.setPosition(100);
+
+        while (window.isOpen()) {
+            Input::update();
+            window.update();
+            scene.update();
+            window.clear(Color(1, 1, 1, 1));
+            window.draw(scene);
+            window.display();
+        }
+    }
+
     void run()
     {
-        demo23();
+        demo100();
+        //demo23();
         //demo22();
         //demo21();
         //demo20();
