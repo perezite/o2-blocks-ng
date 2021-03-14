@@ -1431,9 +1431,13 @@ namespace sceneDemo1
     };
 
     class MyComponent23 : public Component23 {
+        int _val;
+
     public:
+        MyComponent23(int val) : _val(val) { }
+
         virtual void drawSelf(DrawTarget& target, DrawStates drawStates) {
-            cout << "MyComponent23::draw()" << endl;
+            cout << "MyComponent23::draw(), _val = " << _val << endl;
         }
     };
 
@@ -1441,7 +1445,7 @@ namespace sceneDemo1
         DummyDrawTarget22 drawTarget;
         Scene23 scene;
         MyEntity23& entity = scene.create<MyEntity23>();
-        entity.create<MyComponent23>();
+        entity.create<MyComponent23>(42);
         scene.draw(drawTarget);
 
         cin.get();
