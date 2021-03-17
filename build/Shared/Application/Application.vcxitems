@@ -17,6 +17,7 @@
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Asset.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\BlockyCollider.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Configuration.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\GameAssets.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Backdrop.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Block.h" />
@@ -54,6 +55,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Shape.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Sound.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Sprite.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Stats.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Stopwatch.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Tetromino.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Texture.h" />
@@ -88,6 +90,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\SceneDemo1.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Sound.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Sprite.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Stats.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Tetromino.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Texture.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\TextureSheet.cpp" />

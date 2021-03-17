@@ -7,15 +7,16 @@
 
 namespace blocks
 {
+    enum class BlockType { I };
+
     class Block : public sb::Sprite
     {
         sb::Texture& _blockTextures;
 
     public:
-        Block(sb::Texture& blockTextures) :
-            _blockTextures(blockTextures)
-        { }
+        Block(sb::Texture& blockTextures, BlockType type = BlockType::I);
 
-        void setType(char type);
+        void setType(BlockType type);
     };
+
 }

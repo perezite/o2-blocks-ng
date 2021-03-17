@@ -15,6 +15,8 @@ namespace blocks
 
         std::vector<sb::Vector2i> _globalPositions;
 
+        sb::Transform _globalTransform;
+
     protected:
         bool hasCollision(const std::vector<sb::Vector2i>& leftPositions, const std::vector<sb::Vector2i>& rightPositions);
 
@@ -42,5 +44,7 @@ namespace blocks
         }
 
         bool wouldCollide(const sb::Vector2i& displacement);
+
+        // bool wouldCollide(float angle);
     };
 }

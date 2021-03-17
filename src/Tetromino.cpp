@@ -36,19 +36,19 @@ namespace blocks
             translate((float)x, (float)y);
     }
 
-    Tetromino::Tetromino(Texture& squareTextures) :
-        _squareTextures(squareTextures),
+    Tetromino::Tetromino(Texture& squareTextures, TetrominoType type) 
+        : _squareTextures(squareTextures),
         _squareSprite(squareTextures)
     {
-        setType('t');
+        setType(type);
     }
 
-    void Tetromino::setType(char type)
+    void Tetromino::setType(TetrominoType type)
     {
-        if (type == 't')
+        if (type == TetrominoType::T)
             setSquares(TShapeSquarePositions, 0, 0);
         else
-            SB_ERROR("Invalid tetromino type " << type);
+            SB_ERROR("Invalid tetromino type " << (int)type);
     }
 
     void Tetromino::draw(DrawTarget& target, DrawStates drawStates)
@@ -73,9 +73,11 @@ namespace blocks
             tryMove(-1,  0);
         if (Input::isKeyGoingDown(KeyCode::Right))
             tryMove(+1,  0);
-        if (Input::isKeyGoingDown(KeyCode::Up))
+        if (Input::isKeyGoingDown(KeyCode::w))
             tryMove( 0, +1);
         if (Input::isKeyGoingDown(KeyCode::Down))
             tryMove( 0, -1);
+        //if (Input::isKeyGoingDown(KeyCode::Up))
+        //    tryRotate(90);
     }
 }

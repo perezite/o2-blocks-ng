@@ -8,6 +8,8 @@
 
 namespace blocks
 {
+    enum class TetrominoType { T };
+
     class Tetromino : public sb::Drawable, public sb::Transformable
     {
         sb::Texture& _squareTextures;
@@ -24,9 +26,9 @@ namespace blocks
         void tryMove(int x, int y);
 
     public:
-        Tetromino(sb::Texture& squareTextures);
+        Tetromino(sb::Texture& squareTextures, TetrominoType type = TetrominoType::T);
 
-        void setType(char type);
+        void setType(TetrominoType type);
 
         virtual void draw(sb::DrawTarget& target, sb::DrawStates drawStates = sb::DrawStates::getDefault());
 

@@ -4,40 +4,12 @@
 #include "Logger.h"
 #include "Board.h"
 #include "Backdrop.h"
+#include "Stats.h"
 #include "GameAssets.h"
 #include <iostream>
 
 using namespace sb;
 using namespace std;
-
-namespace configuration
-{
-    bool printFramerate = false;
-}
-
-namespace 
-{
-    void printFramerate()
-    {
-        static Stopwatch stopwatch;
-        static size_t counter = 0;
-        counter++;
-
-        if (counter == 100) {
-            float elapsedMs = stopwatch.getElapsedMs();
-            stopwatch.reset();
-            float framerate = (1000.0f * counter) / elapsedMs;
-            counter = 0;
-            SB_MESSAGE("fps: " << int(framerate));
-        }
-    }
-
-    void printStats()
-    {
-        if (configuration::printFramerate)
-            printFramerate();
-    }
-}
 
 namespace blocks
 {

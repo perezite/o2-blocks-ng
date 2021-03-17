@@ -5,7 +5,6 @@
 
 // TODO: 
 // - Draft Tetromino
-//   - Collision
 //   - Rotation
 //   - Autodrop
 //   - Hard Drop

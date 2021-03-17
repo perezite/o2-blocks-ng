@@ -13,7 +13,6 @@ namespace blocks
         _tetromino(assets.squareTextures)
     { 
         _blocks.push_back(new Block(assets.blockTextures));
-        _blocks[0]->setType('i');
         _blocks[0]->setPosition(3, 14);
         _tetromino.setPosition(5, 16);
     }

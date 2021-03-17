@@ -18,11 +18,17 @@ namespace
 
 namespace blocks
 {
-    void Block::setType(char type)
+    Block::Block(sb::Texture& blockTextures, BlockType type)
+        : _blockTextures(blockTextures)
     {
-        if (type == 'i')
+        setType(type);
+    }
+
+    void Block::setType(BlockType type)
+    {
+        if (type == BlockType::I)
             setTexture(_blockTextures, getBlockTextureArea(1, 2));
         else
-            SB_ERROR("Invalid tetromino type " << type);
+            SB_ERROR("Invalid tetromino type " << (int)type);
     }
 }
