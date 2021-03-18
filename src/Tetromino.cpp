@@ -54,7 +54,12 @@ namespace blocks
 
     void Tetromino::draw(DrawTarget& target, DrawStates drawStates)
     {
-        drawStates.transform *= getTransform();
+        static const Transform originTransform(Vector2f(-.5f));
+        static const Transform inverseOriginTransform(Vector2f(.5f));
+
+        // we transform the origin, such that rotations and scaling are applied to the center but 
+        // the drawable is still positioned relative to the original lower left corner
+        drawStates.transform *= inverseOriginTransform * getTransform() * originTransform;
 
         for (size_t i = 0; i < 4; i++) {
             _squareSprite.setPosition((float)_squarePositions[i].x, (float)_squarePositions[i].y);

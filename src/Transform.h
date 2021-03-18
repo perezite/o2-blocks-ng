@@ -15,7 +15,7 @@ namespace sb
 	public:
 		Transform();
 
-		Transform(Vector2f position_, Vector2f scale_, float rotation_);
+		Transform(Vector2f position_, Vector2f scale_ = Vector2f(1), float rotation_ = 0);
 
 		Transform(float a00, float a01, float a02,
 			float a10, float a11, float a12,
