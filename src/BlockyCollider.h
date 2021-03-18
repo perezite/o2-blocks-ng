@@ -17,17 +17,24 @@ namespace blocks
 
         sb::Transform _globalTransform;
 
+        std::vector<sb::Vector2i> _localPositions;
+
     protected:
         bool hasCollision(const std::vector<sb::Vector2i>& leftPositions, const std::vector<sb::Vector2i>& rightPositions);
 
-        void movePositions(const std::vector<sb::Vector2i>& oldPositions, const sb::Vector2i& displacement, std::vector<sb::Vector2i>& newPositions);
+        //void movePositions(const std::vector<sb::Vector2i>& oldPositions, const sb::Vector2i& displacement, std::vector<sb::Vector2i>& newPositions);
+
+        void transformPositions(const std::vector<sb::Vector2i>& oldPositions, const sb::Transform& transform, std::vector<sb::Vector2i>& resultPositions);
+
+
+        bool wouldCollide(const sb::Transform& globalTransform);
 
     public:
         BlockyCollider();
 
         virtual ~BlockyCollider();
 
-        void update(const sb::Transform& globalTransform, const std::vector<sb::Vector2i>& positions);
+        void update(const sb::Transform& globalTransform, const std::vector<sb::Vector2i>& localPositions);
 
         template <class T>
         void update(const sb::Transform& globalTransform, const std::vector<T*>& entities) {
@@ -45,6 +52,6 @@ namespace blocks
 
         bool wouldCollide(const sb::Vector2i& displacement);
 
-        // bool wouldCollide(float angle);
+        bool wouldCollide(float radians);
     };
 }

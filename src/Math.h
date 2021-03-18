@@ -8,7 +8,7 @@ namespace sb
 {
 	const float Pi = (float)M_PI;
 
-	const float ToRadian = 0.01745329251f;
+	const float ToRadians = 0.01745329251f;
 	const float ToDegrees = 57.295779513f;
 	
 	inline float random() {

@@ -39,7 +39,7 @@ namespace sb
 
 		void setRotation(float radians);
 
-		inline void rotate(float angle) { setRotation(getRotation() + angle); }
+		inline void rotate(float radians) { setRotation(getRotation() + radians); }
 
 	protected:
 		void updateTransform();

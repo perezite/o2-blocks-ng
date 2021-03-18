@@ -5,6 +5,16 @@
 using namespace std;
 using namespace sb;
 
+namespace {
+    Vector2f toVector2f(const Vector2i v) {
+        return Vector2f(float(v.x), float(v.y));
+    }
+
+    Vector2i toVector2i(const Vector2f v) {
+        return Vector2i(int(v.x), int(v.y));
+    }
+}
+
 namespace blocks
 {
     vector<BlockyCollider*> BlockyCollider::Colliders;
@@ -22,13 +32,31 @@ namespace blocks
         return false;
     }
 
-    void BlockyCollider::movePositions(const vector<Vector2i>& oldPositions, 
-        const Vector2i& displacement, vector<Vector2i>& newPositions)
+    void BlockyCollider::transformPositions(const vector<Vector2i>& oldPositions, const Transform& transform, vector<Vector2i>& newPositions) 
     {
         newPositions.clear();
         newPositions.reserve(oldPositions.size());
-        for (size_t i = 0; i < oldPositions.size(); i++)
-            newPositions.push_back(oldPositions[i] + displacement);
+
+        for (size_t i = 0; i < oldPositions.size(); i++) {
+            Vector2f temp = transform * toVector2f(oldPositions[i]);
+            newPositions.push_back(toVector2i(temp));
+        }
+    }
+
+    bool BlockyCollider::wouldCollide(const sb::Transform& globalTransform)
+    {
+        vector<Vector2i> newGlobalPositions;
+        transformPositions(_localPositions, globalTransform, newGlobalPositions);
+
+        for (size_t i = 0; i < Colliders.size(); i++) {
+            if (Colliders[i] != this) {
+                bool hasCollision = this->hasCollision(newGlobalPositions, Colliders[i]->_globalPositions);
+                if (hasCollision)
+                    return true;
+            }
+        }
+
+        return false;
     }
 
     BlockyCollider::BlockyCollider()
@@ -41,30 +69,24 @@ namespace blocks
         Colliders.erase(remove(Colliders.begin(), Colliders.end(), this), Colliders.end());
     }
 
-    void BlockyCollider::update(const Transform& globalTransform, const vector<Vector2i>& positions)
+    void BlockyCollider::update(const Transform& globalTransform, const vector<Vector2i>& localPositions)
     {
-        _globalPositions.clear();
-
-        for (size_t i = 0; i < positions.size(); i++) {
-            Vector2f globalPosition = 
-                globalTransform * Vector2f((float)positions[i].x, (float)positions[i].y);
-            _globalPositions.push_back(Vector2i((int)globalPosition.x, (int)globalPosition.y));
-        }
+        _globalTransform = globalTransform;
+        _localPositions = localPositions;
+        transformPositions(localPositions, globalTransform, _globalPositions);
     }
     
     bool BlockyCollider::wouldCollide(const Vector2i& displacement)
     {
-        vector<Vector2i> movedPositions;
-        movePositions(_globalPositions, displacement, movedPositions);
+        Transform newTransform(_globalTransform);
+        newTransform.translate(toVector2f(displacement));
+        return wouldCollide(newTransform);
+    }
 
-        for (size_t i = 0; i < Colliders.size(); i++) {
-            if (Colliders[i] != this) {
-                bool hasCollision = this->hasCollision(movedPositions, Colliders[i]->_globalPositions);
-                if (hasCollision)
-                    return true;
-            }
-        }
-
-        return false;
+    bool BlockyCollider::wouldCollide(float radians)
+    {
+        Transform newTransform(_globalTransform);
+        newTransform.rotate(radians);
+        return wouldCollide(newTransform);
     }
 }

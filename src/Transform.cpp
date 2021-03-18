@@ -14,12 +14,13 @@ namespace sb
 
 	Transform::Transform(Vector2f position, Vector2f scale, float rotation)
 	{
-		float c = cosf(rotation);
-		float s = sinf(rotation);
+		const float c = cosf(rotation), s = sinf(rotation);
+		const float& sx = scale.x, sy = scale.y;
+		const float& tx = position.x, ty = position.y;
 
-		m_matrix[0] = c * scale.x;	m_matrix[3] = -s * scale.y;	m_matrix[6] = position.x;
-		m_matrix[1] = s * scale.x;	m_matrix[4] = c * scale.y;	m_matrix[7] = position.y;
-		m_matrix[2] = 0;			m_matrix[5] = 0;			m_matrix[8] = 1;
+		m_matrix[0] = c * sx;	m_matrix[3] = -s * sy;	m_matrix[6] = tx;
+		m_matrix[1] = s * sx;	m_matrix[4] =  c * sy;	m_matrix[7] = ty;
+		m_matrix[2] = 0;		m_matrix[5] = 0;		m_matrix[8] = 1;
 	}
 
 	Transform::Transform( 
@@ -51,7 +52,7 @@ namespace sb
 
 		return apply(scaling);
 	}
-
+	
 	const Transform& Transform::rotate(const float angle)
 	{
 		float c = cosf(angle);

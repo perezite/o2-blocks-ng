@@ -3,6 +3,7 @@
 #include "Rect.h"
 #include "Memory.h"
 #include "Input.h"
+#include "Math.h"
 #include <algorithm>
 #include <iterator>
 
@@ -77,7 +78,7 @@ namespace blocks
             tryMove( 0, +1);
         if (Input::isKeyGoingDown(KeyCode::Down))
             tryMove( 0, -1);
-        //if (Input::isKeyGoingDown(KeyCode::Up))
-        //    tryRotate(90);
+        if (Input::isKeyGoingDown(KeyCode::Up))
+            rotate(90 * ToRadians);
     }
 }

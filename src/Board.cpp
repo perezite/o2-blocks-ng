@@ -4,7 +4,6 @@
 #include "Memory.h"
 #include "DrawTarget.h"
 
-
 using namespace sb;
 
 namespace blocks

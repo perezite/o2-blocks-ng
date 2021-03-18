@@ -25,6 +25,8 @@ namespace blocks
 
         void tryMove(int x, int y);
 
+        void tryRotate(float angle);
+
     public:
         Tetromino(sb::Texture& squareTextures, TetrominoType type = TetrominoType::T);
 
