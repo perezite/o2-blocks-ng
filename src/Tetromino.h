@@ -8,7 +8,7 @@
 
 namespace blocks
 {
-    enum class TetrominoType { T };
+    enum class TetrominoType { T, Simple };
 
     class Tetromino : public sb::Drawable, public sb::Transformable
     {
@@ -28,7 +28,7 @@ namespace blocks
         void tryRotate(float angle);
 
     public:
-        Tetromino(sb::Texture& squareTextures, TetrominoType type = TetrominoType::T);
+        Tetromino(sb::Texture& squareTextures, TetrominoType type = TetrominoType::Simple);
 
         void setType(TetrominoType type);
 

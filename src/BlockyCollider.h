@@ -3,6 +3,7 @@
 #include "Block.h"
 #include "Vector2.h"
 #include "Transform.h"
+#include "Transformable.h"
 #include <vector>
 
 namespace blocks
@@ -17,7 +18,11 @@ namespace blocks
 
         sb::Transform _globalTransform;
 
+        sb::Transform _parentTransform;
+
         std::vector<sb::Vector2i> _localPositions;
+
+        sb::Transformable& _parent;
 
     protected:
         bool hasCollision(const std::vector<sb::Vector2i>& leftPositions, const std::vector<sb::Vector2i>& rightPositions);
@@ -30,14 +35,14 @@ namespace blocks
         bool wouldCollide(const sb::Transform& globalTransform);
 
     public:
-        BlockyCollider();
+        BlockyCollider(sb::Transformable& parent);
 
         virtual ~BlockyCollider();
 
-        void update(const sb::Transform& globalTransform, const std::vector<sb::Vector2i>& localPositions);
+        void update(const sb::Transform& parentTransform, const sb::Transform& globalTransform, const std::vector<sb::Vector2i>& localPositions);
 
         template <class T>
-        void update(const sb::Transform& globalTransform, const std::vector<T*>& entities) {
+        void update(const sb::Transform& parentTransform, const sb::Transform& globalTransform, const std::vector<T*>& entities) {
             std::vector<sb::Vector2i> positions;
             positions.reserve(entities.size());
 
@@ -47,11 +52,13 @@ namespace blocks
                 positions.push_back(position);
             }
 
-            update(globalTransform, positions);
+            update(parentTransform, globalTransform, positions);
         }
 
         bool wouldCollide(const sb::Vector2i& displacement);
 
         bool wouldCollide(float radians);
+
+        bool wouldCollide(const sb::Vector2i& displacement, float radiansRotation);
     };
 }

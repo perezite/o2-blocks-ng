@@ -1,6 +1,9 @@
 #include "Board.h"
 #include "BlockyCollider.h"
+#include "Transformable.h"
+#include "Input.h"
 #include <algorithm>
+#include <math.h>
 
 using namespace std;
 using namespace sb;
@@ -11,7 +14,7 @@ namespace {
     }
 
     Vector2i toVector2i(const Vector2f v) {
-        return Vector2i(int(v.x), int(v.y));
+        return Vector2i((int)round(v.x), (int)round(v.y));
     }
 }
 
@@ -59,7 +62,7 @@ namespace blocks
         return false;
     }
 
-    BlockyCollider::BlockyCollider()
+    BlockyCollider::BlockyCollider(Transformable& parent) : _parent(parent)
     {
         Colliders.push_back(this);
     }
@@ -69,11 +72,18 @@ namespace blocks
         Colliders.erase(remove(Colliders.begin(), Colliders.end(), this), Colliders.end());
     }
 
-    void BlockyCollider::update(const Transform& globalTransform, const vector<Vector2i>& localPositions)
+    void BlockyCollider::update(const Transform& parentTransform, const Transform& globalTransform, const vector<Vector2i>& localPositions)
     {
         _globalTransform = globalTransform;
+        _parentTransform = parentTransform;
         _localPositions = localPositions;
         transformPositions(localPositions, globalTransform, _globalPositions);
+
+        if (Input::isKeyGoingDown(KeyCode::c) && _globalPositions.size() > 1) {
+            for (size_t i = 0; i < _globalPositions.size(); i++)
+                cout << "(" << _globalPositions[i].x << ", " << _globalPositions[i].y << ") ";
+            cout << endl;
+        }
     }
     
     bool BlockyCollider::wouldCollide(const Vector2i& displacement)
@@ -89,4 +99,18 @@ namespace blocks
         newTransform.rotate(radians);
         return wouldCollide(newTransform);
     }
+
+    bool BlockyCollider::wouldCollide(const sb::Vector2i& displacement, float radians)
+    {
+        Vector2f entityPosition = _parent.getPosition() + toVector2f(displacement);
+        float entityRotation = _parent.getRotation() + radians;
+        Transform localTransform(entityPosition, Vector2f(1), entityRotation);
+        Transform globalTransform = _parentTransform * localTransform;
+
+        return wouldCollide(globalTransform);
+
+        //Transform newTransform(_parentTransform);
+        //newTransform *= Transform(position, Vector2f(1, 1), radians);
+        //return wouldCollide(newTransform);
+    }    
 }
