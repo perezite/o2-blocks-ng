@@ -30,10 +30,10 @@ namespace blocks
 
     void Board::start() { }
 
-    void Board::updateColliders(Transform transform)
+    void Board::updateColliders(Transform parentTransform)
     {
-        _collider.update(transform, _blocks);
-        _tetromino.updateColliders(transform);
+        _collider.update(parentTransform, _blocks);
+        _tetromino.updateColliders(parentTransform);
     }
 
     void Board::update(Window& window)

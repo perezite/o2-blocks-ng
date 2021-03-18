@@ -78,12 +78,6 @@ namespace blocks
         _localPositions = localPositions;
         Transform globalTransform = parentTransform * _entity.getTransform();
         transformPositions(localPositions, globalTransform, _globalPositions);
-
-        if (Input::isKeyGoingDown(KeyCode::c) && _globalPositions.size() > 1) {
-            for (size_t i = 0; i < _globalPositions.size(); i++)
-                cout << "(" << _globalPositions[i].x << ", " << _globalPositions[i].y << ") ";
-            cout << endl;
-        }
     }
    
     bool BlockyCollider::wouldCollide(const sb::Vector2i& deltaPosition, float deltaRadians)

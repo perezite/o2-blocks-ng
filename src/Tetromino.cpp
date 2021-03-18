@@ -35,15 +35,13 @@ namespace blocks
 
     void Tetromino::tryMove(int deltaX, int deltaY)
     {
-        bool wouldCollide = _collider.wouldCollide(Vector2i(deltaX, deltaY));
-        if (!wouldCollide)
+        if (!_collider.wouldCollide(Vector2i(deltaX, deltaY)))
             translate(float(deltaX), float(deltaY));
     }
 
     void Tetromino::tryRotate(float deltaRadians) 
     {
-        bool wouldCollide = _collider.wouldCollide(deltaRadians);
-        if (!wouldCollide)
+        if (!_collider.wouldCollide(deltaRadians))
             rotate(deltaRadians);
     }
 
@@ -78,9 +76,9 @@ namespace blocks
         }
     }
 
-    void Tetromino::updateColliders(Transform transform)
+    void Tetromino::updateColliders(Transform parentTransform)
     {
-        _collider.update(transform, _squarePositions);
+        _collider.update(parentTransform, _squarePositions);
     }
 
     void Tetromino::update()
