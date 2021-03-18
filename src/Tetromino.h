@@ -5,6 +5,7 @@
 #include "Drawable.h"
 #include "Transformable.h"
 #include "BlockyCollider.h"
+#include "Input.h"
 
 namespace blocks
 {
@@ -26,6 +27,8 @@ namespace blocks
         void tryMove(int x, int y);
 
         void tryRotate(float angle);
+
+        void checkMove(sb::KeyCode keyCode, int deltaX, int deltaY);
 
     public:
         Tetromino(sb::Texture& squareTextures, TetrominoType type = TetrominoType::Simple);

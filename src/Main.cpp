@@ -5,7 +5,7 @@
 
 // TODO: 
 // - Draft Tetromino
-//   - Rotation
+//   - Optimize performance in BlockyCollider (remove recomputation of globalPositions every frame, instead create getGlobalPositions() method with dirty flag)
 //   - Autodrop
 //   - Hard Drop
 //   - Annealing

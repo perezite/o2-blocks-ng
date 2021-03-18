@@ -6,6 +6,7 @@
 #include "Math.h"
 #include <algorithm>
 #include <iterator>
+#include <map>
 
 using namespace sb;
 using namespace std;
@@ -45,6 +46,12 @@ namespace blocks
             rotate(deltaRadians);
     }
 
+    void Tetromino::checkMove(sb::KeyCode keyCode, int deltaX, int deltaY)
+    {
+        if (Input::isKeyGoingDown(keyCode))
+            tryMove(deltaX, deltaY);
+    }
+
     Tetromino::Tetromino(Texture& squareTextures, TetrominoType type) 
         : _squareTextures(squareTextures), _squareSprite(squareTextures), _collider(*this)
     {
@@ -63,11 +70,9 @@ namespace blocks
 
     void Tetromino::draw(DrawTarget& target, DrawStates drawStates)
     {
-        static const Transform originTransform(Vector2f(-.5f));
-        static const Transform inverseOriginTransform(Vector2f(.5f));
-
-        // we transform the origin, such that rotations and scaling are applied to the center but 
-        // the drawable is still positioned relative to the original lower left corner
+        // we transform the origin, such that rotations and scaling are applied relative to the center
+        static const Transform originTransform(-.5f);
+        static const Transform inverseOriginTransform(.5f);
         drawStates.transform *= inverseOriginTransform * getTransform() * originTransform;
 
         for (size_t i = 0; i < _squarePositions.size(); i++) {
@@ -83,14 +88,11 @@ namespace blocks
 
     void Tetromino::update()
     {
-        if (Input::isKeyGoingDown(KeyCode::Left))
-            tryMove(-1,  0);
-        if (Input::isKeyGoingDown(KeyCode::Right))
-            tryMove(+1,  0);
-        if (Input::isKeyGoingDown(KeyCode::Up))
-            tryMove( 0, +1);
-        if (Input::isKeyGoingDown(KeyCode::Down))
-            tryMove( 0, -1);
+        checkMove(KeyCode::Left,  -1,  0);
+        checkMove(KeyCode::Right, +1,  0);
+        checkMove(KeyCode::Up,     0, +1);
+        checkMove(KeyCode::Down,  0,  -1);
+
         if (Input::isKeyGoingDown(KeyCode::r))
             tryRotate(90 * ToRadians);
     }
