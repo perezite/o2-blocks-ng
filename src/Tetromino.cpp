@@ -33,18 +33,18 @@ namespace blocks
         _squarePositions.assign(squarePositions.begin(), squarePositions.end());
     }
 
-    void Tetromino::tryMove(int x, int y)
+    void Tetromino::tryMove(int deltaX, int deltaY)
     {
-        bool wouldCollide = _collider.wouldCollide(Vector2i(x, y), 0);
+        bool wouldCollide = _collider.wouldCollide(Vector2i(deltaX, deltaY));
         if (!wouldCollide)
-            translate(float(x), float(y));
+            translate(float(deltaX), float(deltaY));
     }
 
-    void Tetromino::tryRotate(float radians) 
+    void Tetromino::tryRotate(float deltaRadians) 
     {
-        bool wouldCollide = _collider.wouldCollide(Vector2i(0), radians);
+        bool wouldCollide = _collider.wouldCollide(deltaRadians);
         if (!wouldCollide)
-            rotate(radians);
+            rotate(deltaRadians);
     }
 
     Tetromino::Tetromino(Texture& squareTextures, TetrominoType type) 
@@ -80,9 +80,7 @@ namespace blocks
 
     void Tetromino::updateColliders(Transform transform)
     {
-        Transform parentTransform = transform;
-        transform *= getTransform();
-        _collider.update(parentTransform, transform, _squarePositions);
+        _collider.update(transform, _squarePositions);
     }
 
     void Tetromino::update()

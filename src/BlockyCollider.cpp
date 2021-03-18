@@ -62,7 +62,7 @@ namespace blocks
         return false;
     }
 
-    BlockyCollider::BlockyCollider(Transformable& parent) : _parent(parent)
+    BlockyCollider::BlockyCollider(Transformable& parent) : _entity(parent)
     {
         Colliders.push_back(this);
     }
@@ -72,11 +72,11 @@ namespace blocks
         Colliders.erase(remove(Colliders.begin(), Colliders.end(), this), Colliders.end());
     }
 
-    void BlockyCollider::update(const Transform& parentTransform, const Transform& globalTransform, const vector<Vector2i>& localPositions)
+    void BlockyCollider::update(const Transform& parentTransform, const vector<Vector2i>& localPositions)
     {
-        _globalTransform = globalTransform;
         _parentTransform = parentTransform;
         _localPositions = localPositions;
+        Transform globalTransform = parentTransform * _entity.getTransform();
         transformPositions(localPositions, globalTransform, _globalPositions);
 
         if (Input::isKeyGoingDown(KeyCode::c) && _globalPositions.size() > 1) {
@@ -85,32 +85,24 @@ namespace blocks
             cout << endl;
         }
     }
-    
-    bool BlockyCollider::wouldCollide(const Vector2i& displacement)
+   
+    bool BlockyCollider::wouldCollide(const sb::Vector2i& deltaPosition, float deltaRadians)
     {
-        Transform newTransform(_globalTransform);
-        newTransform.translate(toVector2f(displacement));
-        return wouldCollide(newTransform);
-    }
-
-    bool BlockyCollider::wouldCollide(float radians)
-    {
-        Transform newTransform(_globalTransform);
-        newTransform.rotate(radians);
-        return wouldCollide(newTransform);
-    }
-
-    bool BlockyCollider::wouldCollide(const sb::Vector2i& displacement, float radians)
-    {
-        Vector2f entityPosition = _parent.getPosition() + toVector2f(displacement);
-        float entityRotation = _parent.getRotation() + radians;
+        Vector2f entityPosition = _entity.getPosition() + toVector2f(deltaPosition);
+        float entityRotation = _entity.getRotation() + deltaRadians;
         Transform localTransform(entityPosition, Vector2f(1), entityRotation);
         Transform globalTransform = _parentTransform * localTransform;
 
         return wouldCollide(globalTransform);
+    }
 
-        //Transform newTransform(_parentTransform);
-        //newTransform *= Transform(position, Vector2f(1, 1), radians);
-        //return wouldCollide(newTransform);
-    }    
+    bool BlockyCollider::wouldCollide(const sb::Vector2i& deltaPosition)
+    {
+        return wouldCollide(deltaPosition, 0);
+    }
+
+    bool BlockyCollider::wouldCollide(float deltaRadians)
+    {
+        return wouldCollide(Vector2i(0), deltaRadians);
+    }
 }

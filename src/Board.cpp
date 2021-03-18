@@ -32,9 +32,7 @@ namespace blocks
 
     void Board::updateColliders(Transform transform)
     {
-        Transform parentTransform = transform;
-        transform *= getTransform();
-        _collider.update(parentTransform, transform, _blocks);
+        _collider.update(transform, _blocks);
         _tetromino.updateColliders(transform);
     }
 
