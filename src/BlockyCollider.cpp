@@ -62,6 +62,16 @@ namespace blocks
         return false;
     }
 
+    bool BlockyCollider::wouldCollide(const sb::Vector2i& deltaPosition, float deltaRadians)
+    {
+        Vector2f entityPosition = _entity.getPosition() + toVector2f(deltaPosition);
+        float entityRotation = _entity.getRotation() + deltaRadians;
+        Transform localTransform(entityPosition, Vector2f(1), entityRotation);
+        Transform globalTransform = _parentTransform * localTransform;
+
+        return wouldCollide(globalTransform);
+    }
+
     BlockyCollider::BlockyCollider(Transformable& parent) : _entity(parent)
     {
         Colliders.push_back(this);
@@ -80,15 +90,6 @@ namespace blocks
         transformPositions(localPositions, globalTransform, _globalPositions);
     }
    
-    bool BlockyCollider::wouldCollide(const sb::Vector2i& deltaPosition, float deltaRadians)
-    {
-        Vector2f entityPosition = _entity.getPosition() + toVector2f(deltaPosition);
-        float entityRotation = _entity.getRotation() + deltaRadians;
-        Transform localTransform(entityPosition, Vector2f(1), entityRotation);
-        Transform globalTransform = _parentTransform * localTransform;
-
-        return wouldCollide(globalTransform);
-    }
 
     bool BlockyCollider::wouldCollide(const sb::Vector2i& deltaPosition)
     {
