@@ -9,22 +9,13 @@ using namespace sb;
 namespace blocks
 {
     Board::Board(GameAssets& assets) :
-        _tetromino(assets.squareTextures, TetrominoType::T), 
+        _tetromino(assets.squareTextureAtlas, TetrominoType::T), 
         _collider(*this)
     { 
-        _blocks.push_back(new Block(assets.blockTextures));
+        _blocks.push_back(new Block(assets));
         _blocks[0]->setPosition(3, 14);
         _tetromino.setPosition(5, 16);
     }
-
-    //Board::Board(GameAssets& assets) :
-    //    _tetromino(assets.squareTextures, TetrominoType::Simple),
-    //    _collider(*this)
-    //{
-    //    _blocks.push_back(new Block(assets.blockTextures));
-    //    _blocks[0]->setPosition(0, 0);
-    //    _tetromino.setPosition(1, 0);
-    //}
 
     Board::~Board() { deleteAll(_blocks); }
 

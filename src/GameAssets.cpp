@@ -6,6 +6,7 @@ namespace blocks
 {
     GameAssets::GameAssets() :
         blockTextures("Textures/Blocks.png"),
-        squareTextures("Textures/Blocks.png")
+        squareTextures("Textures/Blocks.png"),
+        squareTextureAtlas(squareTextures, 128)
     { }
 }

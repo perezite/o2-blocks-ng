@@ -4,6 +4,7 @@
 #include "Rect.h"
 #include "Texture.h"
 #include "GameAssets.h"
+#include "TextureAtlas.h"
 
 namespace blocks
 {
@@ -11,10 +12,10 @@ namespace blocks
 
     class Block : public sb::Sprite
     {
-        sb::Texture& _blockTextures;
+        TextureAtlas& _blockTextures;
 
     public:
-        Block(sb::Texture& blockTextures, BlockType type = BlockType::I);
+        Block(TextureAtlas& blockTextures, BlockType type = BlockType::I);
 
         void setType(BlockType type);
     };

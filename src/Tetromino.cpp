@@ -13,23 +13,16 @@ using namespace std;
 
 namespace
 {
-    const Vector2ui SquareTextureSize(128);
-
     const vector<Vector2i> TShapeSquarePositions = { Vector2i(0, 0), Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, 1) };
 
     const vector<Vector2i> SimpleShapeSquarePositions = { Vector2i(0, 0), Vector2i(1, 0) };
-
-    IntRect getSquareTextureArea(size_t x, size_t y) {
-        return IntRect(x * SquareTextureSize.x, y * SquareTextureSize.y,
-            SquareTextureSize.x, SquareTextureSize.y);
-    }
 }
 
 namespace blocks
 {
     void Tetromino::setSquares(const vector<Vector2i>& squarePositions, size_t texPosX, size_t texPosY)
     {
-        _squareSprite.setTexture(_squareTextures, getSquareTextureArea(texPosX, texPosY));
+        _squareSprite.setTexture(_squareTextures.getTextureSheet(), _squareTextures.getTextureArea(texPosX, texPosY));
         _squarePositions.clear();
         _squarePositions.assign(squarePositions.begin(), squarePositions.end());
     }
@@ -40,7 +33,7 @@ namespace blocks
             translate(float(deltaX), float(deltaY));
     }
 
-    void Tetromino::tryRotate(float deltaRadians) 
+    void Tetromino::tryRotate(float deltaRadians)
     {
         if (!_collider.wouldCollide(deltaRadians))
             rotate(deltaRadians);
@@ -52,8 +45,8 @@ namespace blocks
             tryMove(deltaX, deltaY);
     }
 
-    Tetromino::Tetromino(Texture& squareTextures, TetrominoType type) 
-        : _squareTextures(squareTextures), _squareSprite(squareTextures), _collider(*this)
+    Tetromino::Tetromino(TextureAtlas& squareTextures, TetrominoType type)
+        : _squareTextures(squareTextures), _collider(*this)
     {
         setType(type);
     }

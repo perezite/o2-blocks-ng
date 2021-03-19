@@ -13,7 +13,7 @@ namespace blocks
 
     class Tetromino : public sb::Drawable, public sb::Transformable
     {
-        sb::Texture& _squareTextures;
+        TextureAtlas& _squareTextures;
 
         sb::Sprite _squareSprite;
 
@@ -31,7 +31,7 @@ namespace blocks
         void checkMove(sb::KeyCode keyCode, int deltaX, int deltaY);
 
     public:
-        Tetromino(sb::Texture& squareTextures, TetrominoType type = TetrominoType::Simple);
+        Tetromino(TextureAtlas& squareTextures, TetrominoType type = TetrominoType::Simple);
 
         void setType(TetrominoType type);
 

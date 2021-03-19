@@ -4,6 +4,7 @@
 #include "Vector2.h"
 #include "Transform.h"
 #include "Transformable.h"
+#include "VectorHelper.h"
 #include <vector>
 
 namespace blocks
@@ -14,18 +15,20 @@ namespace blocks
     {
         static std::vector<BlockyCollider*> Colliders;
 
+        std::vector<sb::Vector2i> _localPositions;
+
         std::vector<sb::Vector2i> _globalPositions;
 
-        std::vector<sb::Vector2i> _localPositions;
-        
-        sb::Transform _parentTransform;
+        bool _globalPositionsNeedUpdate;
+
+        sb::Transform _parentEntityTransform;
 
         sb::Transformable& _entity;
 
     protected:
         bool hasCollision(const std::vector<sb::Vector2i>& leftPositions, const std::vector<sb::Vector2i>& rightPositions);
 
-        void transformPositions(const std::vector<sb::Vector2i>& oldPositions, const sb::Transform& transform, std::vector<sb::Vector2i>& resultPositions);
+        void transformPositions(const std::vector<sb::Vector2i>& oldPositions, const sb::Transform& transform, std::vector<sb::Vector2i>& resultPositions) const;
 
         bool wouldCollide(const sb::Transform& globalTransform);
 
@@ -36,6 +39,8 @@ namespace blocks
 
         virtual ~BlockyCollider();
 
+        const std::vector<sb::Vector2i>& getGlobalPositions();
+
         void update(const sb::Transform& parentTransform, const std::vector<sb::Vector2i>& localPositions);
 
         template <class T>
@@ -45,7 +50,7 @@ namespace blocks
 
             for (size_t i = 0; i < entities.size(); i++) {
                 const sb::Vector2f& entityPos = entities[i]->getPosition();
-                sb::Vector2i position = sb::Vector2i((int)entityPos.x, (int)entityPos.y);
+                sb::Vector2i position = toVector2i(entityPos);
                 positions.push_back(position);
             }
 

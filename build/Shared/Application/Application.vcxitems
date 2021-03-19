@@ -59,12 +59,14 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Stopwatch.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Tetromino.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Texture.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TextureAtlas.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TextureSheet.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Transform.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Transformable.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Triangle.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Tween.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Vector2.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\VectorHelper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Vertex.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Window.h" />
   </ItemGroup>
@@ -93,6 +95,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Stats.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Tetromino.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Texture.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\TextureAtlas.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\TextureSheet.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Transformable.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\DrawBatch.cpp" />
