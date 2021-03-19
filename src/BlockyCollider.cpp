@@ -82,9 +82,9 @@ namespace blocks
         return _globalPositions;
     }
 
-    void BlockyCollider::update(const Transform& parentTransform, const vector<Vector2i>& localPositions)
+    void BlockyCollider::update(const Transform& parentEntityTransform, const vector<Vector2i>& localPositions)
     {
-        _parentEntityTransform = parentTransform;
+        _parentEntityTransform = parentEntityTransform;
         _localPositions = localPositions;
         _globalPositionsNeedUpdate = true;
     }

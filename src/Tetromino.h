@@ -5,6 +5,7 @@
 #include "Drawable.h"
 #include "Transformable.h"
 #include "BlockyCollider.h"
+#include "Vector2.h"
 #include "Input.h"
 
 namespace blocks
@@ -24,7 +25,7 @@ namespace blocks
     protected:
         void setSquares(const std::vector<sb::Vector2i>& squarePositions, size_t texPosX, size_t texPosY);
 
-        void tryMove(int x, int y);
+        void tryMove(const sb::Vector2i& delta);
 
         void tryRotate(float angle);
 

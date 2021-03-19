@@ -8,11 +8,14 @@ namespace blocks
 {
     struct GameAssets 
     {
+        sb::Texture blockTextureSheet;
+
+        sb::Texture squareTextureSheet;
+
+    public:
         GameAssets();
 
-        sb::Texture blockTextures;
-
-        sb::Texture squareTextures;
+        blocks::TextureAtlas blockTextureAtlas;
 
         blocks::TextureAtlas squareTextureAtlas;
     };

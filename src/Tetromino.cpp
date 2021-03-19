@@ -8,13 +8,12 @@
 #include <iterator>
 #include <map>
 
-using namespace sb;
 using namespace std;
+using namespace sb;
 
 namespace
 {
     const vector<Vector2i> TShapeSquarePositions = { Vector2i(0, 0), Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, 1) };
-
     const vector<Vector2i> SimpleShapeSquarePositions = { Vector2i(0, 0), Vector2i(1, 0) };
 }
 
@@ -27,10 +26,10 @@ namespace blocks
         _squarePositions.assign(squarePositions.begin(), squarePositions.end());
     }
 
-    void Tetromino::tryMove(int deltaX, int deltaY)
+    void Tetromino::tryMove(const Vector2i& delta)
     {
-        if (!_collider.wouldCollide(Vector2i(deltaX, deltaY)))
-            translate(float(deltaX), float(deltaY));
+        if (!_collider.wouldCollide(delta))
+            translate(toVector2f(delta));
     }
 
     void Tetromino::tryRotate(float deltaRadians)
@@ -42,7 +41,7 @@ namespace blocks
     void Tetromino::checkMove(sb::KeyCode keyCode, int deltaX, int deltaY)
     {
         if (Input::isKeyGoingDown(keyCode))
-            tryMove(deltaX, deltaY);
+            tryMove(Vector2i(deltaX, deltaY));
     }
 
     Tetromino::Tetromino(TextureAtlas& squareTextures, TetrominoType type)
@@ -69,7 +68,7 @@ namespace blocks
         drawStates.transform *= inverseOriginTransform * getTransform() * originTransform;
 
         for (size_t i = 0; i < _squarePositions.size(); i++) {
-            _squareSprite.setPosition((float)_squarePositions[i].x, (float)_squarePositions[i].y);
+            _squareSprite.setPosition(toVector2f(_squarePositions[i]));
             target.draw(_squareSprite, drawStates);
         }
     }
@@ -84,9 +83,9 @@ namespace blocks
         checkMove(KeyCode::Left,  -1,  0);
         checkMove(KeyCode::Right, +1,  0);
         checkMove(KeyCode::Up,     0, +1);
-        checkMove(KeyCode::Down,  0,  -1);
+        checkMove(KeyCode::Down,   0, -1);
 
         if (Input::isKeyGoingDown(KeyCode::r))
-            tryRotate(90 * ToRadians);
+            tryRotate(-90 * ToRadians);
     }
 }
