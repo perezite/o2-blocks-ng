@@ -19,8 +19,6 @@ namespace blocks
 
     Board::~Board() { deleteAll(_blocks); }
 
-    void Board::start() { }
-
     void Board::updateColliders(Transform parentTransform)
     {
         _collider.update(parentTransform, _blocks);

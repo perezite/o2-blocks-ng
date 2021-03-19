@@ -31,7 +31,6 @@ namespace blocks
             window.setFramerateLimit(65);
             window.getCamera().requestSize(10, 18);
             window.getCamera().setCenter(.5f * window.getCamera().getSize());
-            board.start();
         }
 
         void update()

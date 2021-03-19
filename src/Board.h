@@ -24,8 +24,6 @@ namespace blocks
 
         virtual ~Board();
 
-        void start();
-
         void updateColliders(sb::Transform transform);
 
         void update(sb::Window& window);
