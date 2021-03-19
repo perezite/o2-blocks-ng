@@ -28,13 +28,13 @@ namespace blocks
 
     void Tetromino::tryMove(const Vector2i& delta)
     {
-        if (!_collider.wouldCollide(delta))
+        if (!_collider.wouldCollide(delta, 0))
             translate(toVector2f(delta));
     }
 
     void Tetromino::tryRotate(float deltaRadians)
     {
-        if (!_collider.wouldCollide(deltaRadians))
+        if (!_collider.wouldCollide(0, deltaRadians))
             rotate(deltaRadians);
     }
 

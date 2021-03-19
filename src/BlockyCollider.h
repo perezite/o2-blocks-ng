@@ -32,7 +32,6 @@ namespace blocks
 
         bool wouldCollide(const sb::Transform& globalTransform);
 
-        bool wouldCollide(const sb::Vector2i& displacement, float radiansRotation);
 
     public:
         BlockyCollider(sb::Transformable& parent);
@@ -57,8 +56,6 @@ namespace blocks
             update(parentTransform, positions);
         }
 
-        bool wouldCollide(const sb::Vector2i& displacement);
-
-        bool wouldCollide(float radians);
+        bool wouldCollide(const sb::Vector2i& displacement, float radiansRotation);
     };
 }
