@@ -25,7 +25,8 @@ namespace blocks
 
     void printStats()
     {
-        if (configuration::printFramerate)
+        #if BLOCKS_PRINT_FRAMERATE
             printFramerate();
+        #endif
     }
 }

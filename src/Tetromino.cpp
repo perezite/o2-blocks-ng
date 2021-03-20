@@ -4,6 +4,7 @@
 #include "Memory.h"
 #include "Input.h"
 #include "Math.h"
+#include "Configuration.h"
 #include <algorithm>
 #include <iterator>
 #include <map>
@@ -13,6 +14,7 @@ using namespace sb;
 
 namespace
 {
+    bool autodropEnabled = true;
     const vector<Vector2i> TShapeSquarePositions = { Vector2i(0, 0), Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, 1) };
     const vector<Vector2i> SimpleShapeSquarePositions = { Vector2i(0, 0), Vector2i(1, 0) };
 }
@@ -44,8 +46,30 @@ namespace blocks
             tryMove(Vector2i(deltaX, deltaY));
     }
 
+    void Tetromino::input()
+    {
+        checkMove(KeyCode::Left, -1, 0);
+        checkMove(KeyCode::Right, +1, 0);
+        checkMove(KeyCode::Up, 0, +1);
+        checkMove(KeyCode::Down, 0, -1);
+
+        if (Input::isKeyGoingDown(KeyCode::r))
+            tryRotate(-90 * ToRadians);
+
+        #if _DEBUG
+        if(Input::isKeyGoingDown(KeyCode::d))
+            autodropEnabled = !autodropEnabled;
+        #endif
+    }
+
+    void Tetromino::autodrop()
+    {
+        while (_autodropTicker.hasTicks())
+            tryMove(Vector2i(0, -1));
+    }
+
     Tetromino::Tetromino(TextureAtlas& squareTextures, TetrominoType type)
-        : _squareTextures(squareTextures), _collider(*this)
+        : _squareTextures(squareTextures), _collider(*this), _autodropTicker(configuration::autodropSeconds)
     {
         setType(type);
     }
@@ -80,12 +104,8 @@ namespace blocks
 
     void Tetromino::update()
     {
-        checkMove(KeyCode::Left,  -1,  0);
-        checkMove(KeyCode::Right, +1,  0);
-        checkMove(KeyCode::Up,     0, +1);
-        checkMove(KeyCode::Down,   0, -1);
-
-        if (Input::isKeyGoingDown(KeyCode::r))
-            tryRotate(-90 * ToRadians);
+        input();
+        if (autodropEnabled)
+            autodrop();
     }
 }

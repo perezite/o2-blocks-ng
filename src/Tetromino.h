@@ -5,6 +5,7 @@
 #include "Drawable.h"
 #include "Transformable.h"
 #include "BlockyCollider.h"
+#include "Ticker.h"
 #include "Vector2.h"
 #include "Input.h"
 
@@ -22,6 +23,8 @@ namespace blocks
 
         BlockyCollider _collider;
 
+        Ticker _autodropTicker;
+
     protected:
         void setSquares(const std::vector<sb::Vector2i>& squarePositions, size_t texPosX, size_t texPosY);
 
@@ -30,6 +33,10 @@ namespace blocks
         void tryRotate(float angle);
 
         void checkMove(sb::KeyCode keyCode, int deltaX, int deltaY);
+
+        void input();
+
+        void autodrop();
 
     public:
         Tetromino(TextureAtlas& squareTextures, TetrominoType type = TetrominoType::Simple);
