@@ -28,10 +28,13 @@ namespace blocks
         _squarePositions.assign(squarePositions.begin(), squarePositions.end());
     }
 
-    void Tetromino::tryMove(const Vector2i& delta)
+    bool Tetromino::tryMove(const Vector2i& delta)
     {
-        if (!_collider.wouldCollide(delta, 0))
+        bool wouldCollide = _collider.wouldCollide(delta, 0);
+        if (!wouldCollide)
             translate(toVector2f(delta));
+
+        return wouldCollide;
     }
 
     void Tetromino::tryRotate(float deltaRadians)
@@ -56,9 +59,12 @@ namespace blocks
         if (Input::isKeyGoingDown(KeyCode::r))
             tryRotate(-90 * ToRadians);
 
+        if (Input::isKeyGoingDown(KeyCode::Space))
+            harddrop();
+
         #if _DEBUG
-        if(Input::isKeyGoingDown(KeyCode::d))
-            autodropEnabled = !autodropEnabled;
+            if(Input::isKeyGoingDown(KeyCode::d))
+                autodropEnabled = !autodropEnabled;
         #endif
     }
 
@@ -66,6 +72,15 @@ namespace blocks
     {
         while (_autodropTicker.hasTicks())
             tryMove(Vector2i(0, -1));
+    }
+
+    void Tetromino::harddrop()
+    {
+        bool collided = false;
+
+        while (!collided && toVector2i(getPosition()).y > 0) {
+            collided = tryMove(Vector2i(0, -1));
+        }
     }
 
     Tetromino::Tetromino(TextureAtlas& squareTextures, TetrominoType type)

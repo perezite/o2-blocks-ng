@@ -1,11 +1,11 @@
 #pragma once
 
-#define BLOCKS_PRINT_FRAMERATE 1
+#define BLOCKS_PRINT_FRAMERATE 0
 
 namespace blocks 
 {
     namespace configuration
     {
-        static float autodropSeconds = .5f;
+        static const float autodropSeconds = .5f;
     };
 }

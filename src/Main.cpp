@@ -5,8 +5,6 @@
 
 // TODO: 
 // - Draft Tetromino
-//   - Autodrop
-//   - Hard Drop
 //   - Annealing
 //   - Respawn
 

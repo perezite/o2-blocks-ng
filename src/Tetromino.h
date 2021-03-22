@@ -28,7 +28,7 @@ namespace blocks
     protected:
         void setSquares(const std::vector<sb::Vector2i>& squarePositions, size_t texPosX, size_t texPosY);
 
-        void tryMove(const sb::Vector2i& delta);
+        bool tryMove(const sb::Vector2i& delta);
 
         void tryRotate(float angle);
 
@@ -37,6 +37,8 @@ namespace blocks
         void input();
 
         void autodrop();
+
+        void harddrop();
 
     public:
         Tetromino(TextureAtlas& squareTextures, TetrominoType type = TetrominoType::Simple);
