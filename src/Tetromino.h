@@ -49,6 +49,8 @@ namespace blocks
 
         void updateColliders(sb::Transform transform);
 
+        void updateBlockyPhysics(sb::Transform transform);
+
         void update();
     };
 }

@@ -14,7 +14,7 @@ using namespace sb;
 
 namespace
 {
-    bool autodropEnabled = true;
+    bool autodropEnabled = false;
     const vector<Vector2i> TShapeSquarePositions = { Vector2i(0, 0), Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, 1) };
     const vector<Vector2i> SimpleShapeSquarePositions = { Vector2i(0, 0), Vector2i(1, 0) };
 }
@@ -51,10 +51,10 @@ namespace blocks
 
     void Tetromino::input()
     {
-        checkMove(KeyCode::Left, -1, 0);
-        checkMove(KeyCode::Right, +1, 0);
-        checkMove(KeyCode::Up, 0, +1);
-        checkMove(KeyCode::Down, 0, -1);
+        //checkMove(KeyCode::Left, -1, 0);
+        //checkMove(KeyCode::Right, +1, 0);
+        //checkMove(KeyCode::Up, 0, +1);
+        //checkMove(KeyCode::Down, 0, -1);
 
         if (Input::isKeyGoingDown(KeyCode::r))
             tryRotate(-90 * ToRadians);
@@ -115,6 +115,15 @@ namespace blocks
     void Tetromino::updateColliders(Transform parentTransform)
     {
         _collider.update(parentTransform, _squarePositions);
+    }
+
+    void Tetromino::updateBlockyPhysics(sb::Transform transform)
+    {
+        if (Input::isKeyGoingDown(KeyCode::Up))
+            translate(0, 1);
+
+        transform *= getTransform();
+        _collider.update(transform, _squarePositions);
     }
 
     void Tetromino::update()

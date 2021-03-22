@@ -6,6 +6,7 @@
 #include "Backdrop.h"
 #include "Stats.h"
 #include "GameAssets.h"
+#include "BlockyCollider.h"
 #include <iostream>
 
 using namespace sb;
@@ -25,6 +26,11 @@ namespace blocks
             : board(gameAssets)
         { }
 
+        void updatePhysics() {
+            board.updateBlockyPhysics(Transform::Identity);
+            BlockyCollider::resolveCollisions();
+        }
+
         void start()
         {
             window.setSize(300, 540);
@@ -37,7 +43,8 @@ namespace blocks
         {
             Input::update();
             window.update();
-            board.updateColliders(Transform::Identity);
+            //board.updateColliders(Transform::Identity);
+            updatePhysics();
             backdrop.update(window.getCamera());
             board.update(window);
         }

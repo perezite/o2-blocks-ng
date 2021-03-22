@@ -21,19 +21,24 @@ namespace blocks
 
         bool _globalPositionsNeedUpdate;
 
-        sb::Transform _parentEntityTransform;
+        sb::Transform _currentGlobalTransform;
+
+        sb::Transformable _lastLocalTransform;
 
         sb::Transformable& _entity;
 
     protected:
-        bool hasCollision(const std::vector<sb::Vector2i>& leftPositions, const std::vector<sb::Vector2i>& rightPositions);
+        static bool hasCollision(const std::vector<sb::Vector2i>& leftPositions, const std::vector<sb::Vector2i>& rightPositions);
 
         void transformPositions(const std::vector<sb::Vector2i>& oldPositions, const sb::Transform& transform, std::vector<sb::Vector2i>& resultPositions) const;
 
         bool wouldCollide(const sb::Transform& globalTransform);
 
+        void computeGlobalPositions(const sb::Transform& globalTransform, const std::vector<sb::Vector2i>& localPositions);
 
     public:
+        static void resolveCollisions();
+        
         BlockyCollider(sb::Transformable& parent);
 
         virtual ~BlockyCollider();
