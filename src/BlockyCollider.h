@@ -15,11 +15,7 @@ namespace blocks
     {
         static std::vector<BlockyCollider*> Colliders;
 
-        std::vector<sb::Vector2i> _localPositions;
-
         std::vector<sb::Vector2i> _globalPositions;
-
-        bool _globalPositionsNeedUpdate;
 
         sb::Transform _currentGlobalTransform;
 
@@ -32,8 +28,6 @@ namespace blocks
 
         void transformPositions(const std::vector<sb::Vector2i>& oldPositions, const sb::Transform& transform, std::vector<sb::Vector2i>& resultPositions) const;
 
-        bool wouldCollide(const sb::Transform& globalTransform);
-
         void computeGlobalPositions(const sb::Transform& globalTransform, const std::vector<sb::Vector2i>& localPositions);
 
     public:
@@ -43,12 +37,10 @@ namespace blocks
 
         virtual ~BlockyCollider();
 
-        const std::vector<sb::Vector2i>& getGlobalPositions();
-
-        void update(const sb::Transform& parentTransform, const std::vector<sb::Vector2i>& localPositions);
+        void update(const sb::Transform& globalTransform, const std::vector<sb::Vector2i>& localPositions);
 
         template <class T>
-        void update(const sb::Transform& parentTransform, const std::vector<T*>& entities) {
+        void update(const sb::Transform& globalTransform, const std::vector<T*>& entities) {
             std::vector<sb::Vector2i> positions;
             positions.reserve(entities.size());
 
@@ -58,9 +50,7 @@ namespace blocks
                 positions.push_back(position);
             }
 
-            update(parentTransform, positions);
+            update(globalTransform, positions);
         }
-
-        bool wouldCollide(const sb::Vector2i& displacement, float radiansRotation);
     };
 }

@@ -28,16 +28,11 @@ namespace blocks
 
     Board::~Board() { deleteAll(_blocks); }
 
-    void Board::updateColliders(Transform parentTransform)
-    {
-        _collider.update(parentTransform, _blocks);
-        _tetromino.updateColliders(parentTransform * getTransform());
-    }
-
     void Board::updateBlockyPhysics(sb::Transform transform)
     {
         transform *= getTransform();
         _collider.update(transform, _blocks);
+        _tetromino.updateBlockyPhysics(transform);
     }
 
     void Board::update(Window& window)

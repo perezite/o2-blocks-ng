@@ -36,22 +36,6 @@ namespace blocks
         }
     }
 
-    bool BlockyCollider::wouldCollide(const sb::Transform& globalTransform)
-    {
-        vector<Vector2i> newGlobalPositions;
-        transformPositions(_localPositions, globalTransform, newGlobalPositions);
-
-        for (size_t i = 0; i < Colliders.size(); i++) {
-            if (Colliders[i] != this) {
-                bool hasCollision = this->hasCollision(newGlobalPositions, Colliders[i]->getGlobalPositions());
-                if (hasCollision)
-                    return true;
-            }
-        }
-
-        return false;
-    }
-
     void BlockyCollider::computeGlobalPositions(const sb::Transform& globalTransform, const std::vector<sb::Vector2i>& localPositions)
     {
         transformPositions(localPositions, globalTransform, _globalPositions);
@@ -59,32 +43,36 @@ namespace blocks
 
     void BlockyCollider::resolveCollisions()
     {
-        vector<BlockyCollider*> collidersToCheck(Colliders);
+        vector<BlockyCollider*> colliders(Colliders);
         bool anyCollision = false;
 
-        while (anyCollision) {
-            vector<BlockyCollider*> revertedColliders;
-            for (size_t i = 0; i < collidersToCheck.size(); i++) {
+        do {
+            anyCollision = false;
+            vector<BlockyCollider*> restoredColliders;
+            for (size_t i = 0; i < colliders.size(); i++) {
                 for (size_t j = 0; j < Colliders.size(); j++) {
-                    if (collidersToCheck[i] == Colliders[j])
+                    if (colliders[i] == Colliders[j])
                         continue;
                     
                     bool hasCollision = BlockyCollider::hasCollision(
-                        collidersToCheck[i]->_globalPositions, collidersToCheck[j]->_globalPositions);
+                        colliders[i]->_globalPositions, Colliders[j]->_globalPositions);
                     if (hasCollision) {
-                        Transformable& transformable = collidersToCheck[i]->_entity;
-                        transformable = collidersToCheck[i]->_lastLocalTransform;
-                        revertedColliders.push_back(collidersToCheck[i]);
                         anyCollision = true;
+                        colliders[i]->_entity = colliders[i]->_lastLocalTransform;
+                        restoredColliders.push_back(colliders[i]);
                     }
                 }
             }
 
-            erase(collidersToCheck, revertedColliders);
+            erase(colliders, restoredColliders);
         }
+        while (anyCollision);
+
+        for (size_t i = 0; i < Colliders.size(); i++)
+            Colliders[i]->_lastLocalTransform = Colliders[i]->_entity;
     }
 
-    BlockyCollider::BlockyCollider(Transformable& parent) : _globalPositionsNeedUpdate(true), _entity(parent)
+    BlockyCollider::BlockyCollider(Transformable& parent) : _lastLocalTransform(parent), _entity(parent)
     {
         Colliders.push_back(this);
     }
@@ -94,30 +82,9 @@ namespace blocks
         Colliders.erase(remove(Colliders.begin(), Colliders.end(), this), Colliders.end());
     }
 
-    const std::vector<sb::Vector2i>& BlockyCollider::getGlobalPositions()
-    {
-        if (_globalPositionsNeedUpdate) {
-            Transform globalTransform = _currentGlobalTransform * _entity.getTransform();
-            transformPositions(_localPositions, globalTransform, _globalPositions);
-            _globalPositionsNeedUpdate = false;
-        }
-
-        return _globalPositions;
-    }
-
     void BlockyCollider::update(const Transform& globalTransform, const vector<Vector2i>& localPositions)
     {
         _currentGlobalTransform = globalTransform;
         computeGlobalPositions(globalTransform, localPositions);
-    }
-
-    bool BlockyCollider::wouldCollide(const sb::Vector2i& deltaPosition, float deltaRadians)
-    {
-        Vector2f entityPosition = _entity.getPosition() + toVector2f(deltaPosition);
-        float entityRotation = _entity.getRotation() + deltaRadians;
-        Transform localTransform(entityPosition, 1, entityRotation);
-        Transform globalTransform = _currentGlobalTransform * localTransform;
-
-        return wouldCollide(globalTransform);
     }
 }

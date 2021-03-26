@@ -28,12 +28,6 @@ namespace blocks
     protected:
         void setSquares(const std::vector<sb::Vector2i>& squarePositions, size_t texPosX, size_t texPosY);
 
-        bool tryMove(const sb::Vector2i& delta);
-
-        void tryRotate(float angle);
-
-        void checkMove(sb::KeyCode keyCode, int deltaX, int deltaY);
-
         void input();
 
         void autodrop();

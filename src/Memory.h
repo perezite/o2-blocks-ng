@@ -46,10 +46,10 @@ namespace sb
 		for (size_t i = 0; i < vec.size(); i++)
 			delete vec[i];
 	}
-	
+
 	template <class T, class Predicate>
-	void remove_if(std::vector<T>& vec, const Predicate& predicate) {
-		std::remove_if(vec.begin(), vec.end(), predicate);
+	typename std::vector<T>::iterator remove_if(std::vector<T>& vec, const Predicate& predicate) {
+		return std::remove_if(vec.begin(), vec.end(), predicate);
 	}
 
 	template <class T>
@@ -64,7 +64,28 @@ namespace sb
 	};
 
 	template <class T>
-	void erase(std::vector<T>& vec, const std::vector<T>& toRemove) {
-		remove_if(vec, Find<T>(toRemove));
+	void erase(std::vector<T>& v, std::vector<T>& toRemove) {
+		v.erase(remove_if(v, Find<T>(toRemove)), v.end());
 	}
+	
+	//template <class T, class Predicate>
+	//void remove_if(std::vector<T>& vec, const Predicate& predicate) {
+	//	std::remove_if(vec.begin(), vec.end(), predicate);
+	//}
+
+	//template <class T>
+	//struct Find {
+	//	const std::vector<T>& vec;
+
+	//	Find(const std::vector<T>& vec_) : vec(vec_) { }
+
+	//	bool operator()(const T& t) const {
+	//		return std::find(vec.begin(), vec.end(), t) != vec.end();
+	//	}
+	//};
+
+	//template <class T>
+	//void erase(std::vector<T>& vec, const std::vector<T>& toRemove) {
+	//	remove_if(vec, Find<T>(toRemove));
+	//}
 }
