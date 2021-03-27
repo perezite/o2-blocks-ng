@@ -72,6 +72,16 @@ namespace blocks
         return _globalPositions;
     }
 
+    const vector<Vector2i> BlockyCollider::getGlobalPositions(const Vector2i& deltaPosition)
+    {
+        vector<Vector2i> positions(getGlobalPositions());
+
+        for (size_t i = 0; i < positions.size(); i++)
+            positions[i] += deltaPosition;
+
+        return positions;
+    }
+
     void BlockyCollider::update(const Transform& parentEntityTransform, const vector<Vector2i>& localPositions)
     {
         _parentEntityGlobalTransform = parentEntityTransform;

@@ -22,7 +22,7 @@ namespace blocks
 
     public:
         Scene()
-            : board(gameAssets)
+            : board(gameAssets, 10, 18)
         { }
 
         void start()

@@ -6,15 +6,13 @@
 #include "Math.h"
 #include "Configuration.h"
 #include <algorithm>
-#include <iterator>
-#include <map>
 
 using namespace std;
 using namespace sb;
 
 namespace
 {
-    bool autodropEnabled = true;
+    bool autodropEnabled = false;
     const vector<Vector2i> TShapeSquarePositions = { Vector2i(0, 0), Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, 1) };
     const vector<Vector2i> SimpleShapeSquarePositions = { Vector2i(0, 0), Vector2i(1, 0) };
 }
@@ -77,10 +75,16 @@ namespace blocks
     void Tetromino::harddrop()
     {
         bool collided = false;
+        bool isBelowGround = false;
+        int deltaY = 0;
 
-        while (!collided && toVector2i(getPosition()).y > 0) {
-            collided = tryMove(Vector2i(0, -1));
+        while (!collided && !isBelowGround) {
+            Vector2i delta(0, --deltaY);
+            collided = _collider.wouldCollide(delta, 0);
+            isBelowGround = any(_collider.getGlobalPositions(delta), Tetromino::isBelowGround);
         }
+
+        translate(toVector2f(0, deltaY + 1));
     }
 
     Tetromino::Tetromino(TextureAtlas& squareTextures, TetrominoType type)

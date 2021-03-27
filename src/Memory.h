@@ -46,4 +46,10 @@ namespace sb
 		for (size_t i = 0; i < vec.size(); i++)
 			delete vec[i];
 	}
+
+	template<class T, class UnaryPredicate>
+	bool any(const T& t, UnaryPredicate& predicate) {
+		typename T::const_iterator it = std::find_if(t.begin(), t.end(), predicate);
+		return it != t.end();
+	}
 }

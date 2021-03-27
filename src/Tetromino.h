@@ -26,6 +26,8 @@ namespace blocks
         Ticker _autodropTicker;
 
     protected:
+        inline static bool isBelowGround(const sb::Vector2i& position) { return position.y < 0; }
+
         void setSquares(const std::vector<sb::Vector2i>& squarePositions, size_t texPosX, size_t texPosY);
 
         bool tryMove(const sb::Vector2i& delta);

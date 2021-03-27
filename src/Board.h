@@ -16,11 +16,11 @@ namespace blocks
     {
         Tetromino _tetromino;
         std::vector<Block*> _blocks;
-        BlockyCollider _collider;
+        BlockyCollider _blocksCollider;
         sb::DrawBatch _batch;
 
     public:
-        Board(GameAssets& assets);
+        Board(GameAssets& assets, size_t width, size_t height);
 
         virtual ~Board();
 

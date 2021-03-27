@@ -42,6 +42,8 @@ namespace blocks
 
         const std::vector<sb::Vector2i>& getGlobalPositions();
 
+        const std::vector<sb::Vector2i> getGlobalPositions(const sb::Vector2i& deltaPosition);
+
         void update(const sb::Transform& parentTransform, const std::vector<sb::Vector2i>& localPositions);
 
         template <class T>
@@ -58,6 +60,6 @@ namespace blocks
             update(parentTransform, positions);
         }
 
-        bool wouldCollide(const sb::Vector2i& displacement, float radiansRotation);
+        bool wouldCollide(const sb::Vector2i& deltaPosition, float deltaRadians);
     };
 }
