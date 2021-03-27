@@ -41,8 +41,6 @@ namespace blocks
 
         virtual void draw(sb::DrawTarget& target, sb::DrawStates drawStates = sb::DrawStates::getDefault());
 
-        void updateColliders(sb::Transform transform);
-
         void updateBlockyPhysics(sb::Transform transform);
 
         void update();

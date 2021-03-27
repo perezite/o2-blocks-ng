@@ -43,7 +43,6 @@ namespace blocks
         {
             Input::update();
             window.update();
-            //board.updateColliders(Transform::Identity);
             updatePhysics();
             backdrop.update(window.getCamera());
             board.update(window);
