@@ -64,7 +64,7 @@ namespace blocks
     const std::vector<sb::Vector2i>& BlockyCollider::getGlobalPositions()
     {
         if (_globalPositionsNeedUpdate) {
-            Transform globalTransform = _parentEntityTransform * _entity.getTransform();
+            Transform globalTransform = _parentEntityGlobalTransform * _entityLocalTransform.getTransform();
             transformPositions(_localPositions, globalTransform, _globalPositions);
             _globalPositionsNeedUpdate = false;
         }
@@ -74,17 +74,18 @@ namespace blocks
 
     void BlockyCollider::update(const Transform& parentEntityTransform, const vector<Vector2i>& localPositions)
     {
-        _parentEntityTransform = parentEntityTransform;
+        _parentEntityGlobalTransform = parentEntityTransform;
+        _entityLocalTransform = _entity;
         _localPositions = localPositions;
         _globalPositionsNeedUpdate = true;
     }
    
     bool BlockyCollider::wouldCollide(const sb::Vector2i& deltaPosition, float deltaRadians)
     {
-        Vector2f entityPosition = _entity.getPosition() + toVector2f(deltaPosition);
-        float entityRotation = _entity.getRotation() + deltaRadians;
+        Vector2f entityPosition = _entityLocalTransform.getPosition() + toVector2f(deltaPosition);
+        float entityRotation = _entityLocalTransform.getRotation() + deltaRadians;
         Transform localTransform(entityPosition, 1, entityRotation);
-        Transform globalTransform = _parentEntityTransform * localTransform;
+        Transform globalTransform = _parentEntityGlobalTransform * localTransform;
 
         return wouldCollide(globalTransform);
     }

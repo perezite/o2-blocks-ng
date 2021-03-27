@@ -21,7 +21,9 @@ namespace blocks
 
         bool _globalPositionsNeedUpdate;
 
-        sb::Transform _parentEntityTransform;
+        sb::Transformable _entityLocalTransform;
+
+        sb::Transform _parentEntityGlobalTransform;
 
         sb::Transformable& _entity;
 
