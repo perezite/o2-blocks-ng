@@ -35,16 +35,31 @@ namespace blocks
         return wouldCollide;
     }
 
+    void Tetromino::checkMove(sb::KeyCode keyCode, int deltaX, int deltaY)
+    {
+        if (Input::isKeyGoingDown(keyCode))
+            tryMove(Vector2i(deltaX, deltaY));
+    }
+
     void Tetromino::tryRotate(float deltaRadians)
     {
         if (!_collider.wouldCollide(0, deltaRadians))
             rotate(deltaRadians);
     }
 
-    void Tetromino::checkMove(sb::KeyCode keyCode, int deltaX, int deltaY)
+    void Tetromino::harddrop()
     {
-        if (Input::isKeyGoingDown(keyCode))
-            tryMove(Vector2i(deltaX, deltaY));
+        bool collided = false;
+        bool isBelowGround = false;
+        int deltaY = 0;
+
+        while (!collided && !isBelowGround) {
+            Vector2i delta(0, --deltaY);
+            collided = _collider.wouldCollide(delta, 0);
+            isBelowGround = any(_collider.getGlobalPositions(delta), Tetromino::isBelowGround);
+        }
+
+        translate(toVector2f(0, deltaY + 1));
     }
 
     void Tetromino::input()
@@ -70,21 +85,6 @@ namespace blocks
     {
         while (_autodropTicker.hasTicks())
             tryMove(Vector2i(0, -1));
-    }
-
-    void Tetromino::harddrop()
-    {
-        bool collided = false;
-        bool isBelowGround = false;
-        int deltaY = 0;
-
-        while (!collided && !isBelowGround) {
-            Vector2i delta(0, --deltaY);
-            collided = _collider.wouldCollide(delta, 0);
-            isBelowGround = any(_collider.getGlobalPositions(delta), Tetromino::isBelowGround);
-        }
-
-        translate(toVector2f(0, deltaY + 1));
     }
 
     Tetromino::Tetromino(TextureAtlas& squareTextures, TetrominoType type)

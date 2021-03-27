@@ -32,15 +32,15 @@ namespace blocks
 
         bool tryMove(const sb::Vector2i& delta);
 
+        void checkMove(sb::KeyCode keyCode, int deltaX, int deltaY);
+       
         void tryRotate(float angle);
 
-        void checkMove(sb::KeyCode keyCode, int deltaX, int deltaY);
+        void harddrop();
 
         void input();
 
         void autodrop();
-
-        void harddrop();
 
     public:
         Tetromino(TextureAtlas& squareTextures, TetrominoType type = TetrominoType::Simple);
