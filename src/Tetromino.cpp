@@ -14,7 +14,7 @@ using namespace sb;
 
 namespace
 {
-    bool autodropEnabled = false;
+    bool autodropEnabled = true;
     const vector<Vector2i> TShapeSquarePositions = { Vector2i(0, 0), Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, 1) };
     const vector<Vector2i> SimpleShapeSquarePositions = { Vector2i(0, 0), Vector2i(1, 0) };
 }
@@ -28,13 +28,39 @@ namespace blocks
         _squarePositions.assign(squarePositions.begin(), squarePositions.end());
     }
 
+    bool Tetromino::tryMove(const Vector2i& delta)
+    {
+        bool wouldCollide = _collider.wouldCollide(delta, 0);
+        if (!wouldCollide)
+            translate(toVector2f(delta));
+
+        return wouldCollide;
+    }
+
+    void Tetromino::tryRotate(float deltaRadians)
+    {
+        if (!_collider.wouldCollide(0, deltaRadians))
+            rotate(deltaRadians);
+    }
+
+    void Tetromino::checkMove(sb::KeyCode keyCode, int deltaX, int deltaY)
+    {
+        if (Input::isKeyGoingDown(keyCode))
+            tryMove(Vector2i(deltaX, deltaY));
+    }
+
     void Tetromino::input()
     {
-        //if (Input::isKeyGoingDown(KeyCode::r))
-        //    tryRotate(-90 * ToRadians);
+        checkMove(KeyCode::Left, -1, 0);
+        checkMove(KeyCode::Right, +1, 0);
+        checkMove(KeyCode::Up, 0, +1);
+        checkMove(KeyCode::Down, 0, -1);
 
-        //if (Input::isKeyGoingDown(KeyCode::Space))
-        //    harddrop();
+        if (Input::isKeyGoingDown(KeyCode::r))
+            tryRotate(-90 * ToRadians);
+
+        if (Input::isKeyGoingDown(KeyCode::Space))
+            harddrop();
 
         #if _DEBUG
             if(Input::isKeyGoingDown(KeyCode::d))
@@ -44,17 +70,17 @@ namespace blocks
 
     void Tetromino::autodrop()
     {
-        //while (_autodropTicker.hasTicks())
-        //    tryMove(Vector2i(0, -1));
+        while (_autodropTicker.hasTicks())
+            tryMove(Vector2i(0, -1));
     }
 
     void Tetromino::harddrop()
     {
-        //bool collided = false;
+        bool collided = false;
 
-        //while (!collided && toVector2i(getPosition()).y > 0) {
-        //    collided = tryMove(Vector2i(0, -1));
-        //}
+        while (!collided && toVector2i(getPosition()).y > 0) {
+            collided = tryMove(Vector2i(0, -1));
+        }
     }
 
     Tetromino::Tetromino(TextureAtlas& squareTextures, TetrominoType type)
@@ -86,19 +112,9 @@ namespace blocks
         }
     }
 
-    void Tetromino::updateBlockyPhysics(sb::Transform transform)
+    void Tetromino::updateColliders(Transform parentTransform)
     {
-        if (Input::isKeyGoingDown(KeyCode::Up))
-            translate( 0,  1);
-        if (Input::isKeyGoingDown(KeyCode::Down))
-            translate( 0, -1);
-        if (Input::isKeyGoingDown(KeyCode::Left))
-            translate(-1,  0);
-        if (Input::isKeyGoingDown(KeyCode::Right))
-            translate( 1,  0);
-
-        transform *= getTransform();
-        _collider.update(transform, _squarePositions);
+        _collider.update(parentTransform, _squarePositions);
     }
 
     void Tetromino::update()

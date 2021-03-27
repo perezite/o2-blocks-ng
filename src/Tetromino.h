@@ -28,6 +28,12 @@ namespace blocks
     protected:
         void setSquares(const std::vector<sb::Vector2i>& squarePositions, size_t texPosX, size_t texPosY);
 
+        bool tryMove(const sb::Vector2i& delta);
+
+        void tryRotate(float angle);
+
+        void checkMove(sb::KeyCode keyCode, int deltaX, int deltaY);
+
         void input();
 
         void autodrop();
@@ -41,7 +47,7 @@ namespace blocks
 
         virtual void draw(sb::DrawTarget& target, sb::DrawStates drawStates = sb::DrawStates::getDefault());
 
-        void updateBlockyPhysics(sb::Transform transform);
+        void updateColliders(sb::Transform transform);
 
         void update();
     };

@@ -15,32 +15,35 @@ namespace blocks
     {
         static std::vector<BlockyCollider*> Colliders;
 
+        std::vector<sb::Vector2i> _localPositions;
+
         std::vector<sb::Vector2i> _globalPositions;
 
-        sb::Transform _currentGlobalTransform;
+        bool _globalPositionsNeedUpdate;
 
-        sb::Transformable _lastLocalTransform;
+        sb::Transform _parentEntityTransform;
 
         sb::Transformable& _entity;
 
     protected:
-        static bool hasCollision(const std::vector<sb::Vector2i>& leftPositions, const std::vector<sb::Vector2i>& rightPositions);
+        bool hasCollision(const std::vector<sb::Vector2i>& leftPositions, const std::vector<sb::Vector2i>& rightPositions);
 
         void transformPositions(const std::vector<sb::Vector2i>& oldPositions, const sb::Transform& transform, std::vector<sb::Vector2i>& resultPositions) const;
 
-        void computeGlobalPositions(const sb::Transform& globalTransform, const std::vector<sb::Vector2i>& localPositions);
+        bool wouldCollide(const sb::Transform& globalTransform);
+
 
     public:
-        static void resolveCollisions();
-        
         BlockyCollider(sb::Transformable& parent);
 
         virtual ~BlockyCollider();
 
-        void update(const sb::Transform& globalTransform, const std::vector<sb::Vector2i>& localPositions);
+        const std::vector<sb::Vector2i>& getGlobalPositions();
+
+        void update(const sb::Transform& parentTransform, const std::vector<sb::Vector2i>& localPositions);
 
         template <class T>
-        void update(const sb::Transform& globalTransform, const std::vector<T*>& entities) {
+        void update(const sb::Transform& parentTransform, const std::vector<T*>& entities) {
             std::vector<sb::Vector2i> positions;
             positions.reserve(entities.size());
 
@@ -50,7 +53,9 @@ namespace blocks
                 positions.push_back(position);
             }
 
-            update(globalTransform, positions);
+            update(parentTransform, positions);
         }
+
+        bool wouldCollide(const sb::Vector2i& displacement, float radiansRotation);
     };
 }

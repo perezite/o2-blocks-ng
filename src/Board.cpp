@@ -8,31 +8,21 @@ using namespace sb;
 
 namespace blocks
 {
-    //Board::Board(GameAssets& assets) :
-    //    _tetromino(assets.squareTextureAtlas, TetrominoType::T), 
-    //    _collider(*this)
-    //{ 
-    //    _blocks.push_back(new Block(assets.blockTextureAtlas));
-    //    _blocks[0]->setPosition(3, 14);
-    //    _tetromino.setPosition(5, 16);
-    //}
-
     Board::Board(GameAssets& assets) :
-        _tetromino(assets.squareTextureAtlas, TetrominoType::Simple), 
+        _tetromino(assets.squareTextureAtlas, TetrominoType::T), 
         _collider(*this)
     { 
         _blocks.push_back(new Block(assets.blockTextureAtlas));
-        _blocks[0]->setPosition(1, 1);
-        _tetromino.setPosition(0, 0);
+        _blocks[0]->setPosition(3, 14);
+        _tetromino.setPosition(5, 16);
     }
 
     Board::~Board() { deleteAll(_blocks); }
 
-    void Board::updateBlockyPhysics(sb::Transform transform)
+    void Board::updateColliders(Transform parentTransform)
     {
-        transform *= getTransform();
-        _collider.update(transform, _blocks);
-        _tetromino.updateBlockyPhysics(transform);
+        _collider.update(parentTransform, _blocks);
+        _tetromino.updateColliders(parentTransform * getTransform());
     }
 
     void Board::update(Window& window)
