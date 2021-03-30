@@ -52,4 +52,9 @@ namespace sb
 		typename T::const_iterator it = std::find_if(t.begin(), t.end(), predicate);
 		return it != t.end();
 	}
+
+	template <class T, class Compare>
+	const typename T::const_iterator min_element(const T& t, Compare& compare) {
+		return std::min_element(t.begin(), t.end(), compare);
+	}
 }

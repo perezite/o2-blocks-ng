@@ -2,11 +2,19 @@
 #include "BlockyCollider.h"
 #include "Transformable.h"
 #include "Input.h"
+#include "Memory.h"
 #include <algorithm>
 #include <math.h>
 
 using namespace std;
 using namespace sb;
+
+namespace {
+    bool minX(const Vector2i& left, const Vector2i& right) { return left.x < right.x; }
+    bool minY(const Vector2i& left, const Vector2i& right) { return left.y < right.y; }
+    bool maxX(const Vector2i& left, const Vector2i& right) { return left.x > right.x; }
+    bool maxY(const Vector2i& left, const Vector2i& right) { return left.y > right.y; }
+}
 
 namespace blocks
 {
@@ -51,7 +59,8 @@ namespace blocks
         return false;
     }
 
-    BlockyCollider::BlockyCollider(Transformable& parent) : _globalPositionsNeedUpdate(true), _entity(parent)
+    BlockyCollider::BlockyCollider(Transformable& parent) : _globalPositionsNeedUpdate(true), 
+        _entity(parent), _globalBoundsNeedUpdate(true)
     {
         Colliders.push_back(this);
     }
@@ -88,6 +97,7 @@ namespace blocks
         _entityLocalTransform = _entity;
         _localPositions = localPositions;
         _globalPositionsNeedUpdate = true;
+        _globalBoundsNeedUpdate = true;
     }
    
     bool BlockyCollider::wouldCollide(const sb::Vector2i& deltaPosition, float deltaRadians)
@@ -98,5 +108,13 @@ namespace blocks
         Transform globalTransform = _parentEntityGlobalTransform * localTransform;
 
         return wouldCollide(globalTransform);
+    }
+
+    sb::IntRect BlockyCollider::getGlobalBounds(const sb::Vector2i& deltaPosition)
+    {
+        if (_globalBoundsNeedUpdate) {
+            const vector<Vector2i>& globalPositions = getGlobalPositions();
+            const Vector2i& theMinX = *min_element(globalPositions, minX);
+        }
     }
 }

@@ -5,6 +5,7 @@
 
 // TODO: 
 // - Draft Tetromino
+//   - Bounding Box
 //   - Annealing
 //   - Respawn
 

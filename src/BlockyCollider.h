@@ -5,6 +5,7 @@
 #include "Transform.h"
 #include "Transformable.h"
 #include "VectorHelper.h"
+#include "Rect.h"
 #include <vector>
 
 namespace blocks
@@ -26,6 +27,10 @@ namespace blocks
         sb::Transform _parentEntityGlobalTransform;
 
         sb::Transformable& _entity;
+
+        sb::IntRect _globalBounds;
+
+        bool _globalBoundsNeedUpdate;
 
     protected:
         bool hasCollision(const std::vector<sb::Vector2i>& leftPositions, const std::vector<sb::Vector2i>& rightPositions);
@@ -61,5 +66,7 @@ namespace blocks
         }
 
         bool wouldCollide(const sb::Vector2i& deltaPosition, float deltaRadians);
+
+        sb::IntRect getGlobalBounds(const sb::Vector2i& deltaPosition);
     };
 }

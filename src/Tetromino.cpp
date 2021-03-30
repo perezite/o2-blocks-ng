@@ -5,7 +5,6 @@
 #include "Input.h"
 #include "Math.h"
 #include "Configuration.h"
-#include <algorithm>
 
 using namespace std;
 using namespace sb;
@@ -35,7 +34,7 @@ namespace blocks
         return wouldCollide;
     }
 
-    void Tetromino::checkMove(sb::KeyCode keyCode, int deltaX, int deltaY)
+    void Tetromino::checkMoveInput(sb::KeyCode keyCode, int deltaX, int deltaY)
     {
         if (Input::isKeyGoingDown(keyCode))
             tryMove(Vector2i(deltaX, deltaY));
@@ -56,18 +55,19 @@ namespace blocks
         while (!collided && !isBelowGround) {
             Vector2i delta(0, --deltaY);
             collided = _collider.wouldCollide(delta, 0);
-            isBelowGround = any(_collider.getGlobalPositions(delta), Tetromino::isBelowGround);
+            // isBelowGround = any(_collider.getGlobalPositions(delta), Tetromino::isBelowGround);
+            // isBelowGround = _collider.getGlobalBounds(delta).bottom.y < 0;
         }
 
         translate(toVector2f(0, deltaY + 1));
     }
 
-    void Tetromino::input()
+    void Tetromino::updateInput()
     {
-        checkMove(KeyCode::Left, -1, 0);
-        checkMove(KeyCode::Right, +1, 0);
-        checkMove(KeyCode::Up, 0, +1);
-        checkMove(KeyCode::Down, 0, -1);
+        checkMoveInput(KeyCode::Left, -1, 0);
+        checkMoveInput(KeyCode::Right, +1, 0);
+        checkMoveInput(KeyCode::Up, 0, +1);
+        checkMoveInput(KeyCode::Down, 0, -1);
 
         if (Input::isKeyGoingDown(KeyCode::r))
             tryRotate(-90 * ToRadians);
@@ -105,7 +105,7 @@ namespace blocks
 
     void Tetromino::draw(DrawTarget& target, DrawStates drawStates)
     {
-        // we transform the origin, such that rotations and scaling are applied relative to the center
+        // we transform the origin, such that rotations and scaling are applied relative to the center of the tetromino
         static const Transform originTransform(-.5f);
         static const Transform inverseOriginTransform(.5f);
         drawStates.transform *= inverseOriginTransform * getTransform() * originTransform;
@@ -123,7 +123,8 @@ namespace blocks
 
     void Tetromino::update()
     {
-        input();
+        updateInput();
+        
         if (autodropEnabled)
             autodrop();
     }

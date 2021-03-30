@@ -32,13 +32,13 @@ namespace blocks
 
         bool tryMove(const sb::Vector2i& delta);
 
-        void checkMove(sb::KeyCode keyCode, int deltaX, int deltaY);
+        void checkMoveInput(sb::KeyCode keyCode, int deltaX, int deltaY);
        
         void tryRotate(float angle);
 
         void harddrop();
 
-        void input();
+        void updateInput();
 
         void autodrop();
 
