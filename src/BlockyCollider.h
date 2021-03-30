@@ -39,7 +39,6 @@ namespace blocks
 
         bool wouldCollide(const sb::Transform& globalTransform);
 
-
     public:
         BlockyCollider(sb::Transformable& parent);
 
@@ -67,6 +66,6 @@ namespace blocks
 
         bool wouldCollide(const sb::Vector2i& deltaPosition, float deltaRadians);
 
-        sb::IntRect getGlobalBounds(const sb::Vector2i& deltaPosition);
+        const sb::IntRect& getGlobalBounds(const sb::Vector2i& deltaPosition);
     };
 }

@@ -110,11 +110,19 @@ namespace blocks
         return wouldCollide(globalTransform);
     }
 
-    sb::IntRect BlockyCollider::getGlobalBounds(const sb::Vector2i& deltaPosition)
+    const sb::IntRect& BlockyCollider::getGlobalBounds(const sb::Vector2i& deltaPosition)
     {
         if (_globalBoundsNeedUpdate) {
             const vector<Vector2i>& globalPositions = getGlobalPositions();
             const Vector2i& theMinX = *min_element(globalPositions, minX);
+            const Vector2i& theMinY = *min_element(globalPositions, minY);
+            const Vector2i& theMaxX = *max_element(globalPositions, maxX);
+            const Vector2i& theMaxY = *max_element(globalPositions, maxY);
+            const int width = theMaxX.x - theMinX.x;
+            const int height = theMaxY.y - theMinY.y;
+            _globalBounds = IntRect(theMinX.x, theMinY.y, width, height);
         }
+
+        return _globalBounds;
     }
 }

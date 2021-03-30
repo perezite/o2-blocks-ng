@@ -57,4 +57,9 @@ namespace sb
 	const typename T::const_iterator min_element(const T& t, Compare& compare) {
 		return std::min_element(t.begin(), t.end(), compare);
 	}
+
+	template <class T, class Compare>
+	const typename T::const_iterator max_element(const T& t, Compare& compare) {
+		return std::max_element(t.begin(), t.end(), compare);
+	}
 }

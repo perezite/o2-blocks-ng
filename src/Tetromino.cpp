@@ -55,7 +55,7 @@ namespace blocks
         while (!collided && !isBelowGround) {
             Vector2i delta(0, --deltaY);
             collided = _collider.wouldCollide(delta, 0);
-            // isBelowGround = any(_collider.getGlobalPositions(delta), Tetromino::isBelowGround);
+             isBelowGround = any(_collider.getGlobalPositions(delta), Tetromino::isBelowGround);
             // isBelowGround = _collider.getGlobalBounds(delta).bottom.y < 0;
         }
 
