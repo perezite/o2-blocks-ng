@@ -1,8 +1,8 @@
-#include "Ticker.h"
+#include "Chronometer.h"
 
 namespace blocks 
 {
-    bool Ticker::hasTicks()
+    bool Chronometer::hasTicks()
     {
         _timerSeconds += _stopwatch.getElapsedSeconds();
         _stopwatch.reset();

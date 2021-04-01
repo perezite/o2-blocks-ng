@@ -186,7 +186,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TextureAtlas.h">
       <Filter>Blocks\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Ticker.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Chronometer.h">
       <Filter>Blocks\Headers</Filter>
     </ClInclude>
   </ItemGroup>
@@ -303,7 +303,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\TextureAtlas.cpp">
       <Filter>Blocks</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Ticker.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Chronometer.cpp">
       <Filter>Blocks</Filter>
     </ClCompile>
   </ItemGroup>

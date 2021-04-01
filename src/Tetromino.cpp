@@ -82,12 +82,12 @@ namespace blocks
 
     void Tetromino::autodrop()
     {
-        while (_autodropTicker.hasTicks())
+        while (_autodropChronometer.hasTicks())
             tryMove(Vector2i(0, -1));
     }
 
     Tetromino::Tetromino(TextureAtlas& squareTextures, TetrominoType type)
-        : _squareTextures(squareTextures), _collider(*this), _autodropTicker(configuration::autodropSeconds)
+        : _squareTextures(squareTextures), _collider(*this), _autodropChronometer(configuration::autodropSeconds)
     {
         setType(type);
     }

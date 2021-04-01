@@ -5,7 +5,7 @@
 #include "Drawable.h"
 #include "Transformable.h"
 #include "BlockyCollider.h"
-#include "Ticker.h"
+#include "Chronometer.h"
 #include "Vector2.h"
 #include "Input.h"
 
@@ -23,7 +23,7 @@ namespace blocks
 
         BlockyCollider _collider;
 
-        Ticker _autodropTicker;
+        Chronometer _autodropChronometer;
 
     protected:
         inline static bool isBelowGround(const sb::Vector2i& position) { return position.y < 0; }
