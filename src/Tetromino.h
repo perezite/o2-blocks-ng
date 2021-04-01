@@ -8,6 +8,7 @@
 #include "Chronometer.h"
 #include "Vector2.h"
 #include "Input.h"
+#include "Rect.h"
 
 namespace blocks
 {
@@ -25,16 +26,20 @@ namespace blocks
 
         Chronometer _autodropChronometer;
 
+        sb::IntRect _movementBounds;
+
     protected:
         inline static bool isBelowGround(const sb::Vector2i& position) { return position.y < 0; }
 
         void setSquares(const std::vector<sb::Vector2i>& squarePositions, size_t texPosX, size_t texPosY);
 
-        bool tryMove(const sb::Vector2i& delta);
+        bool canTransform(const sb::Vector2i& deltaPosition, float deltaRadians = 0);
+
+        void tryMove(const sb::Vector2i& delta);
+
+        void tryRotate(float deltaRadians);
 
         void checkMoveInput(sb::KeyCode keyCode, int deltaX, int deltaY);
-       
-        void tryRotate(float angle);
 
         void harddrop();
 
@@ -43,7 +48,7 @@ namespace blocks
         void autodrop();
 
     public:
-        Tetromino(TextureAtlas& squareTextures, TetrominoType type = TetrominoType::Simple);
+        Tetromino(TextureAtlas& squareTextures, const sb::IntRect& movementBounds, TetrominoType type = TetrominoType::Simple);
 
         void setType(TetrominoType type);
 

@@ -3,6 +3,7 @@
 #include "Transformable.h"
 #include "Input.h"
 #include "Memory.h"
+#include "Math.h"
 #include <algorithm>
 #include <math.h>
 #include <limits.h>
@@ -74,8 +75,8 @@ namespace blocks
             maxY = max(positions[i].y, maxY);
         }
 
-        result.left = minX; result.width = maxX - minX;
-        result.bottom = minY; result.height = maxY - minY;
+        result.left = minX; result.width = maxX - minX + 1;
+        result.bottom = minY; result.height = maxY - minY + 1;
     }
 
     BlockyCollider::BlockyCollider(Transformable& parent) : _globalPositionsNeedUpdate(true), 
@@ -119,14 +120,42 @@ namespace blocks
         return wouldCollide(globalTransform);
     }
 
-    const IntRect& BlockyCollider::getGlobalBounds(const Vector2i& deltaPosition)
-    {
-        if (_globalBoundsNeedUpdate) {
-            vector<Vector2i> globalPositions; 
-            getGlobalPositions(deltaPosition, globalPositions);
-            computeBounds(globalPositions, _globalBounds);
-        }
+    //const IntRect& BlockyCollider::getGlobalBounds(const Vector2i& deltaPosition)
+    //{
+    //    if (_globalBoundsNeedUpdate) {
+    //        vector<Vector2i> globalPositions; 
+    //        getGlobalPositions(deltaPosition, globalPositions);
+    //        computeBounds(globalPositions, _globalBounds);
+    //    }
 
-        return _globalBounds;
+    //    return _globalBounds;
+    //}
+
+    const IntRect BlockyCollider::getGlobalBounds(const Vector2i& deltaPosition, float deltaRadians)
+    {
+        Vector2i bottomLeft, topRight;
+        sb::computeBounds(_localPositions, bottomLeft, topRight);
+        FloatRect localBounds(toVector2f(bottomLeft), toVector2f(topRight));
+
+        Vector2f entityPosition = _entityLocalTransform.getPosition() + toVector2f(deltaPosition);
+        float entityRotation = _entityLocalTransform.getRotation() + deltaRadians;
+        Transform localTransform(entityPosition, 1, entityRotation);
+        Transform globalTransform = _parentEntityGlobalTransform * localTransform;
+
+        FloatRect globalBounds = globalTransform * localBounds;
+        return IntRect((int)globalBounds.left, (int)globalBounds.bottom, 
+            (int)globalBounds.width, (int)globalBounds.height);
+
+        //if (_globalBoundsNeedUpdate)
+        //    computeBounds(getGlobalPositions(), _globalBounds);
+
+        //Transform localTransform = Transform(toVector2f(deltaPosition), 0, deltaRadians);
+        //Transform globalTransform = _parentEntityGlobalTransform * localTransform;
+
+        //FloatRect temp((float)_globalBounds.left, (float)_globalBounds.bottom, 
+        //    (float)_globalBounds.width, (float)_globalBounds.height);
+        //temp = globalTransform * temp;
+        //return IntRect((int)temp.left, (int)temp.bottom, (int)temp.width, (int)temp.height);
+
     }
 }

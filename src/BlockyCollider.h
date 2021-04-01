@@ -68,6 +68,8 @@ namespace blocks
 
         bool wouldCollide(const sb::Vector2i& deltaPosition, float deltaRadians);
 
-        const sb::IntRect& getGlobalBounds(const sb::Vector2i& deltaPosition);
+        //const sb::IntRect& getGlobalBounds(const sb::Vector2i& deltaPosition);
+
+        const sb::IntRect getGlobalBounds(const sb::Vector2i& deltaPosition, float deltaRadians = 0);
     };
 }

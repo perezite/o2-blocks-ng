@@ -25,13 +25,34 @@ namespace blocks
         _squarePositions.assign(squarePositions.begin(), squarePositions.end());
     }
 
-    bool Tetromino::tryMove(const Vector2i& delta)
+    bool Tetromino::canTransform(const sb::Vector2i& deltaPosition, float deltaRadians)
     {
-        bool wouldCollide = _collider.wouldCollide(delta, 0);
-        if (!wouldCollide)
-            translate(toVector2f(delta));
+        bool wouldCollide = _collider.wouldCollide(deltaPosition, deltaRadians);
+        auto globalBounds = _collider.getGlobalBounds(deltaPosition, deltaRadians);
+        bool wouldLeaveBounds = !_movementBounds.contains(globalBounds);
 
-        return wouldCollide;
+        if (wouldCollide)
+            cout << "would collide" << endl;
+
+        if (wouldLeaveBounds)
+            cout << "would leave bounds" << endl;
+
+
+        return !wouldCollide && !wouldLeaveBounds;
+    }
+
+    void Tetromino::tryMove(const Vector2i& delta)
+    {
+        bool canMove = canTransform(delta);
+        if (canMove)
+            translate(toVector2f(delta));
+    }
+
+
+    void Tetromino::tryRotate(float deltaRadians)
+    {
+        if (canTransform(0, deltaRadians))
+            rotate(deltaRadians);
     }
 
     void Tetromino::checkMoveInput(sb::KeyCode keyCode, int deltaX, int deltaY)
@@ -40,23 +61,15 @@ namespace blocks
             tryMove(Vector2i(deltaX, deltaY));
     }
 
-    void Tetromino::tryRotate(float deltaRadians)
-    {
-        if (!_collider.wouldCollide(0, deltaRadians))
-            rotate(deltaRadians);
-    }
-
     void Tetromino::harddrop()
     {
-        bool collided = false;
-        bool isBelowGround = false;
+        bool canMove;
         int deltaY = 0;
 
-        while (!collided && !isBelowGround) {
-            Vector2i delta(0, --deltaY);
-            collided = _collider.wouldCollide(delta, 0);
-            isBelowGround = _collider.getGlobalBounds(delta).bottom < 0;
-        }
+        do {
+            Vector2i deltaPosition(0, --deltaY);
+            canMove = canTransform(deltaPosition);
+        } while (canMove);
 
         translate(toVector2f(0, deltaY + 1));
     }
@@ -86,8 +99,9 @@ namespace blocks
             tryMove(Vector2i(0, -1));
     }
 
-    Tetromino::Tetromino(TextureAtlas& squareTextures, TetrominoType type)
-        : _squareTextures(squareTextures), _collider(*this), _autodropChronometer(configuration::autodropSeconds)
+    Tetromino::Tetromino(TextureAtlas& squareTextures, const sb::IntRect& movementBounds, TetrominoType type)
+        : _squareTextures(squareTextures), _collider(*this), _autodropChronometer(configuration::autodropSeconds),
+          _movementBounds(movementBounds)
     {
         setType(type);
     }

@@ -6,6 +6,7 @@
 #include "Backdrop.h"
 #include "Stats.h"
 #include "GameAssets.h"
+#include "VectorHelper.h"
 #include <iostream>
 
 using namespace sb;
@@ -19,17 +20,19 @@ namespace blocks
         GameAssets gameAssets;
         Backdrop backdrop;
         Board board;
+        Vector2i size;
 
     public:
-        Scene()
-            : board(gameAssets, 10, 18)
+        Scene(size_t width, size_t height)
+            : board(gameAssets, width, height),
+              size(width, height)
         { }
 
         void start()
         {
             window.setSize(300, 540);
             window.setFramerateLimit(65);
-            window.getCamera().requestSize(10, 18);
+            window.getCamera().requestSize(toVector2f(size));
             window.getCamera().setCenter(.5f * window.getCamera().getSize());
         }
 
@@ -64,7 +67,8 @@ namespace blocks
 
     void runGame()
     {
-        Scene scene;
+        Scene scene(4, 4);
+        //Scene scene(10, 18);
         scene.run();
     }
 }
