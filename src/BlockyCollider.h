@@ -39,14 +39,16 @@ namespace blocks
 
         bool wouldCollide(const sb::Transform& globalTransform);
 
+        void getGlobalPositions(const sb::Vector2i& deltaPosition, std::vector<sb::Vector2i>& result);
+
+        void computeBounds(const std::vector<sb::Vector2i>& positions, sb::IntRect& result);
+
     public:
         BlockyCollider(sb::Transformable& parent);
 
         virtual ~BlockyCollider();
 
         const std::vector<sb::Vector2i>& getGlobalPositions();
-
-        const std::vector<sb::Vector2i> getGlobalPositions(const sb::Vector2i& deltaPosition);
 
         void update(const sb::Transform& parentTransform, const std::vector<sb::Vector2i>& localPositions);
 

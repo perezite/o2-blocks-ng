@@ -5,16 +5,10 @@
 #include "Memory.h"
 #include <algorithm>
 #include <math.h>
+#include <limits.h>
 
 using namespace std;
 using namespace sb;
-
-namespace {
-    bool minX(const Vector2i& left, const Vector2i& right) { return left.x < right.x; }
-    bool minY(const Vector2i& left, const Vector2i& right) { return left.y < right.y; }
-    bool maxX(const Vector2i& left, const Vector2i& right) { return left.x > right.x; }
-    bool maxY(const Vector2i& left, const Vector2i& right) { return left.y > right.y; }
-}
 
 namespace blocks
 {
@@ -43,7 +37,7 @@ namespace blocks
         }
     }
 
-    bool BlockyCollider::wouldCollide(const sb::Transform& globalTransform)
+    bool BlockyCollider::wouldCollide(const Transform& globalTransform)
     {
         vector<Vector2i> newGlobalPositions;
         transformPositions(_localPositions, globalTransform, newGlobalPositions);
@@ -59,6 +53,31 @@ namespace blocks
         return false;
     }
 
+    void BlockyCollider::getGlobalPositions(const Vector2i& deltaPosition, vector<Vector2i>& result)
+    {
+        const vector<Vector2i>& globalPositions = getGlobalPositions();
+        result.reserve(globalPositions.size()); result.clear();
+
+        for (size_t i = 0; i < globalPositions.size(); i++)
+            result.push_back(globalPositions[i] + deltaPosition);
+    }
+
+    void BlockyCollider::computeBounds(const vector<Vector2i>& positions, IntRect& result)
+    {
+        int minX = INT_MAX, minY = INT_MAX;
+        int maxX = INT_MIN, maxY = INT_MIN;
+        
+        for (size_t i = 0; i < positions.size(); i++) {
+            minX = min(positions[i].x, minX);
+            minY = min(positions[i].y, minY);
+            maxX = max(positions[i].x, maxX);
+            maxY = max(positions[i].y, maxY);
+        }
+
+        result.left = minX; result.width = maxX - minX;
+        result.bottom = minY; result.height = maxY - minY;
+    }
+
     BlockyCollider::BlockyCollider(Transformable& parent) : _globalPositionsNeedUpdate(true), 
         _entity(parent), _globalBoundsNeedUpdate(true)
     {
@@ -70,7 +89,7 @@ namespace blocks
         Colliders.erase(remove(Colliders.begin(), Colliders.end(), this), Colliders.end());
     }
 
-    const std::vector<sb::Vector2i>& BlockyCollider::getGlobalPositions()
+    const vector<Vector2i>& BlockyCollider::getGlobalPositions()
     {
         if (_globalPositionsNeedUpdate) {
             Transform globalTransform = _parentEntityGlobalTransform * _entityLocalTransform.getTransform();
@@ -79,16 +98,6 @@ namespace blocks
         }
 
         return _globalPositions;
-    }
-
-    const vector<Vector2i> BlockyCollider::getGlobalPositions(const Vector2i& deltaPosition)
-    {
-        vector<Vector2i> positions(getGlobalPositions());
-
-        for (size_t i = 0; i < positions.size(); i++)
-            positions[i] += deltaPosition;
-
-        return positions;
     }
 
     void BlockyCollider::update(const Transform& parentEntityTransform, const vector<Vector2i>& localPositions)
@@ -100,7 +109,7 @@ namespace blocks
         _globalBoundsNeedUpdate = true;
     }
    
-    bool BlockyCollider::wouldCollide(const sb::Vector2i& deltaPosition, float deltaRadians)
+    bool BlockyCollider::wouldCollide(const Vector2i& deltaPosition, float deltaRadians)
     {
         Vector2f entityPosition = _entityLocalTransform.getPosition() + toVector2f(deltaPosition);
         float entityRotation = _entityLocalTransform.getRotation() + deltaRadians;
@@ -110,17 +119,12 @@ namespace blocks
         return wouldCollide(globalTransform);
     }
 
-    const sb::IntRect& BlockyCollider::getGlobalBounds(const sb::Vector2i& deltaPosition)
+    const IntRect& BlockyCollider::getGlobalBounds(const Vector2i& deltaPosition)
     {
         if (_globalBoundsNeedUpdate) {
-            const vector<Vector2i>& globalPositions = getGlobalPositions();
-            const Vector2i& theMinX = *min_element(globalPositions, minX);
-            const Vector2i& theMinY = *min_element(globalPositions, minY);
-            const Vector2i& theMaxX = *max_element(globalPositions, maxX);
-            const Vector2i& theMaxY = *max_element(globalPositions, maxY);
-            const int width = theMaxX.x - theMinX.x;
-            const int height = theMaxY.y - theMinY.y;
-            _globalBounds = IntRect(theMinX.x, theMinY.y, width, height);
+            vector<Vector2i> globalPositions; 
+            getGlobalPositions(deltaPosition, globalPositions);
+            computeBounds(globalPositions, _globalBounds);
         }
 
         return _globalBounds;
