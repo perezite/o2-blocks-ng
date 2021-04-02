@@ -134,8 +134,7 @@ namespace sb
 		edges[3] = transform * sb::Vector2f(rect.left + rect.width, rect.bottom + rect.height);
 		
 		sb::Vector2f min, max;
-		computeBounds(edges, min, max);
-		return sb::FloatRect(min.x, min.y, max.x - min.x, max.y - min.y);
+		return computeBounds(edges);
 	}
 
 	Mesh operator*(const Transform& transform, const Mesh& mesh)

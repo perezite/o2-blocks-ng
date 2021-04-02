@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include "Vector2.h"
+#include "Rect.h"
 #define _USE_MATH_DEFINES
 
 namespace sb
@@ -62,22 +63,22 @@ namespace sb
 		return t > max ? max : t < min ? min : t;
 	}
 
-	template <class V>
-	void computeBounds(std::vector<V> v, V& lower, V& upper) {
-		lower = upper = V(v[0].x, v[0].y);
+	template <class T>
+	Rect<T> computeBounds(const std::vector<Vector2<T>>& v) {
+		Vector2<T> min = Vector2<T>(v[0].x, v[0].y), max = min;
 
 		for (size_t i = 0; i < v.size(); i++) {
-			V& val = v[i];
-			if (val.x < lower.x)
-				lower.x = val.x;
-			if (val.x > upper.x)
-				upper.x = val.x;
-			if (val.y < lower.y)
-				lower.y = val.y;
-			if (val.y > upper.y)
-				upper.y = val.y;
+			const Vector2<T>& val = v[i];
+			if (val.x < min.x)
+				min.x = val.x;
+			if (val.x > max.x)
+				max.x = val.x;
+			if (val.y < min.y)
+				min.y = val.y;
+			if (val.y > max.y)
+				max.y = val.y;
 		}
+
+		return Rect<T>(min, max);
 	}
-
-
 }

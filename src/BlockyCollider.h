@@ -41,7 +41,7 @@ namespace blocks
 
         void getGlobalPositions(const sb::Vector2i& deltaPosition, std::vector<sb::Vector2i>& result);
 
-        void computeBounds(const std::vector<sb::Vector2i>& positions, sb::IntRect& result);
+        //void computeBounds(const std::vector<sb::Vector2i>& positions, sb::IntRect& result);
 
     public:
         BlockyCollider(sb::Transformable& parent);
@@ -67,8 +67,6 @@ namespace blocks
         }
 
         bool wouldCollide(const sb::Vector2i& deltaPosition, float deltaRadians);
-
-        //const sb::IntRect& getGlobalBounds(const sb::Vector2i& deltaPosition);
 
         const sb::IntRect getGlobalBounds(const sb::Vector2i& deltaPosition, float deltaRadians = 0);
     };

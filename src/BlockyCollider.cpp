@@ -63,21 +63,21 @@ namespace blocks
             result.push_back(globalPositions[i] + deltaPosition);
     }
 
-    void BlockyCollider::computeBounds(const vector<Vector2i>& positions, IntRect& result)
-    {
-        int minX = INT_MAX, minY = INT_MAX;
-        int maxX = INT_MIN, maxY = INT_MIN;
-        
-        for (size_t i = 0; i < positions.size(); i++) {
-            minX = min(positions[i].x, minX);
-            minY = min(positions[i].y, minY);
-            maxX = max(positions[i].x, maxX);
-            maxY = max(positions[i].y, maxY);
-        }
+    //void BlockyCollider::computeBounds(const vector<Vector2i>& positions, IntRect& result)
+    //{
+    //    int minX = INT_MAX, minY = INT_MAX;
+    //    int maxX = INT_MIN, maxY = INT_MIN;
+    //    
+    //    for (size_t i = 0; i < positions.size(); i++) {
+    //        minX = min(positions[i].x, minX);
+    //        minY = min(positions[i].y, minY);
+    //        maxX = max(positions[i].x, maxX);
+    //        maxY = max(positions[i].y, maxY);
+    //    }
 
-        result.left = minX; result.width = maxX - minX + 1;
-        result.bottom = minY; result.height = maxY - minY + 1;
-    }
+    //    result.left = minX; result.width = maxX - minX + 1;
+    //    result.bottom = minY; result.height = maxY - minY + 1;
+    //}
 
     BlockyCollider::BlockyCollider(Transformable& parent) : _globalPositionsNeedUpdate(true), 
         _entity(parent), _globalBoundsNeedUpdate(true)
@@ -120,23 +120,8 @@ namespace blocks
         return wouldCollide(globalTransform);
     }
 
-    //const IntRect& BlockyCollider::getGlobalBounds(const Vector2i& deltaPosition)
-    //{
-    //    if (_globalBoundsNeedUpdate) {
-    //        vector<Vector2i> globalPositions; 
-    //        getGlobalPositions(deltaPosition, globalPositions);
-    //        computeBounds(globalPositions, _globalBounds);
-    //    }
-
-    //    return _globalBounds;
-    //}
-
     const IntRect BlockyCollider::getGlobalBounds(const Vector2i& deltaPosition, float deltaRadians)
     {
-        Vector2i bottomLeft, topRight;
-        sb::computeBounds(_localPositions, bottomLeft, topRight);
-        FloatRect localBounds(toVector2f(bottomLeft), toVector2f(topRight));
-
         Vector2f entityPosition = _entityLocalTransform.getPosition() + toVector2f(deltaPosition);
         float entityRotation = _entityLocalTransform.getRotation() + deltaRadians;
         Transform localTransform(entityPosition, 1, entityRotation);
@@ -145,24 +130,7 @@ namespace blocks
         vector<Vector2i> globalPositions;
         transformPositions(_localPositions, globalTransform, globalPositions);
 
-        sb::computeBounds(globalPositions, bottomLeft, topRight);
-        IntRect globalBounds(bottomLeft, topRight);
+        IntRect globalBounds = computeBounds(globalPositions);
         return globalBounds;
-
-       /* FloatRect globalBounds = globalTransform * localBounds;
-        return IntRect((int)globalBounds.left, (int)globalBounds.bottom, 
-            (int)globalBounds.width, (int)globalBounds.height);*/
-
-        //if (_globalBoundsNeedUpdate)
-        //    computeBounds(getGlobalPositions(), _globalBounds);
-
-        //Transform localTransform = Transform(toVector2f(deltaPosition), 0, deltaRadians);
-        //Transform globalTransform = _parentEntityGlobalTransform * localTransform;
-
-        //FloatRect temp((float)_globalBounds.left, (float)_globalBounds.bottom, 
-        //    (float)_globalBounds.width, (float)_globalBounds.height);
-        //temp = globalTransform * temp;
-        //return IntRect((int)temp.left, (int)temp.bottom, (int)temp.width, (int)temp.height);
-
     }
 }
