@@ -142,9 +142,16 @@ namespace blocks
         Transform localTransform(entityPosition, 1, entityRotation);
         Transform globalTransform = _parentEntityGlobalTransform * localTransform;
 
-        FloatRect globalBounds = globalTransform * localBounds;
+        vector<Vector2i> globalPositions;
+        transformPositions(_localPositions, globalTransform, globalPositions);
+
+        sb::computeBounds(globalPositions, bottomLeft, topRight);
+        IntRect globalBounds(bottomLeft, topRight);
+        return globalBounds;
+
+       /* FloatRect globalBounds = globalTransform * localBounds;
         return IntRect((int)globalBounds.left, (int)globalBounds.bottom, 
-            (int)globalBounds.width, (int)globalBounds.height);
+            (int)globalBounds.width, (int)globalBounds.height);*/
 
         //if (_globalBoundsNeedUpdate)
         //    computeBounds(getGlobalPositions(), _globalBounds);

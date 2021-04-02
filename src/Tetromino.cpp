@@ -37,7 +37,6 @@ namespace blocks
         if (wouldLeaveBounds)
             cout << "would leave bounds" << endl;
 
-
         return !wouldCollide && !wouldLeaveBounds;
     }
 
