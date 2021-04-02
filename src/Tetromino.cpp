@@ -34,13 +34,14 @@ namespace blocks
         return !wouldCollide && !wouldLeaveBounds;
     }
 
-    void Tetromino::tryMove(const Vector2i& delta)
+    bool Tetromino::tryMove(const Vector2i& delta)
     {
         bool canMove = canTransform(delta);
         if (canMove)
             translate(toVector2f(delta));
-    }
 
+        return canMove;
+    }
 
     void Tetromino::tryRotate(float deltaRadians)
     {
@@ -48,10 +49,17 @@ namespace blocks
             rotate(deltaRadians);
     }
 
-    void Tetromino::checkMoveInput(sb::KeyCode keyCode, int deltaX, int deltaY)
+    bool Tetromino::checkMoveInput(sb::KeyCode keyCode, int deltaX, int deltaY)
     {
         if (Input::isKeyGoingDown(keyCode))
-            tryMove(Vector2i(deltaX, deltaY));
+            return tryMove(Vector2i(deltaX, deltaY));
+
+        return true;
+    }
+
+    void Tetromino::drop() {
+        if (!tryMove(Vector2i(0, -1)))
+            _isDead = true;
     }
 
     void Tetromino::harddrop()
@@ -65,6 +73,7 @@ namespace blocks
         } while (canMove);
 
         translate(toVector2f(0, deltaY + 1));
+        _isDead = true;
     }
 
     void Tetromino::updateInput()
@@ -72,13 +81,15 @@ namespace blocks
         checkMoveInput(KeyCode::Left, -1, 0);
         checkMoveInput(KeyCode::Right, +1, 0);
         checkMoveInput(KeyCode::Up, 0, +1);
-        checkMoveInput(KeyCode::Down, 0, -1);
 
-        if (Input::isKeyGoingDown(KeyCode::r))
-            tryRotate(-90 * ToRadians);
+        if (Input::isKeyGoingDown(KeyCode::Down))
+            drop();
 
         if (Input::isKeyGoingDown(KeyCode::Space))
             harddrop();
+
+        if (Input::isKeyGoingDown(KeyCode::r))
+            tryRotate(-90 * ToRadians);
 
         #if _DEBUG
             if(Input::isKeyGoingDown(KeyCode::d))
@@ -88,13 +99,14 @@ namespace blocks
 
     void Tetromino::autodrop()
     {
-        while (_autodropChronometer.hasTicks())
-            tryMove(Vector2i(0, -1));
+        while (_autodropChronometer.hasTicks()) {
+            drop();
+        }
     }
 
     Tetromino::Tetromino(TextureAtlas& squareTextures, const sb::IntRect& movementBounds, TetrominoType type)
         : _squareTextures(squareTextures), _collider(*this), _autodropChronometer(configuration::autodropSeconds),
-          _movementBounds(movementBounds)
+          _movementBounds(movementBounds), _isDead(false)
     {
         setType(type);
     }

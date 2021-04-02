@@ -47,6 +47,12 @@ namespace sb
 			delete vec[i];
 	}
 
+	template <class T>
+	inline void safeDelete(T* pointer) {
+		if (pointer)
+			delete pointer;
+	}
+
 	template<class T, class UnaryPredicate>
 	bool any(const T& t, UnaryPredicate& predicate) {
 		typename T::const_iterator it = std::find_if(t.begin(), t.end(), predicate);

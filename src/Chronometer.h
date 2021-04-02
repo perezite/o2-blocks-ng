@@ -14,7 +14,7 @@ namespace blocks
 
 	public:
 		Chronometer(float intervalSeconds)
-			: _intervalSeconds(intervalSeconds) 
+			: _intervalSeconds(intervalSeconds), _timerSeconds(0)
 		{ }
 
 		bool hasTicks(); 

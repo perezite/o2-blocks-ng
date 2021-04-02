@@ -14,10 +14,15 @@ namespace blocks
 {
     class Board : public sb::Drawable, public sb::Transformable
     {
-        Tetromino _tetromino;
+        GameAssets _assets;
+        sb::Vector2i _size;
+        Tetromino* _tetromino;
         std::vector<Block*> _blocks;
         BlockyCollider _blocksCollider;
         sb::DrawBatch _batch;
+
+    protected:
+        void respawnTetromino();
 
     public:
         Board(GameAssets& assets, size_t width, size_t height);

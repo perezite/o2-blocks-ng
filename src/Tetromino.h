@@ -28,6 +28,8 @@ namespace blocks
 
         sb::IntRect _movementBounds;
 
+        bool _isDead;
+
     protected:
         inline static bool isBelowGround(const sb::Vector2i& position) { return position.y < 0; }
 
@@ -35,11 +37,13 @@ namespace blocks
 
         bool canTransform(const sb::Vector2i& deltaPosition, float deltaRadians = 0);
 
-        void tryMove(const sb::Vector2i& delta);
+        bool tryMove(const sb::Vector2i& delta);
 
         void tryRotate(float deltaRadians);
 
-        void checkMoveInput(sb::KeyCode keyCode, int deltaX, int deltaY);
+        bool checkMoveInput(sb::KeyCode keyCode, int deltaX, int deltaY);
+
+        void drop();
 
         void harddrop();
 
@@ -49,6 +53,8 @@ namespace blocks
 
     public:
         Tetromino(TextureAtlas& squareTextures, const sb::IntRect& movementBounds, TetrominoType type = TetrominoType::Simple);
+
+        bool isDead() const { return _isDead; }
 
         void setType(TetrominoType type);
 
