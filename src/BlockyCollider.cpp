@@ -17,12 +17,10 @@ namespace blocks
 
     bool BlockyCollider::hasCollision(const vector<Vector2i>& leftPositions, const vector<Vector2i>& rightPositions)
     {
-        for (size_t i = 0; i < leftPositions.size(); i++) {
-            for (size_t j = 0; j < rightPositions.size(); j++) {
+        for (size_t i = 0; i < leftPositions.size(); i++) 
+            for (size_t j = 0; j < rightPositions.size(); j++) 
                 if (leftPositions[i] == rightPositions[j])
                     return true;
-            }
-        }
 
         return false;
     }

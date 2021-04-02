@@ -67,8 +67,8 @@ namespace blocks
 
     void runGame()
     {
-        Scene scene(4, 4);
-        //Scene scene(10, 18);
+        //Scene scene(4, 4);
+        Scene scene(10, 18);
         scene.run();
     }
 }

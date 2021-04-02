@@ -31,12 +31,6 @@ namespace blocks
         auto globalBounds = _collider.getGlobalBounds(deltaPosition, deltaRadians);
         bool wouldLeaveBounds = !_movementBounds.contains(globalBounds);
 
-        if (wouldCollide)
-            cout << "would collide" << endl;
-
-        if (wouldLeaveBounds)
-            cout << "would leave bounds" << endl;
-
         return !wouldCollide && !wouldLeaveBounds;
     }
 
