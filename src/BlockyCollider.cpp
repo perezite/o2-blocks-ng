@@ -38,14 +38,21 @@ namespace blocks
         }
     }
 
-    bool BlockyCollider::wouldCollide(const Transform& globalTransform)
+    void BlockyCollider::getGlobalPositions(const Vector2i& deltaPosition, float deltaRadians, vector<Vector2i>& result)
     {
-        vector<Vector2i> newGlobalPositions;
-        transformPositions(_localPositions, globalTransform, newGlobalPositions);
+        Vector2f entityPosition = _entityLocalTransform.getPosition() + toVector2f(deltaPosition);
+        float entityRotation = _entityLocalTransform.getRotation() + deltaRadians;
+        Transform localTransform(entityPosition, 1, entityRotation);
+        Transform globalTransform = _parentEntityGlobalTransform * localTransform;
 
+        transformPositions(_localPositions, globalTransform, result);
+    }
+
+    bool BlockyCollider::wouldCollide(const vector<Vector2i>& globalPositions)
+    {
         for (size_t i = 0; i < Colliders.size(); i++) {
             if (Colliders[i] != this) {
-                bool hasCollision = this->hasCollision(newGlobalPositions, Colliders[i]->getGlobalPositions());
+                bool hasCollision = this->hasCollision(globalPositions, Colliders[i]->getGlobalPositions());
                 if (hasCollision)
                     return true;
             }
@@ -54,33 +61,8 @@ namespace blocks
         return false;
     }
 
-    void BlockyCollider::getGlobalPositions(const Vector2i& deltaPosition, vector<Vector2i>& result)
-    {
-        const vector<Vector2i>& globalPositions = getGlobalPositions();
-        result.reserve(globalPositions.size()); result.clear();
-
-        for (size_t i = 0; i < globalPositions.size(); i++)
-            result.push_back(globalPositions[i] + deltaPosition);
-    }
-
-    //void BlockyCollider::computeBounds(const vector<Vector2i>& positions, IntRect& result)
-    //{
-    //    int minX = INT_MAX, minY = INT_MAX;
-    //    int maxX = INT_MIN, maxY = INT_MIN;
-    //    
-    //    for (size_t i = 0; i < positions.size(); i++) {
-    //        minX = min(positions[i].x, minX);
-    //        minY = min(positions[i].y, minY);
-    //        maxX = max(positions[i].x, maxX);
-    //        maxY = max(positions[i].y, maxY);
-    //    }
-
-    //    result.left = minX; result.width = maxX - minX + 1;
-    //    result.bottom = minY; result.height = maxY - minY + 1;
-    //}
-
     BlockyCollider::BlockyCollider(Transformable& parent) : _globalPositionsNeedUpdate(true), 
-        _entity(parent), _globalBoundsNeedUpdate(true)
+        _entity(parent)
     {
         Colliders.push_back(this);
     }
@@ -107,30 +89,22 @@ namespace blocks
         _entityLocalTransform = _entity;
         _localPositions = localPositions;
         _globalPositionsNeedUpdate = true;
-        _globalBoundsNeedUpdate = true;
     }
    
     bool BlockyCollider::wouldCollide(const Vector2i& deltaPosition, float deltaRadians)
     {
-        Vector2f entityPosition = _entityLocalTransform.getPosition() + toVector2f(deltaPosition);
-        float entityRotation = _entityLocalTransform.getRotation() + deltaRadians;
-        Transform localTransform(entityPosition, 1, entityRotation);
-        Transform globalTransform = _parentEntityGlobalTransform * localTransform;
+        vector<Vector2i> globalPositions;
+        getGlobalPositions(deltaPosition, deltaRadians, globalPositions);
 
-        return wouldCollide(globalTransform);
+        return wouldCollide(globalPositions);
     }
 
     const IntRect BlockyCollider::getGlobalBounds(const Vector2i& deltaPosition, float deltaRadians)
     {
-        Vector2f entityPosition = _entityLocalTransform.getPosition() + toVector2f(deltaPosition);
-        float entityRotation = _entityLocalTransform.getRotation() + deltaRadians;
-        Transform localTransform(entityPosition, 1, entityRotation);
-        Transform globalTransform = _parentEntityGlobalTransform * localTransform;
-
         vector<Vector2i> globalPositions;
-        transformPositions(_localPositions, globalTransform, globalPositions);
-
+        getGlobalPositions(deltaPosition, deltaRadians, globalPositions);
         IntRect globalBounds = computeBounds(globalPositions);
+
         return globalBounds;
     }
 }

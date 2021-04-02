@@ -28,20 +28,14 @@ namespace blocks
 
         sb::Transformable& _entity;
 
-        sb::IntRect _globalBounds;
-
-        bool _globalBoundsNeedUpdate;
-
     protected:
         bool hasCollision(const std::vector<sb::Vector2i>& leftPositions, const std::vector<sb::Vector2i>& rightPositions);
 
         void transformPositions(const std::vector<sb::Vector2i>& oldPositions, const sb::Transform& transform, std::vector<sb::Vector2i>& resultPositions) const;
 
-        bool wouldCollide(const sb::Transform& globalTransform);
+        void getGlobalPositions(const sb::Vector2i& deltaPosition, float deltaRadians, std::vector<sb::Vector2i>& result);
 
-        void getGlobalPositions(const sb::Vector2i& deltaPosition, std::vector<sb::Vector2i>& result);
-
-        //void computeBounds(const std::vector<sb::Vector2i>& positions, sb::IntRect& result);
+        bool wouldCollide(const std::vector<sb::Vector2i>& globalPositions);
 
     public:
         BlockyCollider(sb::Transformable& parent);
