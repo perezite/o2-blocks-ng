@@ -30,7 +30,8 @@ namespace blocks
         newPositions.clear();
         newPositions.reserve(oldPositions.size());
 
-        for (size_t i = 0; i < oldPositions.size(); i++) {
+        for (size_t i = 0; i < oldPositions.size(); i++) 
+        {
             Vector2f temp = transform * toVector2f(oldPositions[i]);
             newPositions.push_back(toVector2i(temp));
         }
@@ -48,8 +49,10 @@ namespace blocks
 
     bool BlockyCollider::wouldCollide(const vector<Vector2i>& globalPositions)
     {
-        for (size_t i = 0; i < Colliders.size(); i++) {
-            if (Colliders[i] != this) {
+        for (size_t i = 0; i < Colliders.size(); i++) 
+        {
+            if (Colliders[i] != this) 
+            {
                 bool hasCollision = this->hasCollision(globalPositions, Colliders[i]->getGlobalPositions());
                 if (hasCollision)
                     return true;
@@ -72,7 +75,8 @@ namespace blocks
 
     const vector<Vector2i>& BlockyCollider::getGlobalPositions()
     {
-        if (_globalPositionsNeedUpdate) {
+        if (_globalPositionsNeedUpdate) 
+        {
             Transform globalTransform = _parentEntityGlobalTransform * _entityLocalTransform.getTransform();
             transformPositions(_localPositions, globalTransform, _globalPositions);
             _globalPositionsNeedUpdate = false;
