@@ -1,7 +1,7 @@
 class Board 
 {
 public:
-	bool tetrominoCollides () const
+	bool tetrominoCollides() const
 	{
 		const vector<Vector2i>& globalPositions = _tetromino->getGlobalPositions();
 		const vector<Vector2i>& blockPositions = getBlockPositions();
