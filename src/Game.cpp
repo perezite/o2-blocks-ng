@@ -40,7 +40,6 @@ namespace blocks
         {
             Input::update();
             window.update();
-            board.updateColliders(Transform::Identity);
             backdrop.update(window.getCamera());
             board.update(window);
         }

@@ -5,6 +5,7 @@
 #include "Input.h"
 #include "Math.h"
 #include "Configuration.h"
+#include "VectorHelper.h"
 
 using namespace std;
 using namespace sb;
@@ -25,55 +26,15 @@ namespace blocks
         _squarePositions.assign(squarePositions.begin(), squarePositions.end());
     }
 
-    bool Tetromino::canTransform(const sb::Vector2i& deltaPosition, float deltaRadians)
-    {
-        bool wouldCollide = _collider.wouldCollide(deltaPosition, deltaRadians);
-        auto globalBounds = _collider.getGlobalBounds(deltaPosition, deltaRadians);
-        bool wouldLeaveBounds = !_movementBounds.contains(globalBounds);
-
-        return !wouldCollide && !wouldLeaveBounds;
-    }
-
-    bool Tetromino::tryMove(const Vector2i& delta)
-    {
-        bool canMove = canTransform(delta);
-        if (canMove)
-            translate(toVector2f(delta));
-
-        return canMove;
-    }
-
-    void Tetromino::tryRotate(float deltaRadians)
-    {
-        if (canTransform(0, deltaRadians))
-            rotate(deltaRadians);
-    }
-
-    bool Tetromino::checkMoveInput(sb::KeyCode keyCode, int deltaX, int deltaY)
+    void Tetromino::checkMoveInput(sb::KeyCode keyCode, int deltaX, int deltaY)
     {
         if (Input::isKeyGoingDown(keyCode))
-            return tryMove(Vector2i(deltaX, deltaY));
-
-        return true;
-    }
-
-    void Tetromino::drop() {
-        if (!tryMove(Vector2i(0, -1)))
-            _isDead = true;
+            translate((float)deltaX, (float)deltaY);
     }
 
     void Tetromino::harddrop()
     {
-        bool canMove;
-        int deltaY = 0;
-
-        do {
-            Vector2i deltaPosition(0, --deltaY);
-            canMove = canTransform(deltaPosition);
-        } while (canMove);
-
-        translate(toVector2f(0, deltaY + 1));
-        _isDead = true;
+        // Todo
     }
 
     void Tetromino::updateInput()
@@ -81,15 +42,13 @@ namespace blocks
         checkMoveInput(KeyCode::Left, -1, 0);
         checkMoveInput(KeyCode::Right, +1, 0);
         checkMoveInput(KeyCode::Up, 0, +1);
-
-        if (Input::isKeyGoingDown(KeyCode::Down))
-            drop();
+        checkMoveInput(KeyCode::Down, 0, -1);
 
         if (Input::isKeyGoingDown(KeyCode::Space))
             harddrop();
 
         if (Input::isKeyGoingDown(KeyCode::r))
-            tryRotate(-90 * ToRadians);
+            rotate(-90 * ToRadians);
 
         #if _DEBUG
             if(Input::isKeyGoingDown(KeyCode::d))
@@ -99,14 +58,12 @@ namespace blocks
 
     void Tetromino::autodrop()
     {
-        while (_autodropChronometer.hasTicks()) {
-            drop();
-        }
+        while (_autodropChronometer.hasTicks())
+            checkMoveInput(KeyCode::Down, 0, -1);
     }
 
-    Tetromino::Tetromino(TextureAtlas& squareTextures, const sb::IntRect& movementBounds, TetrominoType type)
-        : _squareTextures(squareTextures), _collider(*this), _autodropChronometer(configuration::autodropSeconds),
-          _movementBounds(movementBounds), _isDead(false)
+    Tetromino::Tetromino(TextureAtlas& squareTextures, TetrominoType type)
+        : _squareTextures(squareTextures), _autodropChronometer(configuration::autodropSeconds)
     {
         setType(type);
     }
@@ -132,11 +89,6 @@ namespace blocks
             _squareSprite.setPosition(toVector2f(_squarePositions[i]));
             target.draw(_squareSprite, drawStates);
         }
-    }
-
-    void Tetromino::updateColliders(Transform parentTransform)
-    {
-        _collider.update(parentTransform, _squarePositions);
     }
 
     void Tetromino::update()

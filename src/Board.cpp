@@ -12,14 +12,13 @@ namespace blocks
     {
         safeDelete(_tetromino);
 
-        _tetromino = new Tetromino(_assets.squareTextureAtlas, 
-            IntRect(0, 0, _size.x, _size.y), TetrominoType::T);
+        _tetromino = new Tetromino(_assets.squareTextureAtlas, TetrominoType::T);
 
         _tetromino->setPosition(5, 16);
     }
 
     Board::Board(GameAssets& assets, size_t width, size_t height) : 
-        _assets(assets), _tetromino(NULL), _size(width, height), _blocksCollider(*this)
+        _assets(assets), _size(width, height), _tetromino(NULL)
     { 
         _blocks.push_back(new Block(assets.blockTextureAtlas));
         _blocks[0]->setPosition(3, 14);
@@ -35,18 +34,9 @@ namespace blocks
         delete _tetromino;
     }
 
-    void Board::updateColliders(Transform parentTransform)
-    {
-        _blocksCollider.update(parentTransform, _blocks);
-        _tetromino->updateColliders(parentTransform * getTransform());
-    }
-
     void Board::update(Window& window)
     {
         _tetromino->update();
-
-        if (_tetromino->isDead())
-            respawnTetromino();
     }
 
     void Board::draw(DrawTarget& target, DrawStates states)
