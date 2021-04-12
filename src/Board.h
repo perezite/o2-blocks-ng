@@ -18,9 +18,18 @@ namespace blocks
         Tetromino* _tetromino;
         std::vector<Block*> _blocks;
         sb::DrawBatch _batch;
+        sb::Transformable _lastTetrominoTransformable;
 
     protected:
         void respawnTetromino();
+
+        void getBlockPositions(std::vector<sb::Vector2i>& result);
+
+        bool hasTetrominoCollision();
+
+        void resolveTetrominoCollisions();
+
+        void updateTetrominoCollisions();
 
     public:
         Board(GameAssets& assets, size_t width, size_t height);

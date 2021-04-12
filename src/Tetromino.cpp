@@ -68,6 +68,17 @@ namespace blocks
         setType(type);
     }
 
+    void Tetromino::getTransformedSquarePositions(vector<Vector2i>& result)
+    {
+        result.clear(); result.reserve(_squarePositions.size());
+
+        for (size_t i = 0; i < _squarePositions.size(); i++)
+        {
+            Vector2f temp = getTransform() * toVector2f(_squarePositions[i]);
+            result.push_back(toVector2i(temp));
+        }
+    }
+
     void Tetromino::setType(TetrominoType type)
     {
         if (type == TetrominoType::T)
