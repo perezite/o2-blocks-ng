@@ -32,17 +32,43 @@ class Board
 		_tetromino.setPosition(_lastTetrominoTransformable.getPosition());
 		_isTetrominoDead = tetrominoCollidedDownwards();
 	}
-	
-	void resolveTetrominoCollision(const Transformable& lastTransformable) 
+
+	bool resolveTetrominoStep() 
 	{
-		if (hasTetrominoCollision())
-			resolveTetrominoRotation();
+		float deltaRotation = (_tetromino.getRotation() - _lastTetrominoTransformable.getRotation()) * toDegrees;
+		int deltaRotationSteps = round(deltaRotation / 90);
+		Vector2i deltaPosition = toVector2f(tetromino.getPosition() - _lastTetrominoTransformable.getPosition();
 		
-		if (hasTetrominoCollision()) 
-			resolveTetrominoPosition();
+		bool canResolveCollision = deltaRotation != 0 || deltaPosition != Vector2i(0);
+		if (!canResolveCollision)
+			return false;
 		
-		if (hasTetrominoCollision())
-			_isTetrominoStuck = true;	
+		if (deltaRotationSteps != 0)
+			_tetromino.rotate(deltaRotationSteps > 0 ? 90 * toRadians : - 90 * toRadians);
+		else if (deltaPosition.y < 0) 
+		{
+			_tetromino.translate(0, 1);
+			_isTetrominoDead = true;		// a vertical downwards collision means that the tetromino died			 
+		}
+		else if (deltaPosition.y > 0)
+			_tetromino.translate(0, -1);
+		else if (deltaPosition.x != 0)
+			_tetromino.translate();
+		
+		return true;
+	}
+	
+	void resolveTetrominoCollisions() 
+	{	
+		while (hasTetrominoCollision()) 
+		{
+			bool couldResolveCollision = resolveTetrominoCollisionStep();
+			if (!couldResolveCollision)
+			{
+				_isTetrominoStuck = true;
+				break;
+			}			
+		}	
 	}
 	
 	void updateTetrominoCollisions()
