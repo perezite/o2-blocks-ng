@@ -18,7 +18,8 @@ namespace blocks
         Tetromino* _tetromino;
         std::vector<Block*> _blocks;
         sb::DrawBatch _batch;
-        sb::Transformable _lastTetrominoTransformable;
+        sb::Transformable _lastTetromino;
+        bool _mustResetTetrominoCollisions;
         bool _isTetrominoDead;
         bool _isTetrominoStuck;
 
@@ -28,6 +29,8 @@ namespace blocks
         void getBlockPositions(std::vector<sb::Vector2i>& result);
 
         bool hasTetrominoCollision();
+
+        void resetTetrominoCollisions();
 
         bool resolveTetrominoCollisionStep();
 

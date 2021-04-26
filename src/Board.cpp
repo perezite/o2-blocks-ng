@@ -43,11 +43,18 @@ namespace blocks
         return false;
     }
 
+    void Board::resetTetrominoCollisions()
+    {
+        _lastTetromino = (Transformable)*_tetromino;
+        _isTetrominoDead = false;
+        _isTetrominoStuck = false;
+    }
+
     bool Board::resolveTetrominoCollisionStep()
     {
-        float deltaAngle = (_tetromino->getRotation() - _lastTetrominoTransformable.getRotation());
+        float deltaAngle = (_tetromino->getRotation() - _lastTetromino.getRotation());
         int deltaAngleSteps = (int)round(deltaAngle * ToDegrees / 90);
-        Vector2i deltaPosition = toVector2i(_tetromino->getPosition() - _lastTetrominoTransformable.getPosition());
+        Vector2i deltaPosition = toVector2i(_tetromino->getPosition() - _lastTetromino.getPosition());
         bool canResolveCollision = deltaAngleSteps != 0 || deltaPosition != Vector2i(0);
 
         if (canResolveCollision)
@@ -83,18 +90,26 @@ namespace blocks
 
     void Board::updateTetrominoCollisions()
     {
+        if (_mustResetTetrominoCollisions)
+        {
+            resetTetrominoCollisions();
+            _mustResetTetrominoCollisions = false;
+        }
+    
         resolveTetrominoCollisions();
+
+        _lastTetromino = (Transformable)*_tetromino;
 
         if (_isTetrominoDead)
         {
             cout << "dead" << endl;
-            _isTetrominoDead = false;
+            _mustResetTetrominoCollisions = true;
             respawnTetromino();
         }
 
         if (_isTetrominoStuck)
         {
-            _isTetrominoStuck = false;
+            _mustResetTetrominoCollisions = true;
             while (true)
             {
                 cout << "Game over!!" << endl;
@@ -105,7 +120,8 @@ namespace blocks
 
     Board::Board(GameAssets& assets, size_t width, size_t height) : 
         _assets(assets), _size(width, height), _tetromino(NULL), 
-        _isTetrominoDead(false), _isTetrominoStuck(false)
+        _mustResetTetrominoCollisions(true), _isTetrominoDead(false),
+        _isTetrominoStuck(false)
     { 
         _blocks.push_back(new Block(assets.blockTextureAtlas));
         _blocks[0]->setPosition(3, 14);
@@ -123,7 +139,6 @@ namespace blocks
 
     void Board::update(Window& window)
     {
-        _lastTetrominoTransformable = (Transformable)*_tetromino;
         _tetromino->update();
         updateTetrominoCollisions();
     }
