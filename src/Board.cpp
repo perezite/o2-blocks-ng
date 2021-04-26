@@ -2,6 +2,7 @@
 #include "Block.h"
 #include "Window.h"
 #include "Memory.h"
+#include "Math.h"
 #include "DrawTarget.h"
 #include "VectorHelper.h"
 
@@ -15,7 +16,6 @@ namespace blocks
         safeDelete(_tetromino);
 
         _tetromino = new Tetromino(_assets.squareTextureAtlas, TetrominoType::T);
-
         _tetromino->setPosition(5, 16);
     }
 
@@ -43,20 +43,69 @@ namespace blocks
         return false;
     }
 
+    bool Board::resolveTetrominoCollisionStep()
+    {
+        float deltaAngle = (_tetromino->getRotation() - _lastTetrominoTransformable.getRotation());
+        int deltaAngleSteps = (int)round(deltaAngle * ToDegrees / 90);
+        Vector2i deltaPosition = toVector2i(_tetromino->getPosition() - _lastTetrominoTransformable.getPosition());
+        bool canResolveCollision = deltaAngleSteps != 0 || deltaPosition != Vector2i(0);
+
+        if (canResolveCollision)
+        {
+            if (deltaAngleSteps != 0)
+                _tetromino->rotate(deltaAngleSteps > 0 ? -90 * ToRadians : 90 * ToRadians);
+            else if (deltaPosition.y < 0)
+            {
+                _tetromino->translate(0, 1);
+                _isTetrominoDead = true;        // downwards collisions kill the tetromino
+            }
+            else if (deltaPosition.y > 0)
+                _tetromino->translate(0, -1);
+            else if (deltaPosition.x != 0)
+                _tetromino->translate(deltaPosition.x > 0 ? Vector2f(-1, 0) : Vector2f(1, 0));
+        }
+
+        return canResolveCollision;
+    }
+
     void Board::resolveTetrominoCollisions()
     {
-        // Todo
+        while (hasTetrominoCollision())
+        {
+            bool couldResolveCollision = resolveTetrominoCollisionStep();
+            if (!couldResolveCollision)
+            {
+                _isTetrominoStuck = true;
+                break;
+            }
+        }
     }
 
     void Board::updateTetrominoCollisions()
     {
-        _lastTetrominoTransformable = (Transformable)*_tetromino;
-
         resolveTetrominoCollisions();
+
+        if (_isTetrominoDead)
+        {
+            cout << "dead" << endl;
+            _isTetrominoDead = false;
+            respawnTetromino();
+        }
+
+        if (_isTetrominoStuck)
+        {
+            _isTetrominoStuck = false;
+            while (true)
+            {
+                cout << "Game over!!" << endl;
+                cin.get();
+            }
+        }
     }
 
     Board::Board(GameAssets& assets, size_t width, size_t height) : 
-        _assets(assets), _size(width, height), _tetromino(NULL)
+        _assets(assets), _size(width, height), _tetromino(NULL), 
+        _isTetrominoDead(false), _isTetrominoStuck(false)
     { 
         _blocks.push_back(new Block(assets.blockTextureAtlas));
         _blocks[0]->setPosition(3, 14);
@@ -74,6 +123,7 @@ namespace blocks
 
     void Board::update(Window& window)
     {
+        _lastTetrominoTransformable = (Transformable)*_tetromino;
         _tetromino->update();
         updateTetrominoCollisions();
     }
