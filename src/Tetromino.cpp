@@ -33,20 +33,12 @@ namespace blocks
             translate((float)deltaX, (float)deltaY);
     }
 
-    void Tetromino::harddrop()
-    {
-        // Todo
-    }
-
     void Tetromino::updateInput()
     {
         checkMoveInput(KeyCode::Left, -1, 0);
         checkMoveInput(KeyCode::Right, +1, 0);
         checkMoveInput(KeyCode::Up, 0, +1);
         checkMoveInput(KeyCode::Down, 0, -1);
-
-        if (Input::isKeyGoingDown(KeyCode::Space))
-            harddrop();
 
         if (Input::isKeyGoingDown(KeyCode::r))
             rotate(-90 * ToRadians);

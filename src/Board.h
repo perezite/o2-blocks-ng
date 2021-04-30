@@ -6,6 +6,7 @@
 #include "GameAssets.h"
 #include "DrawBatch.h"
 #include "Window.h"
+#include "BoardCollisionLogic.h"
 #include "Block.h"
 #include <vector>
 
@@ -18,6 +19,8 @@ namespace blocks
         Tetromino* _tetromino;
         std::vector<Block*> _blocks;
         sb::DrawBatch _batch;
+        BoardCollisionLogic _collisionLogic;
+
         sb::Transformable _lastTetromino;
         bool _mustResetTetrominoCollisions;
         bool _isTetrominoDead;
@@ -25,8 +28,6 @@ namespace blocks
 
     protected:
         void respawnTetromino();
-
-        void getBlockPositions(std::vector<sb::Vector2i>& result);
 
         bool tetrominoIsOutsideBounds();
 
@@ -42,10 +43,18 @@ namespace blocks
 
         void updateTetrominoCollisions();
 
+        void harddropTetromino();
+
     public:
         Board(GameAssets& assets, size_t width, size_t height);
 
         virtual ~Board();
+
+        inline Tetromino& getTetromino() { return *_tetromino; }
+
+        void getBlockPositions(std::vector<sb::Vector2i>& result);
+
+        inline const sb::Vector2i& getSize() const { return _size; }
 
         void update(sb::Window& window);
 

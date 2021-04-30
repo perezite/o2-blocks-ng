@@ -5,9 +5,9 @@
 
 // TODO: 
 // - Draft Tetromino
-//   - Harddrop
 //   - Component
 //   - Annealing
+//   - Concept for Collision with Animation
 
 using namespace blocks;
 

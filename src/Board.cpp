@@ -18,8 +18,8 @@ namespace blocks
 
         _tetromino = new Tetromino(_assets.squareTextureAtlas, TetrominoType::T);
         _tetromino->setPosition(5, 16);
-        //_tetromino->setPosition(0, 0);
-
+        
+        _collisionLogic.resetTetrominoCollisionData();
     }
 
     void Board::getBlockPositions(std::vector<sb::Vector2i>& result)
@@ -62,7 +62,6 @@ namespace blocks
         }
 
         return false;
-
     }
 
     bool Board::hasTetrominoCollision()
@@ -120,26 +119,14 @@ namespace blocks
 
     void Board::updateTetrominoCollisions()
     {
-        if (_mustResetTetrominoCollisions)
+        if (_collisionLogic.isTetrominoDead())
         {
-            resetTetrominoCollisions();
-            _mustResetTetrominoCollisions = false;
-        }
-    
-        resolveTetrominoCollisions();
-
-        _lastTetromino = (Transformable)*_tetromino;
-
-        if (_isTetrominoDead)
-        {
-            cout << "respawn" << endl;
-            _mustResetTetrominoCollisions = true;
+            cout << "respawn from position " << _tetromino->getPosition().x << " " << _tetromino->getPosition().y << endl;
             respawnTetromino();
         }
 
-        if (_isTetrominoStuck)
+        if (_collisionLogic.isTetrominoStuck())
         {
-            _mustResetTetrominoCollisions = true;
             while (true)
             {
                 cout << "Game over!!" << endl;
@@ -148,10 +135,19 @@ namespace blocks
         }
     }
 
+    void Board::harddropTetromino()
+    {
+        do
+        {
+            _tetromino->translate(0, -1);
+        } while (!hasTetrominoCollision());
+
+    }
+
     Board::Board(GameAssets& assets, size_t width, size_t height) : 
         _assets(assets), _size(width, height), _tetromino(NULL), 
-        _mustResetTetrominoCollisions(true), _isTetrominoDead(false),
-        _isTetrominoStuck(false)
+        _collisionLogic(*this), _mustResetTetrominoCollisions(true), 
+        _isTetrominoDead(false), _isTetrominoStuck(false)
     { 
         _blocks.push_back(new Block(assets.blockTextureAtlas));
         _blocks[0]->setPosition(3, 14);
@@ -170,7 +166,10 @@ namespace blocks
     void Board::update(Window& window)
     {
         _tetromino->update();
+        _collisionLogic.update();
         updateTetrominoCollisions();
+        if (Input::isKeyGoingDown(KeyCode::Space))
+            harddropTetromino();
     }
 
     void Board::draw(DrawTarget& target, DrawStates states)
