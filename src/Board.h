@@ -21,27 +21,10 @@ namespace blocks
         sb::DrawBatch _batch;
         BoardCollisionLogic _collisionLogic;
 
-        sb::Transformable _lastTetromino;
-        bool _mustResetTetrominoCollisions;
-        bool _isTetrominoDead;
-        bool _isTetrominoStuck;
-
     protected:
         void respawnTetromino();
 
-        bool tetrominoIsOutsideBounds();
-
-        bool tetrominoCollidesWithBlock();
-
-        bool hasTetrominoCollision();
-
-        void resetTetrominoCollisions();
-
-        bool resolveTetrominoCollisionStep();
-
-        void resolveTetrominoCollisions();
-
-        void updateTetrominoCollisions();
+        void updateSelf();
 
         void harddropTetromino();
 

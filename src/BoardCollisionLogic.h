@@ -22,7 +22,6 @@ namespace blocks
 
         bool tetrominoCollidesWithBlock();
 
-        bool hasTetrominoCollision();
 
         bool resolveTetrominoCollisionStep();
 
@@ -38,7 +37,9 @@ namespace blocks
 
         bool isTetrominoStuck() const { return _isTetrominoStuck; }
 
-        void resetTetrominoCollisionData();
+        bool hasTetrominoCollision();
+
+        void resetTetrominoData();
 
 		void update();
 	};

@@ -44,14 +44,6 @@ namespace blocks
         return false;
     }
 
-    bool BoardCollisionLogic::hasTetrominoCollision()
-    {
-        bool hasCollision = tetrominoCollidesWithBlock();
-        hasCollision |= tetrominoIsOutsideBounds();
-
-        return hasCollision;
-    }
-
     bool BoardCollisionLogic::resolveTetrominoCollisionStep()
     {
         float deltaAngle = (getTetromino().getRotation() - getTetromino().getRotation());
@@ -94,7 +86,7 @@ namespace blocks
     {
         if (_mustResetTetrominoCollisionData)
         {
-            resetTetrominoCollisionData();
+            resetTetrominoData();
             _mustResetTetrominoCollisionData = false;
         }
 
@@ -103,7 +95,15 @@ namespace blocks
         _lastTetromino = (Transformable)_parent.getTetromino();
     }
 
-    void BoardCollisionLogic::resetTetrominoCollisionData()
+    bool BoardCollisionLogic::hasTetrominoCollision()
+    {
+        bool hasCollision = tetrominoCollidesWithBlock();
+        hasCollision |= tetrominoIsOutsideBounds();
+
+        return hasCollision;
+    }
+
+    void BoardCollisionLogic::resetTetrominoData()
     {
         _lastTetromino = (Transformable)_parent.getTetromino();
         _isTetrominoDead = false;
