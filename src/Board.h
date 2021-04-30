@@ -28,6 +28,10 @@ namespace blocks
 
         void getBlockPositions(std::vector<sb::Vector2i>& result);
 
+        bool tetrominoIsOutsideBounds();
+
+        bool tetrominoCollidesWithBlock();
+
         bool hasTetrominoCollision();
 
         void resetTetrominoCollisions();

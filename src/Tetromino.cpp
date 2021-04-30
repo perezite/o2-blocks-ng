@@ -15,6 +15,7 @@ namespace
     bool autodropEnabled = false;
     const vector<Vector2i> TShapeSquarePositions = { Vector2i(0, 0), Vector2i(-1, 0), Vector2i(1, 0), Vector2i(0, 1) };
     const vector<Vector2i> SimpleShapeSquarePositions = { Vector2i(0, 0), Vector2i(1, 0) };
+    const vector<Vector2i> VerySimpleShapeSquarePositions = { Vector2i(0, 0) };
 }
 
 namespace blocks
@@ -85,6 +86,8 @@ namespace blocks
             setSquares(TShapeSquarePositions, 0, 0);
         else if (type == TetrominoType::Simple)
             setSquares(SimpleShapeSquarePositions, 0, 0);
+        else if (type == TetrominoType::VerySimple)
+            setSquares(VerySimpleShapeSquarePositions, 0, 0);
         else
             SB_ERROR("Invalid tetromino type " << (int)type);
     }

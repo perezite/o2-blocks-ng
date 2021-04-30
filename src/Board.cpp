@@ -3,6 +3,7 @@
 #include "Window.h"
 #include "Memory.h"
 #include "Math.h"
+#include "Rect.h"
 #include "DrawTarget.h"
 #include "VectorHelper.h"
 
@@ -17,6 +18,8 @@ namespace blocks
 
         _tetromino = new Tetromino(_assets.squareTextureAtlas, TetrominoType::T);
         _tetromino->setPosition(5, 16);
+        //_tetromino->setPosition(0, 0);
+
     }
 
     void Board::getBlockPositions(std::vector<sb::Vector2i>& result)
@@ -30,17 +33,44 @@ namespace blocks
         }
     }
 
-    bool Board::hasTetrominoCollision()
+    bool Board::tetrominoIsOutsideBounds()
+    {
+        vector<Vector2i> positions; _tetromino->getTransformedSquarePositions(positions);
+        IntRect boardRect(0, 0, _size.x, _size.y);
+
+        for (size_t i = 0; i < positions.size(); i++)
+        {
+            if (!boardRect.contains(positions[i]))
+                return true;
+        }
+
+        return false;
+    }
+
+    bool Board::tetrominoCollidesWithBlock()
     {
         vector<Vector2i> blockPositions; getBlockPositions(blockPositions);
         vector<Vector2i> tetrominoPositions; _tetromino->getTransformedSquarePositions(tetrominoPositions);
 
         for (size_t i = 0; i < blockPositions.size(); i++)
+        {
             for (size_t j = 0; j < tetrominoPositions.size(); j++)
+            {
                 if (blockPositions[i] == tetrominoPositions[j])
                     return true;
+            }
+        }
 
         return false;
+
+    }
+
+    bool Board::hasTetrominoCollision()
+    {
+        bool hasCollision = tetrominoCollidesWithBlock();
+        hasCollision |= tetrominoIsOutsideBounds();
+
+        return hasCollision;
     }
 
     void Board::resetTetrominoCollisions()
@@ -102,7 +132,7 @@ namespace blocks
 
         if (_isTetrominoDead)
         {
-            cout << "dead" << endl;
+            cout << "respawn" << endl;
             _mustResetTetrominoCollisions = true;
             respawnTetromino();
         }

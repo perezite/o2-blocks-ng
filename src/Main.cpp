@@ -5,8 +5,9 @@
 
 // TODO: 
 // - Draft Tetromino
+//   - Harddrop
+//   - Component
 //   - Annealing
-//   - Respawn
 
 using namespace blocks;
 

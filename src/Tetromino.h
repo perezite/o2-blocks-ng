@@ -12,7 +12,7 @@
 
 namespace blocks
 {
-    enum class TetrominoType { T, Simple };
+    enum class TetrominoType { T, Simple, VerySimple };
 
     class Tetromino : public sb::Drawable, public sb::Transformable
     {

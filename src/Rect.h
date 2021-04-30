@@ -24,9 +24,9 @@ namespace sb
 			: left(other.left), bottom(other.bottom), width(other.width), height(other.height)
 		{ }
 
-		inline T right() const { return left + width; }
+		inline T right() const { return left + width - 1; }
 		
-		inline T top() const { return bottom + height; }
+		inline T top() const { return bottom + height -1; }
 
 		inline Vector2<T> bottomLeft() { return Vector2<T>(left, bottom); }
 
