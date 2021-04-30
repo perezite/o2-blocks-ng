@@ -51,12 +51,12 @@ namespace blocks
 
     void Tetromino::autodrop()
     {
-        while (_autodropChronometer.hasTicks())
+        while (_autodropTimer.hasTicks())
             checkMoveInput(KeyCode::Down, 0, -1);
     }
 
     Tetromino::Tetromino(TextureAtlas& squareTextures, TetrominoType type)
-        : _squareTextures(squareTextures), _autodropChronometer(configuration::autodropSeconds)
+        : _squareTextures(squareTextures), _autodropTimer(configuration::autodropSeconds)
     {
         setType(type);
     }

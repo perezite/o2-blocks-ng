@@ -183,10 +183,10 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TextureAtlas.h">
       <Filter>Blocks\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Chronometer.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\BoardCollisionLogic.h">
       <Filter>Blocks\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\BoardCollisionLogic.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Timer.h">
       <Filter>Blocks\Headers</Filter>
     </ClInclude>
   </ItemGroup>
@@ -300,10 +300,10 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\TextureAtlas.cpp">
       <Filter>Blocks</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Chronometer.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\BoardCollisionLogic.cpp">
       <Filter>Blocks</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\BoardCollisionLogic.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Timer.cpp">
       <Filter>Blocks</Filter>
     </ClCompile>
   </ItemGroup>

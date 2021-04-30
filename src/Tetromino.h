@@ -5,7 +5,7 @@
 #include "Drawable.h"
 #include "Transformable.h"
 #include "TextureAtlas.h"
-#include "Chronometer.h"
+#include "Timer.h"
 #include "Vector2.h"
 #include "Input.h"
 #include "Rect.h"
@@ -22,7 +22,7 @@ namespace blocks
 
         std::vector<sb::Vector2i> _squarePositions;
 
-        Chronometer _autodropChronometer;
+        Timer _autodropTimer;
 
     protected:
         void setSquares(const std::vector<sb::Vector2i>& squarePositions, size_t texPosX, size_t texPosY);

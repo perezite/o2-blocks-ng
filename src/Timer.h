@@ -4,7 +4,7 @@
 
 namespace blocks 
 {
-	class Chronometer
+	class Timer
 	{
 		sb::Stopwatch _stopwatch;
 
@@ -13,7 +13,7 @@ namespace blocks
 		float _timerSeconds;
 
 	public:
-		Chronometer(float intervalSeconds)
+		Timer(float intervalSeconds)
 			: _intervalSeconds(intervalSeconds), _timerSeconds(0)
 		{ }
 

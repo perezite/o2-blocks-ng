@@ -1,7 +1,7 @@
-#include "Chronometer.h"
+#include "Timer.h"
 
 namespace blocks {
-    bool Chronometer::hasTicks()
+    bool Timer::hasTicks()
     {
         _timerSeconds += _stopwatch.getElapsedSeconds();
         _stopwatch.reset();
