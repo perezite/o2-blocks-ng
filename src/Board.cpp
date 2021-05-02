@@ -14,6 +14,9 @@ namespace blocks
 {
     void Board::respawnTetromino()
     {
+        if (_tetromino)
+            cout << "respawn from position " << _tetromino->getPosition().x << " " << _tetromino->getPosition().y << endl;
+        
         safeDelete(_tetromino);
 
         _tetromino = new Tetromino(_assets.squareTextureAtlas, TetrominoType::T);
@@ -25,27 +28,16 @@ namespace blocks
     void Board::updateSelf()
     {
         if (_collisionLogic.isTetrominoDead())
-        {
-            cout << "respawn from position " << _tetromino->getPosition().x << " " << _tetromino->getPosition().y << endl;
             respawnTetromino();
-        }
 
         if (_collisionLogic.isTetrominoStuck())
-        {
-            while (true)
-            {
-                cout << "Game over!!" << endl;
-                cin.get();
-            }
-        }
+            cout << "Game over!!" << endl;
     }
 
     void Board::harddropTetromino()
     {
-        do
-        {
+        while (!_collisionLogic.hasTetrominoCollision())
             _tetromino->translate(0, -1);
-        } while (!_collisionLogic.hasTetrominoCollision());
     }
 
     Board::Board(GameAssets& assets, size_t width, size_t height) : 

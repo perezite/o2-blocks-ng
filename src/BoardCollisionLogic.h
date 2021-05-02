@@ -11,7 +11,7 @@ namespace blocks
 	{
         Board& _parent;
         sb::Transformable _lastTetromino;
-        bool _mustResetTetrominoCollisionData;
+        bool _mustResetTetrominoData;
         bool _isTetrominoDead;
         bool _isTetrominoStuck;
 

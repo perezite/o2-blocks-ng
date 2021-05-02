@@ -19,10 +19,8 @@ namespace blocks
         IntRect boardRect(0, 0, _parent.getSize().x, _parent.getSize().y);
 
         for (size_t i = 0; i < positions.size(); i++)
-        {
             if (!boardRect.contains(positions[i]))
                 return true;
-        }
 
         return false;
     }
@@ -33,13 +31,9 @@ namespace blocks
         vector<Vector2i> tetrominoPositions; getTetromino().getTransformedSquarePositions(tetrominoPositions);
 
         for (size_t i = 0; i < blockPositions.size(); i++)
-        {
             for (size_t j = 0; j < tetrominoPositions.size(); j++)
-            {
                 if (blockPositions[i] == tetrominoPositions[j])
                     return true;
-            }
-        }
 
         return false;
     }
@@ -73,8 +67,8 @@ namespace blocks
     {
         while (hasTetrominoCollision())
         {
-            bool couldResolveCollision = resolveTetrominoCollisionStep();
-            if (!couldResolveCollision)
+            bool collisionResolved = resolveTetrominoCollisionStep();
+            if (!collisionResolved)
             {
                 _isTetrominoStuck = true;
                 break;
@@ -84,10 +78,10 @@ namespace blocks
 
     void BoardCollisionLogic::updateTetrominoCollisions()
     {
-        if (_mustResetTetrominoCollisionData)
+        if (_mustResetTetrominoData)
         {
             resetTetrominoData();
-            _mustResetTetrominoCollisionData = false;
+            _mustResetTetrominoData = false;
         }
 
         resolveTetrominoCollisions();
