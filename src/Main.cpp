@@ -5,7 +5,6 @@
 
 // TODO: 
 // - Draft Tetromino
-//   - Component
 //   - Annealing
 //   - Concept for Collision with Animation
 

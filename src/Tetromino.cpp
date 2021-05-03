@@ -20,11 +20,22 @@ namespace
 
 namespace blocks
 {
-    void Tetromino::setSquares(const vector<Vector2i>& squarePositions, size_t texPosX, size_t texPosY)
+    void Tetromino::setSquarePositions(const vector<Vector2i>& positions)
     {
-        _squareSprite.setTexture(_squareTextures.getTextureSheet(), _squareTextures.getTextureArea(texPosX, texPosY));
         _squarePositions.clear();
-        _squarePositions.assign(squarePositions.begin(), squarePositions.end());
+        _squarePositions.assign(positions.begin(), positions.end());
+    }
+
+    void Tetromino::setSquarePositions(BlockType type)
+    {
+        if (type == BlockType::T)
+            setSquarePositions(TShapeSquarePositions);
+        else if (type == BlockType::Simple)
+            setSquarePositions(SimpleShapeSquarePositions);
+        else if (type == BlockType::VerySimple)
+            setSquarePositions(VerySimpleShapeSquarePositions);
+        else
+            SB_ERROR("Invalid block type " << (int)type);
     }
 
     void Tetromino::checkMoveInput(sb::KeyCode keyCode, int deltaX, int deltaY)
@@ -55,7 +66,7 @@ namespace blocks
             checkMoveInput(KeyCode::Down, 0, -1);
     }
 
-    Tetromino::Tetromino(TextureAtlas& squareTextures, TetrominoType type)
+    Tetromino::Tetromino(TextureAtlas& squareTextures, BlockType type)
         : _squareTextures(squareTextures), _autodropTimer(configuration::autodropSeconds)
     {
         setType(type);
@@ -72,16 +83,14 @@ namespace blocks
         }
     }
 
-    void Tetromino::setType(TetrominoType type)
+    void Tetromino::setType(BlockType type)
     {
-        if (type == TetrominoType::T)
-            setSquares(TShapeSquarePositions, 0, 0);
-        else if (type == TetrominoType::Simple)
-            setSquares(SimpleShapeSquarePositions, 0, 0);
-        else if (type == TetrominoType::VerySimple)
-            setSquares(VerySimpleShapeSquarePositions, 0, 0);
-        else
-            SB_ERROR("Invalid tetromino type " << (int)type);
+        _type = type;
+
+        Vector2i texturePosition = BlockTypeHelper::getTexturePosition(type);
+        _squareSprite.setTexture(_squareTextures.getTextureSheet(), _squareTextures.getTextureArea(texturePosition));
+        
+        setSquarePositions(type);
     }
 
     void Tetromino::draw(DrawTarget& target, DrawStates drawStates)

@@ -5,10 +5,10 @@
 #include "Texture.h"
 #include "GameAssets.h"
 #include "TextureAtlas.h"
+#include "BlockType.h"
 
 namespace blocks
 {
-    enum class BlockType { I };
 
     class Block : public sb::Sprite
     {

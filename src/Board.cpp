@@ -12,6 +12,17 @@ using namespace std;
 
 namespace blocks
 {
+    void Board::cureTetromino()
+    {
+        vector<Vector2i> positions; _tetromino->getTransformedSquarePositions(positions);
+        for (size_t i = 0; i < positions.size(); i++)
+        {
+            Block* block = new Block(_assets.blockTextureAtlas, _tetromino->getType());
+            block->setPosition(toVector2f(positions[i]));
+            _blocks.push_back(block);
+        }
+    }
+
     void Board::respawnTetromino()
     {
         if (_tetromino)
@@ -19,7 +30,7 @@ namespace blocks
         
         safeDelete(_tetromino);
 
-        _tetromino = new Tetromino(_assets.squareTextureAtlas, TetrominoType::T);
+        _tetromino = new Tetromino(_assets.squareTextureAtlas, BlockType::T);
         _tetromino->setPosition(5, 16);
         
         _collisionLogic.resetTetrominoData();
@@ -28,7 +39,10 @@ namespace blocks
     void Board::updateSelf()
     {
         if (_collisionLogic.isTetrominoDead())
+        {
+            cureTetromino();
             respawnTetromino();
+        }
 
         if (_collisionLogic.isTetrominoStuck())
             cout << "Game over!!" << endl;

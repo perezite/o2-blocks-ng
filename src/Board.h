@@ -22,6 +22,8 @@ namespace blocks
         BoardCollisionLogic _collisionLogic;
 
     protected:
+        void cureTetromino();
+
         void respawnTetromino();
 
         void updateSelf();

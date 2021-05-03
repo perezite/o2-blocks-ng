@@ -20,5 +20,8 @@ namespace blocks
 		inline sb::Texture& getTextureSheet() { return _textureSheet; }
 
 		sb::IntRect getTextureArea(size_t x, size_t y);
+
+		inline sb::IntRect getTextureArea(const sb::Vector2i& position) { return getTextureArea(position.x, position.y); }
+
 	};
 }

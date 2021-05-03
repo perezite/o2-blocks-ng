@@ -5,6 +5,7 @@
 #include "Drawable.h"
 #include "Transformable.h"
 #include "TextureAtlas.h"
+#include "BlockType.h"
 #include "Timer.h"
 #include "Vector2.h"
 #include "Input.h"
@@ -12,10 +13,10 @@
 
 namespace blocks
 {
-    enum class TetrominoType { T, Simple, VerySimple };
-
     class Tetromino : public sb::Drawable, public sb::Transformable
     {
+        BlockType _type;
+
         TextureAtlas& _squareTextures;
 
         sb::Sprite _squareSprite;
@@ -25,7 +26,9 @@ namespace blocks
         Timer _autodropTimer;
 
     protected:
-        void setSquares(const std::vector<sb::Vector2i>& squarePositions, size_t texPosX, size_t texPosY);
+        void setSquarePositions(const std::vector<sb::Vector2i>& positions);
+
+        void setSquarePositions(BlockType type);
 
         void autodrop();
 
@@ -34,11 +37,13 @@ namespace blocks
         void checkMoveInput(sb::KeyCode keyCode, int deltaX, int deltaY);
 
     public:
-        Tetromino(TextureAtlas& squareTextures, TetrominoType type = TetrominoType::Simple);
+        Tetromino(TextureAtlas& squareTextures, BlockType type = BlockType::Simple);
 
         void getTransformedSquarePositions(std::vector<sb::Vector2i>& result);
 
-        void setType(TetrominoType type);
+        inline BlockType getType() { return _type; }
+
+        void setType(BlockType type);
 
         virtual void draw(sb::DrawTarget& target, sb::DrawStates drawStates = sb::DrawStates::getDefault());
 

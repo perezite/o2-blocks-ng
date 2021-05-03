@@ -15,9 +15,7 @@ namespace blocks
 
     void Block::setType(BlockType type)
     {
-        if (type == BlockType::I)
-            setTexture(_blockTextures.getTextureSheet(), _blockTextures.getTextureArea(1, 2));
-        else
-            SB_ERROR("Invalid tetromino type " << (int)type);
+        Vector2i texturePosition = BlockTypeHelper::getTexturePosition(type);
+        setTexture(_blockTextures.getTextureSheet(), _blockTextures.getTextureArea(texturePosition));
     }
 }
