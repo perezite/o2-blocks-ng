@@ -174,7 +174,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Stats.h">
       <Filter>Blocks\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Configuration.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Settings.h">
       <Filter>Blocks\Headers</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\VectorHelper.h">

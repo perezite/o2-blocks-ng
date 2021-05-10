@@ -22,7 +22,6 @@ namespace blocks
 
         bool tetrominoCollidesWithBlock();
 
-
         bool resolveTetrominoCollisionStep();
 
         void resolveTetrominoCollisions();

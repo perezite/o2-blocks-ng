@@ -4,7 +4,7 @@
 #include "Memory.h"
 #include "Input.h"
 #include "Math.h"
-#include "Configuration.h"
+#include "Settings.h"
 #include "VectorHelper.h"
 
 using namespace std;
@@ -63,11 +63,11 @@ namespace blocks
     void Tetromino::autodrop()
     {
         while (_autodropTimer.hasTicks())
-            checkMoveInput(KeyCode::Down, 0, -1);
+            translate(0, -1);
     }
 
     Tetromino::Tetromino(TextureAtlas& squareTextures, BlockType type)
-        : _squareTextures(squareTextures), _autodropTimer(configuration::autodropSeconds)
+        : _squareTextures(squareTextures), _autodropTimer(settings::autodropSeconds)
     {
         setType(type);
     }

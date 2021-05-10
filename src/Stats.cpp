@@ -2,7 +2,7 @@
 
 #include "Stopwatch.h"
 #include "Logger.h"
-#include "Configuration.h"
+#include "Settings.h"
 
 using namespace sb;
 

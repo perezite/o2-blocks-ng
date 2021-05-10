@@ -40,7 +40,7 @@ namespace blocks
 
     bool BoardCollisionLogic::resolveTetrominoCollisionStep()
     {
-        float deltaAngle = (getTetromino().getRotation() - getTetromino().getRotation());
+        float deltaAngle = (getTetromino().getRotation() - _lastTetromino.getRotation());
         int deltaAngleSteps = (int)round(deltaAngle * ToDegrees / 90);
         Vector2i deltaPosition = toVector2i(getTetromino().getPosition() - _lastTetromino.getPosition());
         bool canResolveCollision = deltaAngleSteps != 0 || deltaPosition != Vector2i(0);

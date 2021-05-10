@@ -15,6 +15,7 @@ namespace blocks
     void Board::cureTetromino()
     {
         vector<Vector2i> positions; _tetromino->getTransformedSquarePositions(positions);
+
         for (size_t i = 0; i < positions.size(); i++)
         {
             Block* block = new Block(_assets.blockTextureAtlas, _tetromino->getType());

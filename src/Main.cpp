@@ -5,8 +5,11 @@
 
 // TODO: 
 // - Draft Tetromino
-//   - Annealing
-//   - Concept for Collision with Animation
+//   - Collision with Animation
+//   - Lines
+//   - Effects for lines
+//   - Particles for lines
+//   - Particles tetromino
 
 using namespace blocks;
 
