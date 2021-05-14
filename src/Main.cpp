@@ -4,12 +4,7 @@
 #include "SceneDemo1.h"
 
 // TODO: 
-// - Draft Tetromino
-//   - Collision with Animation
-//   - Lines
-//   - Effects for lines
-//   - Particles for lines
-//   - Particles tetromino
+// - Animation concept
 
 using namespace blocks;
 

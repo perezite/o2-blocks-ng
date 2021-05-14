@@ -46,10 +46,17 @@ class BoardCollisionLogic
 		return getTargetRotation(tetromino1) - getTargetRotation(tetromino2);
 	}
 	
+	template <class TResult, typename F>
+	TResult delta(Tetromino& tetromino1, Tetromino& tetromino2, F f)
+	{
+		return f(tetromino1) - f(tetromino2);
+	}
+	
 	bool resolveTetrominoCollisionStep()
 	{
 		...
-		float deltaAngle = targetDeltaRotation(getTetromino(), _lastTetromino);
+		// float deltaAngle = targetDeltaRotation(getTetromino(), _lastTetromino);
+		float deltaAngle = delta(getTetromino(), _lastTetromino, getTargetRotation);
 		...
 	}
 }

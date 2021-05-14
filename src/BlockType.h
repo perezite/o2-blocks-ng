@@ -26,7 +26,7 @@ namespace blocks
             else
             {
                 SB_ERROR("Invalid block type " << (int)type);
-                return sb::Vector2i(0);
+                return sb::Vector2i();
             }
 
         }
