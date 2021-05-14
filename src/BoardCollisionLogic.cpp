@@ -49,13 +49,16 @@ namespace blocks
         {
             if (deltaAngleSteps != 0)
                 getTetromino().rotate(deltaAngleSteps > 0 ? -90 * ToRadians : 90 * ToRadians);
+
             else if (deltaPosition.y < 0)
             {
                 getTetromino().translate(0, 1);
                 _isTetrominoDead = true;        // downwards collisions kill the tetromino
             }
+
             else if (deltaPosition.y > 0)
                 getTetromino().translate(0, -1);
+            
             else if (deltaPosition.x != 0)
                 getTetromino().translate(deltaPosition.x > 0 ? Vector2f(-1, 0) : Vector2f(1, 0));
         }

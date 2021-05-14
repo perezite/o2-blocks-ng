@@ -1,62 +1,84 @@
+namespace easings 
+{
+	typedef float(*Easing)(float);
+	...
+}
+
 namespace 
 {
-	Tween2f moveEffect(float dx, float dy) {
-		return Tween2f().sineOut(Vector2f(dx, dy));
-	}
+	Easing moveEasing = easings::sineOut;
 }
 
-class Tetromino 
+namespace blocks 
 {
-	void input()
+	class Tetromino 
 	{
-		if (Input::isKeyGoingDown(KeyCode::Left))
-			_transformEffect.move(moveEffect(-1, 0));
-		if (Input::isKeyGoingDown(KeyCode::Right))
-			_transformEffect.move(moveEffect(0, 1));
-	}
-	
-public:
-	void update() 
-	{
-		input();
+		void input()
+		{
+			if (Input::isKeyGoingDown(KeyCode::Left))
+				_transformTweener.move(-1, 0, easings::sineOut, 0.2f);
+			if (Input::isKeyGoingDown(KeyCode::Right))
+				_transformTweener.move(1, 0, easings::sineOut, 0.2f);
+		}
+		
+	public:
+		void update() 
+		{
+			input();
+		}
 	}
 }
 
-class TransformEffect
+namespace blocks
 {
-	Transformable _targetTransform;
+	class TransformTweener
+	{
+		Transformable _targetTransform;
 
-public:
-	float getTargetRotation();
-	
-	Transformable& getTargetTransform() { return _targetTransform; }
+	public:
+		float getTargetRotation();
+		
+		Transformable& getTargetTransform() { return _targetTransform; }
+	}
 }
 
-class BoardCollisionLogic 
-{		
-	Tetromino& _lastTetromino;
+namespace orbis
+{
+	inline float signum(float value) 
+	{
+		if (value == 0)
+			return 0;
+		
+		return value > 0 ? 1 : -1;
+	}
+}
 
-	float getTargetRotation(Tetromino& tetromino) 
-	{
-		return tetormino.getTransformEffect().getTargetRotation();
-	}
+namespace blocks 
+{	
+	class BoardCollisionLogic 
+	{		
+		Tetromino& _lastTetromino;
 
-	float targetDeltaRotation(Tetromino& tetromino1, Tetromino& tetromino2) 
-	{ 
-		return getTargetRotation(tetromino1) - getTargetRotation(tetromino2);
-	}
-	
-	template <class TResult, typename F>
-	TResult delta(Tetromino& tetromino1, Tetromino& tetromino2, F f)
-	{
-		return f(tetromino1) - f(tetromino2);
-	}
-	
-	bool resolveTetrominoCollisionStep()
-	{
-		...
-		// float deltaAngle = targetDeltaRotation(getTetromino(), _lastTetromino);
-		float deltaAngle = delta(getTetromino(), _lastTetromino, getTargetRotation);
-		...
+		float getRotation(Tetromino& tetromino) 
+		{
+			return tetromino.getTransformTweener().getTargetRotation();
+		}
+		
+		void rotate(Tetromino& tetromino, float angle) 
+		{
+			tetromino.getTransformTweener().rotate(angle);
+		}
+		
+		bool resolveTetrominoCollisionStep()
+		{
+			...
+			
+			float deltaAngle = getRotation(getTetromino) - getRotation(_lastTetromino);
+			
+			...
+			
+			if (canResolveCollision)
+				rotate(tetromino, -signum(deltaAngleSteps) * 90 * toRadians);
+		}
 	}
 }
