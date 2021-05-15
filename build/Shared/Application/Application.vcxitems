@@ -67,6 +67,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Transformable.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Triangle.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Tween.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TweenDemo1.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TweenFunctions.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TweenV2.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Vector2.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\VectorHelper.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Vertex.h" />
@@ -111,6 +114,7 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Stopwatch.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Transform.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Triangle.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\TweenDemo1.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Window.cpp" />
   </ItemGroup>
 </Project>

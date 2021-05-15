@@ -22,6 +22,9 @@
     <Filter Include="Demos\02_Scene">
       <UniqueIdentifier>{839305d8-6d54-41bf-85f4-142b2a95b18e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Demos\03_Tween">
+      <UniqueIdentifier>{8bd9f6b6-21f8-44f3-8c3d-57997aaa9b31}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Color.h">
@@ -192,6 +195,15 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\BlockType.h">
       <Filter>Blocks\Headers</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TweenDemo1.h">
+      <Filter>Demos\03_Tween</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TweenFunctions.h">
+      <Filter>_Orbis2D\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TweenV2.h">
+      <Filter>_Orbis2D\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Window.cpp">
@@ -308,6 +320,9 @@
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Timer.cpp">
       <Filter>Blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\TweenDemo1.cpp">
+      <Filter>Demos\03_Tween</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

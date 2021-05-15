@@ -2,14 +2,21 @@
 #include "Logger.h"
 #include "CameraDemo1.h"
 #include "SceneDemo1.h"
+#include "TweenDemo1.h"
 
 // TODO: 
 // - Animation concept
+// - Tween draft (in Demos), must have:
+//   - tweening functions
+//   - lifetime
+//   - chaining
+//   - replace existing tweens by new ones. also make compatible with particle systems
 
 using namespace blocks;
 
 int main() {
-    blocks::runGame();
+    tweenDemo1::run();
+    //blocks::runGame();
 
     return 0;
 }
