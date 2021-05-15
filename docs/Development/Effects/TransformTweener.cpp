@@ -16,9 +16,9 @@ namespace blocks
 		void input()
 		{
 			if (Input::isKeyGoingDown(KeyCode::Left))
-				_transformTweener.move(-1, 0, easings::sineOut, 0.2f);
+				_transformTweener.move(-1, 0, moveEasing, 0.2f);
 			if (Input::isKeyGoingDown(KeyCode::Right))
-				_transformTweener.move(1, 0, easings::sineOut, 0.2f);
+				_transformTweener.move(1, 0, moveEasing, 0.2f);
 		}
 		
 	public:
@@ -33,12 +33,10 @@ namespace blocks
 {
 	class TransformTweener
 	{
-		Transformable _targetTransform;
+		float _targetAngle;
 
 	public:
-		float getTargetRotation();
-		
-		Transformable& getTargetTransform() { return _targetTransform; }
+		float getTargetAngle();
 	}
 }
 
@@ -59,9 +57,9 @@ namespace blocks
 	{		
 		Tetromino& _lastTetromino;
 
-		float getRotation(Tetromino& tetromino) 
+		float getAngle(Tetromino& tetromino) 
 		{
-			return tetromino.getTransformTweener().getTargetRotation();
+			return tetromino.getTransformTweener().getTargetAngle();
 		}
 		
 		void rotate(Tetromino& tetromino, float angle) 
@@ -73,12 +71,12 @@ namespace blocks
 		{
 			...
 			
-			float deltaAngle = getRotation(getTetromino) - getRotation(_lastTetromino);
+			float deltaAngle = getAngle(getTetromino) - getAngle(_lastTetromino);
 			
 			...
 			
 			if (canResolveCollision)
-				rotate(tetromino, -signum(deltaAngleSteps) * 90 * toRadians);
+				rotate(tetromino, -90 * toRadians * signum(deltaAngleSteps));
 		}
 	}
 }
