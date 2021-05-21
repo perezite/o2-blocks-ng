@@ -6,8 +6,6 @@
 
 namespace sb 
 {
-	typedef float(*TweenFunction)(float);
-
 	template <class T>
 	class TweenV2
 	{
@@ -15,19 +13,20 @@ namespace sb
 
 		T _targetValue;
 
-		TweenFunction _tweenFunction;
-
 		float _duration;
+		
+		TweenFunction _tweenFunction;
 
 		Stopwatch _watch;
 
 		bool _isStarted;
 
 	public:
-		TweenV2(const T& startValue, const T& targetValue, TweenFunction tweenFunction = tweenFunctions::linear, float duration = 1) 
-			: _startValue(startValue), _targetValue(targetValue), _tweenFunction(tweenFunction), _duration(1), _isStarted(false)
-		{
-		}
+		TweenV2(const T& startValue, const T& targetValue, 
+			float duration = 1, TweenFunction tweenFunction = tweenFunctions::linear) 
+			: _startValue(startValue), _targetValue(targetValue), _duration(duration),
+			  _tweenFunction(tweenFunction), _isStarted(true)
+		{ }
 
 		inline float getProgress()
 		{
@@ -40,10 +39,11 @@ namespace sb
 
 		inline T getValue()
 		{
-			return lerp(getProgress(), _startValue, _targetValue);
+			float tweenValue = _tweenFunction(getProgress());
+			return lerp(tweenValue, _startValue, _targetValue);
 		}
 
-		void start()
+		void reset()
 		{
 			_isStarted = true;
 			_watch.reset();

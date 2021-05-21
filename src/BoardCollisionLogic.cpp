@@ -45,13 +45,11 @@ namespace blocks
         Vector2i deltaPosition = toVector2i(getTetromino().getPosition() - _lastTetromino.getPosition());
         bool canResolveCollision = deltaAngleSteps != 0 || deltaPosition != Vector2i(0);
 
-        if (canResolveCollision)
-        {
+        if (canResolveCollision) {
             if (deltaAngleSteps != 0)
                 getTetromino().rotate(deltaAngleSteps > 0 ? -90 * ToRadians : 90 * ToRadians);
 
-            else if (deltaPosition.y < 0)
-            {
+            else if (deltaPosition.y < 0) {
                 getTetromino().translate(0, 1);
                 _isTetrominoDead = true;        // downwards collisions kill the tetromino
             }
@@ -68,11 +66,9 @@ namespace blocks
 
     void BoardCollisionLogic::resolveTetrominoCollisions()
     {
-        while (hasTetrominoCollision())
-        {
+        while (hasTetrominoCollision()) {
             bool collisionResolved = resolveTetrominoCollisionStep();
-            if (!collisionResolved)
-            {
+            if (!collisionResolved) {
                 _isTetrominoStuck = true;
                 break;
             }
@@ -81,8 +77,7 @@ namespace blocks
 
     void BoardCollisionLogic::updateTetrominoCollisions()
     {
-        if (_mustResetTetrominoData)
-        {
+        if (_mustResetTetrominoData) {
             resetTetrominoData();
             _mustResetTetrominoData = false;
         }
@@ -107,7 +102,7 @@ namespace blocks
         _isTetrominoStuck = false;
     }
 
-    void BoardCollisionLogic::update()
+    void BoardCollisionLogic::update() 
     {
         updateTetrominoCollisions();
     }

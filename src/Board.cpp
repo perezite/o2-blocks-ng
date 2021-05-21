@@ -16,8 +16,7 @@ namespace blocks
     {
         vector<Vector2i> positions; _tetromino->getTransformedSquarePositions(positions);
 
-        for (size_t i = 0; i < positions.size(); i++)
-        {
+        for (size_t i = 0; i < positions.size(); i++) {
             Block* block = new Block(_assets.blockTextureAtlas, _tetromino->getType());
             block->setPosition(toVector2f(positions[i]));
             _blocks.push_back(block);
@@ -27,20 +26,24 @@ namespace blocks
     void Board::respawnTetromino()
     {
         if (_tetromino)
-            cout << "respawn from position " << _tetromino->getPosition().x << " " << _tetromino->getPosition().y << endl;
-        
+            cout << "respawn from position " << _tetromino->getPosition().x << " " << _tetromino->getPosition().y << endl;     
         safeDelete(_tetromino);
-
+        
         _tetromino = new Tetromino(_assets.squareTextureAtlas, BlockType::T);
         _tetromino->setPosition(5, 16);
         
         _collisionLogic.resetTetrominoData();
     }
 
-    void Board::updateSelf()
+    void Board::handleInput()
     {
-        if (_collisionLogic.isTetrominoDead())
-        {
+        if (Input::isKeyGoingDown(KeyCode::Space))
+            harddropTetromino();
+    }
+
+    void Board::handleCollisions()
+    {
+        if (_collisionLogic.isTetrominoDead()) {
             cureTetromino();
             respawnTetromino();
         }
@@ -77,8 +80,7 @@ namespace blocks
     {
         result.clear(); result.reserve(_blocks.size());
 
-        for (size_t i = 0; i < _blocks.size(); i++)
-        {
+        for (size_t i = 0; i < _blocks.size(); i++) {
             Vector2i blockPosition = toVector2i(_blocks[i]->getPosition());
             result.push_back(blockPosition);
         }
@@ -86,11 +88,10 @@ namespace blocks
 
     void Board::update(Window& window)
     {
+        handleInput();
         _tetromino->update();
-        if (Input::isKeyGoingDown(KeyCode::Space))
-            harddropTetromino();
         _collisionLogic.update();
-        updateSelf();
+        handleCollisions();
     }
 
     void Board::draw(DrawTarget& target, DrawStates states)

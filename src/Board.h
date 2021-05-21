@@ -26,7 +26,9 @@ namespace blocks
 
         void respawnTetromino();
 
-        void updateSelf();
+        void handleInput();
+
+        void handleCollisions();
 
         void harddropTetromino();
 

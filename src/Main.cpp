@@ -6,6 +6,7 @@
 
 // TODO: 
 // - Animation concept
+// - Define tween interface including chaining
 // - Tween draft (in Demos), must have:
 //   - tweening functions
 //   - lifetime
