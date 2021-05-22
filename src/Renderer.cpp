@@ -58,7 +58,7 @@ namespace sb
 		setupShaderAttributes(shader, vertices, states);
 	}
 
-	void Renderer::setupShaderUniforms(Shader* shader, const DrawStates & states)
+	void Renderer::setupShaderUniforms(Shader* shader, const DrawStates& states)
 	{
 		shader->setMatrix3("transform", states.transform.getMatrix());
 		if (states.texture) {

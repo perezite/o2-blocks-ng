@@ -4,8 +4,6 @@
 
 namespace sb 
 {
-	typedef float(*TweenFunction)(float);
-
 	namespace tweenFunctions
 	{
 		inline float linear(float x)
@@ -33,4 +31,6 @@ namespace sb
 			return n1 * (x -= 2.625f / d1) * x + 0.984375f;
 		}
 	}
+	
+	typedef float(*TweenFunction)(float);
 }

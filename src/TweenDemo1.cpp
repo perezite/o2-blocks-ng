@@ -9,6 +9,7 @@ using namespace sb;
 
 namespace tweenDemo1
 {
+    using namespace v2;
     using namespace tweenFunctions;
     
     void demo0()
@@ -19,7 +20,7 @@ namespace tweenDemo1
 
         quad.setScale(40, 40);
         quad.setPosition(-100);
-        TweenV2<float> tween(quad.getPosition().x, 100, 2, smoothstep);
+        Tween<float> tween(quad.getPosition().x, 100, 2, smoothstep);
 
         while (window.isOpen())
         {
@@ -49,12 +50,12 @@ namespace tweenDemo1
         }
     }
 
-    void update1(Window& window, Quad& quad, TweenV2<Vector2f>& tween)
+    void update1(Window& window, Quad& quad, Tween<Vector2f>& tween)
     {
         if (Input::isTouchGoingDown(1)) {
             Vector2f touchPosition = Input::getTouchPosition(window);
             float duration = random(1, 3);
-            tween = TweenV2<Vector2f>(quad.getPosition(), touchPosition, duration, getRandomTweenFunction1());
+            tween = Tween<Vector2f>(quad.getPosition(), touchPosition, duration, getRandomTweenFunction1());
         }
     }
 
@@ -66,7 +67,7 @@ namespace tweenDemo1
         quad.setScale(40, 40);
         quad.setPosition(-100);
 
-        TweenV2<Vector2f> tween(quad.getPosition(), quad.getPosition());
+        Tween2f tween(quad.getPosition(), quad.getPosition());
 
         while (window.isOpen())
         {
