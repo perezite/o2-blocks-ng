@@ -67,6 +67,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Transformable.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Triangle.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Tween.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TweenChain.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TweenDemo1.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TweenFunctions.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TweenV2.h" />

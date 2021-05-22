@@ -81,6 +81,31 @@ namespace tweenDemo1
         }
     }
 
+    void demo10()
+    {
+        Window window(400, 400);
+        Quad quad;
+
+        quad.setScale(40, 40);
+        quad.setPosition(-100);
+
+        // Tween2f tween(quad.getPosition(), quad.getPosition());
+
+        // TweenChain2f tween(quad.getPosition())
+        //      .to(Vector2f(100, -50), 2, smoothstep)
+        //      .to(Vector2f(-50, 100), 3, bounceOut);
+
+        while (window.isOpen())
+        {
+            Input::update();
+            window.update();
+            window.clear(Color(1, 1, 1, 1));
+            //quad.setPosition(tween.getValue());
+            window.draw(quad);
+            window.display();
+        }
+    }
+
     void run()
     {
         demo1();

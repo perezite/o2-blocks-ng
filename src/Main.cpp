@@ -8,8 +8,8 @@
 // - Animation concept
 // - Define tween interface including chaining
 // - Tween draft (in Demos), must have:
-//   - tweening functions
-//   - lifetime
+//   - tweening functions OK
+//   - duration OK
 //   - chaining
 //   - replace existing tweens by new ones. also make compatible with particle systems
 
