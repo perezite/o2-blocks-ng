@@ -31,6 +31,8 @@ namespace sb
 				_tweenFunction(tweenFunction), _isStarted(true)
 			{ }
 
+			inline const T& getTargetValue() const { return _targetValue; }
+
 			inline float getProgress()
 			{
 				if (!_isStarted)

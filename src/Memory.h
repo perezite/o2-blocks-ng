@@ -46,7 +46,7 @@ namespace sb
 		for (size_t i = 0; i < vec.size(); i++)
 			delete vec[i];
 	}
-
+	
 	template <class T>
 	inline void safeDelete(T* pointer) {
 		if (pointer)
@@ -67,5 +67,11 @@ namespace sb
 	template <class T, class Compare>
 	const typename T::const_iterator max_element(const T& t, Compare& compare) {
 		return std::max_element(t.begin(), t.end(), compare);
+	}
+
+	template <class TContainer>
+	const typename TContainer::const_iterator last(const TContainer& container)
+	{
+		return --container.end();
 	}
 }
