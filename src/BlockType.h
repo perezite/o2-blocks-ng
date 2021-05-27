@@ -23,12 +23,9 @@ namespace blocks
                 return sb::Vector2i(0, 0);
             else if (type == BlockType::VerySimple)
                 return sb::Vector2i(0, 0);
-            else
-            {
-                SB_ERROR("Invalid block type " << (int)type);
-                return sb::Vector2i();
-            }
-
+            
+            SB_ERROR("Invalid block type " << (int)type);
+            return sb::Vector2i();
         }
     };
 }

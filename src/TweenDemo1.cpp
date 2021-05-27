@@ -112,6 +112,7 @@ namespace tweenDemo1
             // }
             // 
             // quad.setPosition(tweener.getValue());
+
             window.draw(quad);
             window.display();
         }
@@ -144,7 +145,6 @@ namespace tweenDemo1
         //              .to(Vector2f(-100, -50), 2, smoothstep);
         // Tweener2f tweener2(tween);
 
-
         // Tween2f tween2 = Tween2f(quad3.getPosition())
         //              .to(Vector2f(50, 0), 4, linear);
         // Stopwatch watch;
@@ -164,9 +164,9 @@ namespace tweenDemo1
 
     void run()
     {
-        demo200();
+        //demo200();
         //demo100();
-        //demo1();
+        demo1();
         //demo0();
     }
 }
