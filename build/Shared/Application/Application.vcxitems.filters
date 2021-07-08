@@ -25,6 +25,9 @@
     <Filter Include="Demos\03_Tween">
       <UniqueIdentifier>{8bd9f6b6-21f8-44f3-8c3d-57997aaa9b31}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Development">
+      <UniqueIdentifier>{7b6d8d41-e289-433b-9aed-2378e1937806}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Color.h">
@@ -198,14 +201,14 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TweenDemo1.h">
       <Filter>Demos\03_Tween</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TweenFunctions.h">
-      <Filter>_Orbis2D\Headers</Filter>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TweenDev.h">
+      <Filter>Development</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TweenV2.h">
-      <Filter>_Orbis2D\Headers</Filter>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TweenChainDev.h">
+      <Filter>Development</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TweenChain.h">
-      <Filter>_Orbis2D\Headers</Filter>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TweenFunctionsDev.h">
+      <Filter>Development</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
