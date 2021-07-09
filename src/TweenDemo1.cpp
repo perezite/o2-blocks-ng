@@ -82,45 +82,48 @@ namespace tweenDemo1
 
     void demo100()
     {
-        // using namespace v3
-
         Window window(400, 400);
         Quad quad;
         Quad quad2;
         Quad quad3;
 
-        quad.setScale(40, 40);
-        quad.setPosition(-100);
 
-        quad2.setScale(40, 40);
-        quad2.setPosition(100);
+        quad.setScale(40);
+        quad.setPosition(-50);
 
-        quad3.setScale(40, 40);
-        quad3.setPosition(-50, 0);
+        quad3.setScale(30);
+        quad3.setPosition(-50, 50);
 
+        quad2.setScale(20);
+        quad2.setPosition(50, -50);
+
+        v2::Tween2f tween = v2::Tween2f(quad.getPosition())
+            .to(Vector2f(50, -50), 1, linear)
+            .to(Vector2f(50), 3, smoothstep);
+        Stopwatch watch;
+
+        // 
         // Tween2f tween = Tween2f(quad2.getPosition())
         //              .to(Vector2f(-50, 100, 1, bounceOut))
         //              .to(Vector2f(-100, -50), 2, smoothstep);
-        // Tweener2f tweener2(tween);
+        // Tweener2f tweener(tween);
         // 
-        // Tweener2f tweener = Tweener2f(quad.getPosition())
+        // Tweener2f tweener2 = Tweener2f(quad.getPosition())
         //              .to(Vector2f(50, 100), 2, smoothstep)
         //              .to(Vector2f(50, -100), 1, bounceOut);
 
-
-        // Tween2f tween2 = Tween2f(quad3.getPosition())
-        //              .to(Vector2f(50, 0), 4, linear);
-        // Stopwatch watch;
 
         while (window.isOpen())
         {
             Input::update();
             window.update();
             window.clear(Color(1, 1, 1, 1));
-            //quad.setPosition(tweener.getValue());
-            //quad2.setPosition(tweener2.getValue());
-            //quad3.setPosition(tween2.getValue(watch.getElapsedSeconds()));
+            quad.setPosition(tween.getValue(watch.getElapsedSeconds()));
+            //quad2.setPosition(tweener.getValue());
+            //quad3.setPosition(tweener2.getValue());
             window.draw(quad);
+            window.draw(quad2);
+            window.draw(quad3);
             window.display();
         }
     }
