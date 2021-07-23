@@ -26,9 +26,9 @@ namespace sb
 			bool _isStarted;
 
 		public:
-			Tween(const T& startValue, const T& targetValue,
+			Tween(const T& startValue, const T& endValue,
 				float duration = 1, TweenFunction tweenFunction = tweenFunctions::linear)
-				: _startValue(startValue), _targetValue(targetValue), _duration(duration),
+				: _startValue(startValue), _targetValue(endValue), _duration(duration),
 				_tweenFunction(tweenFunction), _isStarted(true)
 			{ }
 
@@ -63,63 +63,61 @@ namespace sb
 	namespace v2
 	{
 		namespace my {
-			template <class T> struct Waypoint {
-				T targetValue;
+			template <class T> struct Transition {
+				T endValue;
 				float duration;
 				v1::TweenFunction tweenFunction;
-				Waypoint(const T& targetValue_, float duration_, v1::TweenFunction tweenFunction_) : 
-					targetValue(targetValue_), duration(duration_), tweenFunction(tweenFunction_) { }
+				Transition(const T& targetValue_, float duration_, v1::TweenFunction tweenFunction_) : 
+					endValue(targetValue_), duration(duration_), tweenFunction(tweenFunction_) { }
 			};
 		}
 
 		template <class T> class Tween
 		{
 			T _startValue;
-			std::vector<my::Waypoint<T>> _waypoints;
+			std::vector<my::Transition<T>> _transitions;
+
 		public:
-			Tween(const T& startValue)
-				: _startValue(startValue)
+			Tween(const T& startValue) : _startValue(startValue) 
 			{ }
 
-			Tween<T>& to(const T& targetValue, float duration, v1::TweenFunction tweenFunction) {
-				my::Waypoint<T> waypoint(targetValue, duration, tweenFunction);
-				_waypoints.push_back(waypoint);
+			Tween<T>& to(const T& endValue, float duration, v1::TweenFunction tweenFunction) {
+				my::Transition<T> transition(endValue, duration, tweenFunction);
+				_transitions.push_back(transition);
 				return *this;
 			}
 
-			size_t getCurrentWaypointIndex(float elapsedSeconds, float& elapsedSecondsInWaypoint) {
-				SB_ERROR_IF(elapsedSeconds < 0, "Argument must not be negative");
-				SB_ERROR_IF(_waypoints.empty(), "No waypoints");
+			inline T getValue(float secondsElapsed) {
+				float transitionStartSeconds = 0; float transitionEndSeconds;
 
-				float startSeconds = 0, endSeconds;
-				for (size_t i = 0; i < _waypoints.size(); i++) {
-					endSeconds = startSeconds + _waypoints[i].duration;
-					if (elapsedSeconds >= startSeconds && elapsedSeconds < endSeconds) {
-						elapsedSecondsInWaypoint = elapsedSeconds - startSeconds;
-						return i;
+				for (size_t i = 0; i < _transitions.size(); i++) {
+					transitionEndSeconds = transitionStartSeconds + _transitions[i].duration;
+					if (isInRange(secondsElapsed, transitionStartSeconds, transitionEndSeconds)) {
+						float secondsElapsedInTransition = secondsElapsed - transitionStartSeconds;
+						return getValue(i, secondsElapsedInTransition);
 					}
-					startSeconds = endSeconds;
+
+					transitionStartSeconds = transitionEndSeconds;
 				}
 
-				elapsedSecondsInWaypoint = last(_waypoints)->duration;
-				return _waypoints.size() - 1;
-			}
-			
-			inline float getProgress(my::Waypoint<T>& waypoint, float elapsedSecondsInWaypoint)
-			{
-				float progress = elapsedSecondsInWaypoint / waypoint.duration;
-				return clamp(progress, 0, 1);
+				return last(_transitions)->endValue;
 			}
 
-			inline T getValue(float elapsedSeconds)
-			{
-				float elapsedSecondsInWaypoint;
-				size_t currentWaypointIndex = getCurrentWaypointIndex(elapsedSeconds, elapsedSecondsInWaypoint);
-				my::Waypoint<T>& currentWaypoint = _waypoints[currentWaypointIndex];
-				float progress = getProgress(currentWaypoint, elapsedSecondsInWaypoint);
-				float tweenValue = currentWaypoint.tweenFunction(progress);
-				T& startValue = currentWaypointIndex == 0 ? _startValue : _waypoints[currentWaypointIndex - 1].targetValue;
-				return lerp(tweenValue, startValue, currentWaypoint.targetValue);
+			inline static bool isInRange(float current, float start, float end) {
+				return current >= start && current < end;
+			}
+
+			inline T getValue(size_t transitionIndex, float secondsElapsedInTransition) {
+				my::Transition<T>& transition = _transitions[transitionIndex];
+				float percentage = getPercentage(transition, secondsElapsedInTransition);
+				float progress = transition.tweenFunction(percentage);
+				T& startValue = transitionIndex == 0 ? _startValue : _transitions[transitionIndex - 1].endValue;
+				return lerp(progress, startValue, transition.endValue);
+			}
+
+			inline float getPercentage(my::Transition<T>& waypoint, float secondsElapsedInTransition) {
+				float percentage = secondsElapsedInTransition / waypoint.duration;
+				return clamp(percentage, 0, 1);
 			}
 		};
 

@@ -99,7 +99,7 @@ namespace tweenDemo1
 
         v2::Tween2f tween = v2::Tween2f(quad.getPosition())
             .to(Vector2f(50, -50), 1, linear)
-            .to(Vector2f(50), 3, smoothstep);
+            .to(50, 3, smoothstep);
         Stopwatch watch;
 
         // 
@@ -111,7 +111,6 @@ namespace tweenDemo1
         // Tweener2f tweener2 = Tweener2f(quad.getPosition())
         //              .to(Vector2f(50, 100), 2, smoothstep)
         //              .to(Vector2f(50, -100), 1, bounceOut);
-
 
         while (window.isOpen())
         {

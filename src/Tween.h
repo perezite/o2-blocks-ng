@@ -62,7 +62,7 @@ namespace sb
 			return easingCommand.easing(t, easingCommand.t0, easingCommand.t1, easingCommand.from, easingCommand.to);
 		}
 
-		inline T targetValue() const {
+		inline T endValue() const {
 			if (_easingCommands.empty())
 				return 0;
 

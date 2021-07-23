@@ -27,9 +27,9 @@ namespace sb
 				: _startValue(startValue)
 			{ }
 
-			inline TweenChain& to(const T& targetValue, float duration, TweenFunction tweenFunction)
+			inline TweenChain& to(const T& endValue, float duration, TweenFunction tweenFunction)
 			{
-				v1::Tween<T> tween(getPreviousTargetValue(), targetValue, duration, tweenFunction);
+				v1::Tween<T> tween(getPreviousTargetValue(), endValue, duration, tweenFunction);
 				_tweens.push_back(tween);
 				return *this;
 			}
