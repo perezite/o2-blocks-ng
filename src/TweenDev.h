@@ -88,26 +88,24 @@ namespace sb
 			}
 
 			inline T getValue(float secondsElapsed) {
-				float transitionStartSeconds = 0; float transitionEndSeconds;
+				float transitionStart = 0; float transitionEnd;
 
 				for (size_t i = 0; i < _transitions.size(); i++) {
-					transitionEndSeconds = transitionStartSeconds + _transitions[i].duration;
-					if (isInRange(secondsElapsed, transitionStartSeconds, transitionEndSeconds)) {
-						float secondsElapsedInTransition = secondsElapsed - transitionStartSeconds;
-						return getValue(i, secondsElapsedInTransition);
+					transitionEnd = transitionStart + _transitions[i].duration;
+					bool isInRange = secondsElapsed >= transitionStart && secondsElapsed < transitionEnd;
+					if (isInRange) {
+						float secondsInTransition = secondsElapsed - transitionStart;
+						return getValueInTransition(i, secondsInTransition);
 					}
 
-					transitionStartSeconds = transitionEndSeconds;
+					transitionStart = transitionEnd;
 				}
 
 				return last(_transitions)->endValue;
 			}
 
-			inline static bool isInRange(float current, float start, float end) {
-				return current >= start && current < end;
-			}
-
-			inline T getValue(size_t transitionIndex, float secondsElapsedInTransition) {
+		protected:
+			inline T getValueInTransition(size_t transitionIndex, float secondsElapsedInTransition) {
 				my::Transition<T>& transition = _transitions[transitionIndex];
 				float percentage = getPercentage(transition, secondsElapsedInTransition);
 				float progress = transition.tweenFunction(percentage);

@@ -88,8 +88,8 @@ namespace blocks
 
     void Board::update(Window& window)
     {
-        handleInput();
         _tetromino->update();
+        handleInput();
         _collisionLogic.update();
         handleCollisions();
     }
