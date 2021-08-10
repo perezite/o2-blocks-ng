@@ -210,6 +210,9 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TweenFunctionsDev.h">
       <Filter>Development</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TweenerDev.h">
+      <Filter>Development</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Window.cpp">

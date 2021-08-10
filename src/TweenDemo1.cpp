@@ -4,6 +4,7 @@
 #include "Quad.h"
 #include "TweenDev.h"
 #include "TweenChainDev.h"
+#include "TweenerDev.h"
 
 using namespace std;
 using namespace sb;
@@ -85,29 +86,27 @@ namespace tweenDemo1
         Window window(400, 400);
         Quad quad;
         Quad quad2;
-        Quad quad3;
+        //Quad quad3;
 
-
-        quad.setScale(40);
+        quad.setScale(10);
         quad.setPosition(-50);
 
-        quad3.setScale(30);
-        quad3.setPosition(-50, 50);
-
         quad2.setScale(20);
-        quad2.setPosition(50, -50);
+        quad2.setPosition(-100);
+
+        //quad3.setScale(30);
+        //quad3.setPosition(-50, 50);
 
         v2::Tween2f tween = v2::Tween2f(quad.getPosition())
             .to(Vector2f(50, -50), 1, linear)
             .to(50, 3, smoothstep);
         Stopwatch watch;
 
-        // 
-        // Tween2f tween = Tween2f(quad2.getPosition())
-        //              .to(Vector2f(-50, 100, 1, bounceOut))
-        //              .to(Vector2f(-100, -50), 2, smoothstep);
-        // Tweener2f tweener(tween);
-        // 
+        v2::Tween2f tween2 = v2::Tween2f(quad2.getPosition())
+                    .to(Vector2f(100, -100), 1, smoothstep)
+                    .to(100, 3, bounceOut);
+        v1::Tweener2f tweener(tween2);
+
         // Tweener2f tweener2 = Tweener2f(quad.getPosition())
         //              .to(Vector2f(50, 100), 2, smoothstep)
         //              .to(Vector2f(50, -100), 1, bounceOut);
@@ -118,11 +117,11 @@ namespace tweenDemo1
             window.update();
             window.clear(Color(1, 1, 1, 1));
             quad.setPosition(tween.getValue(watch.getElapsedSeconds()));
-            //quad2.setPosition(tweener.getValue());
+            quad2.setPosition(tweener.getValue());
             //quad3.setPosition(tweener2.getValue());
             window.draw(quad);
             window.draw(quad2);
-            window.draw(quad3);
+            //window.draw(quad3);
             window.display();
         }
     }

@@ -92,8 +92,8 @@ namespace sb
 
 				for (size_t i = 0; i < _transitions.size(); i++) {
 					transitionEnd = transitionStart + _transitions[i].duration;
-					bool isInRange = secondsElapsed >= transitionStart && secondsElapsed < transitionEnd;
-					if (isInRange) {
+					bool isInTransition = secondsElapsed >= transitionStart && secondsElapsed < transitionEnd;
+					if (isInTransition) {
 						float secondsInTransition = secondsElapsed - transitionStart;
 						return getValueInTransition(i, secondsInTransition);
 					}
@@ -107,14 +107,14 @@ namespace sb
 		protected:
 			inline T getValueInTransition(size_t transitionIndex, float secondsElapsedInTransition) {
 				my::Transition<T>& transition = _transitions[transitionIndex];
+				T& startValue = transitionIndex == 0 ? _startValue : _transitions[transitionIndex - 1].endValue;
 				float percentage = getPercentage(transition, secondsElapsedInTransition);
 				float progress = transition.tweenFunction(percentage);
-				T& startValue = transitionIndex == 0 ? _startValue : _transitions[transitionIndex - 1].endValue;
 				return lerp(progress, startValue, transition.endValue);
 			}
 
-			inline float getPercentage(my::Transition<T>& waypoint, float secondsElapsedInTransition) {
-				float percentage = secondsElapsedInTransition / waypoint.duration;
+			inline float getPercentage(my::Transition<T>& transition, float secondsElapsedInTransition) {
+				float percentage = secondsElapsedInTransition / transition.duration;
 				return clamp(percentage, 0, 1);
 			}
 		};
