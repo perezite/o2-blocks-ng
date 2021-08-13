@@ -118,13 +118,13 @@ namespace tweenDemo1
             Stopwatch watch;
 
             v2::Tween2f tween2 = v2::Tween2f(quad2.getPosition())
-                .to(Vector2f(100, -100), 1, smoothstep)
-                .to(100, 3, bounceOut);
+                .to(Vector2f(100, -100), 2, smoothstep)
+                .to(100, 2, bounceOut);
             v1::Tweener2f tweener(tween2);
 
-            // Tweener2f tweener2 = Tweener2f(quad.getPosition())
-            //              .to(Vector2f(50, 100), 2, smoothstep)
-            //              .to(Vector2f(50, -100), 1, bounceOut);
+            v1::Tweener2f tweener2 = v1::Tweener2f(quad3.getPosition())
+                          .to(Vector2f(150, -150), 3, smoothstep)
+                          .to(150, 1, bounceOut);
 
             while (window.isOpen())
             {
@@ -132,10 +132,11 @@ namespace tweenDemo1
                 Input::update();
                 window.update();
                 tweener.update(ds);
+                tweener2.update(ds);
                 window.clear(Color(1, 1, 1, 1));
                 quad.setPosition(tween.getValue(watch.getElapsedSeconds()));
                 quad2.setPosition(tweener.getValue());
-                //quad3.setPosition(tweener2.getValue());
+                quad3.setPosition(tweener2.getValue());
                 window.draw(quad);
                 window.draw(quad2);
                 window.draw(quad3);
