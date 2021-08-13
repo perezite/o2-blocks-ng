@@ -5,13 +5,13 @@
 #include "TweenDemo1.h"
 
 // TODO: 
-// - Animation concept
-// - Define tween interface including chaining
+// - Define tween interface
 // - Tween draft (in Demos), must have:
 //   - tweening functions OK
 //   - duration OK
 //   - chaining
 //   - replace existing tweens by new ones. also make compatible with particle systems
+// - Automate draw() calls
 
 using namespace blocks;
 

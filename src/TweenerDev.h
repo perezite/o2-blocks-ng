@@ -10,14 +10,16 @@ namespace sb
 		template <class T>
 		class Tweener {
 			v2::Tween<T>& _tween;
-			Stopwatch _watch;
+			float _secondsElapsed;
 
 		public:
-			Tweener(v2::Tween<T>& tween) : _tween(tween)
+			Tweener(v2::Tween<T>& tween) : _tween(tween), _secondsElapsed(0)
 			{ }
 
+			inline void update(float ds) { _secondsElapsed += ds; }
+
 			inline T getValue() {
-				return _tween.getValue(_watch.getElapsedSeconds());
+				return _tween.getValue(_secondsElapsed);
 			}
 		};
 
