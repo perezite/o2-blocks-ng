@@ -165,6 +165,7 @@ namespace tweenDemo1
             ParticleSystem emitter(1024);
             
             emitterTex.loadFromAsset("Textures/LightGreenPropulsion.png");
+            float halfAngle = 35;
             emitter.setScale(100);
             emitter.setTexture(emitterTex);
             emitter.setParticleLifetimeRange(Vector2f(1, 1));
@@ -173,10 +174,10 @@ namespace tweenDemo1
             emitter.setParticleColor(Color(1, 1, 1, 0.3f));
             emitter.setEmissionRatePerSecond(100);
             emitter.setParticleInertia(0.5f);
+            emitter.setEmissionShape(Disk(0, 0.6f, (270 - halfAngle) * ToRadians, (270 + halfAngle) * ToRadians));
             emitter.setParticleColorChannelOverLifetime(3, Tweenf().linear(1, 0.3f, 1));
             emitter.setParticleScaleOverLifetime(Tweenf().bounceOut(0, 1, 0.1f).quadInOut(1, 0.3f, 0.9f));
-            float halfAngle = 35;
-            emitter.setEmissionShape(Disk(0, 0.6f, (270 - halfAngle) * ToRadians, (270 + halfAngle) * ToRadians));
+            // emitter.setParticleScaleOverLifetime(v2::Tweenf(0).to(1, 0.1f, bounceOut).to(0.3f, 0.9f, quadInOut));
 
             while (window.isOpen())
             {
