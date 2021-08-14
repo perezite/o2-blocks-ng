@@ -2,9 +2,11 @@
 #include "Window.h"
 #include "Input.h"
 #include "Quad.h"
+#include "Tween.h"
 #include "TweenDev.h"
 #include "TweenChainDev.h"
 #include "TweenerDev.h"
+#include "ParticleSystem.h"
 
 using namespace std;
 using namespace sb;
@@ -12,7 +14,7 @@ using namespace sb;
 namespace tweenDemo1
 {
     using namespace v1::tweenFunctions;
-    
+
     namespace d0 {
         void demo()
         {
@@ -145,11 +147,55 @@ namespace tweenDemo1
         }
     }
 
+    namespace my {
+        float getDeltaSeconds() {
+            static Stopwatch watch;
+            static float lastSeconds = watch.getElapsedSeconds();
+            float currentSeconds = watch.getElapsedSeconds();
+            float deltaSeconds = currentSeconds - lastSeconds;
+            lastSeconds = currentSeconds;
+            return deltaSeconds;
+        }
+    }
+
+    namespace d200 {
+        void demo() {
+            Window window(400, 400);
+            Texture emitterTex;
+            ParticleSystem emitter(1024);
+            
+            emitterTex.loadFromAsset("Textures/LightGreenPropulsion.png");
+            emitter.setScale(100);
+            emitter.setTexture(emitterTex);
+            emitter.setParticleLifetimeRange(Vector2f(1, 1));
+            emitter.setParticleSpeedRange(Vector2f(1, 1));
+            emitter.setParticleSizeRange(0.8f * Vector2f(0.175f, 0.75f));
+            emitter.setParticleColor(Color(1, 1, 1, 0.3f));
+            emitter.setEmissionRatePerSecond(100);
+            emitter.setParticleInertia(0.5f);
+            emitter.setParticleColorChannelOverLifetime(3, Tweenf().linear(1, 0.3f, 1));
+            emitter.setParticleScaleOverLifetime(Tweenf().bounceOut(0, 1, 0.1f).quadInOut(1, 0.3f, 0.9f));
+            float halfAngle = 35;
+            emitter.setEmissionShape(Disk(0, 0.6f, (270 - halfAngle) * ToRadians, (270 + halfAngle) * ToRadians));
+
+            while (window.isOpen())
+            {
+                float ds = my::getDeltaSeconds();
+                Input::update();
+                window.update();
+                emitter.update(ds);
+                window.clear(Color(1, 1, 1, 1));
+                window.draw(emitter);
+                window.display();
+            }
+        }
+    }
 
 
     void run()
     {
-        d100::demo();
+        d200::demo();
+        //d100::demo();
         //demo1();
         //demo0();
     }
