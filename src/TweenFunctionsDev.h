@@ -36,6 +36,10 @@ namespace sb
 				x -= 2.625f / d1;
 				return n1 * x * x + 0.984375f;
 			}
+
+			inline float quadInOut(float x) {
+				return x < 0.5 ? 2 * x * x : 1 - pow(-2 * x + 2, 2) / 2;
+			}
 		}
 	
 		typedef float(*TweenFunction)(float);

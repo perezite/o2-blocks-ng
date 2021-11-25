@@ -7,9 +7,6 @@
 // TODO:
 // - Define tween interface
 // - Tween draft (in Demos), must have:
-//   - tweening functions OK
-//   - duration OK
-//   - chaining OK
 //   - replace existing tweens by new ones. also make compatible with particle systems
 // - Automate draw() calls
 

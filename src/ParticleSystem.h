@@ -7,6 +7,7 @@
 #include "Mesh.h"
 #include "Texture.h"
 #include "Tween.h"
+#include "TweenDev.h"
 #include "Shape.h"
 #include "Disk.h"
 #include "Math.h"
@@ -115,7 +116,7 @@ namespace sb
 			_particleDrag(0), _angularParticleDrag(0), _particleIntertia(1), _particleLifetimeRange(1, 1),
 			_particleSizeRange(0.1f, 0.1f), _particleRotationRange(0, 0), _particleSpeedRange(1, 1),
 			_particleVertexColors(4, Color(1, 1, 1, 1)), _hasParticleColorChannelsOverLifetime(4, false), 
-			_particleColorChannelsOverLifetime(4), _hasParticleScaleOverLifetime(false), 
+			_particleColorChannelsOverLifetime(4), _hasParticleScaleTween(false), _particleScaleTween(0),
 			_emissionType(EmissionType::Concentric), _emissionDirection(1, 0), _state(State::Alive)
 		{ }
 
@@ -168,9 +169,9 @@ namespace sb
 
 		void setParticleColor(const Color& color);
 
-		void setParticleColorChannelOverLifetime(std::size_t channelIndex, const Tweenf& particleColorChannelOverLifetime);
+		void setParticleColorChannelTween(std::size_t channelIndex, const Tweenf& particleColorChannelTween);
 
-		void setParticleScaleOverLifetime(const Tweenf& particleScaleOverLifetime);
+		void setParticleScaleTween(const v2::Tweenf& particleScaleTween);
 
 		void setLifetime(float lifetime);
 
@@ -275,8 +276,8 @@ namespace sb
 		std::vector<Color> _particleVertexColors;
 		std::vector<bool> _hasParticleColorChannelsOverLifetime;
 		std::vector<Tweenf> _particleColorChannelsOverLifetime;
-		bool _hasParticleScaleOverLifetime;
-		Tweenf _particleScaleOverLifetime;
+		bool _hasParticleScaleTween;
+		v2::Tweenf _particleScaleTween;
 		Emission _emission;
 		EmissionType _emissionType;
 		sb::Vector2f _emissionDirection;

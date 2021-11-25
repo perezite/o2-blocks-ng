@@ -161,6 +161,7 @@ namespace tweenDemo1
     namespace d200 {
         void demo() {
             Window window(400, 400);
+            window.setFramerateLimit(100);
             Texture emitterTex;
             ParticleSystem emitter(1024);
             
@@ -175,9 +176,8 @@ namespace tweenDemo1
             emitter.setEmissionRatePerSecond(100);
             emitter.setParticleInertia(0.5f);
             emitter.setEmissionShape(Disk(0, 0.6f, (270 - halfAngle) * ToRadians, (270 + halfAngle) * ToRadians));
-            emitter.setParticleColorChannelOverLifetime(3, Tweenf().linear(1, 0.3f, 1));
-            emitter.setParticleScaleOverLifetime(Tweenf().bounceOut(0, 1, 0.1f).quadInOut(1, 0.3f, 0.9f));
-            // emitter.setParticleScaleOverLifetime(v2::Tweenf(0).to(1, 0.1f, bounceOut).to(0.3f, 0.9f, quadInOut));
+            emitter.setParticleColorChannelTween(3, Tweenf().linear(1, 0.3f, 1));
+            emitter.setParticleScaleTween(v2::Tweenf(0).to(1, 0.1f, bounceOut).to(0.3f, 0.9f, quadInOut));
 
             while (window.isOpen())
             {
