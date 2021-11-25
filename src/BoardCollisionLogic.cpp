@@ -12,7 +12,7 @@ namespace blocks
     {
         return _parent.getTetromino();
     }
-
+      
     bool BoardCollisionLogic::tetrominoIsOutsideBounds()
     {
         vector<Vector2i> positions; getTetromino().getTransformedSquarePositions(positions);

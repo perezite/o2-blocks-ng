@@ -20,13 +20,11 @@ namespace sceneDemo1
         Texture greenBlock;
         Texture yellowBlock;
 
-
         Assets()
-            :   greenBlock("Textures/GreenBlock.png"),
-                yellowBlock("Textures/YellowBlock.png")
+            : greenBlock("Textures/GreenBlock.png"),
+            yellowBlock("Textures/YellowBlock.png")
 
         { }
-
     };
 
     class MyEntity1 : public Drawable, public Transformable
@@ -69,14 +67,14 @@ namespace sceneDemo1
         template <class T>
         inline T& addDrawable(T* entity) {
             _drawables.push_back(entity);
-            return *entity; 
+            return *entity;
         }
     public:
         virtual ~Scene2() {
             deleteAll(_drawables);
         }
 
-        template <class T, class Arg1> 
+        template <class T, class Arg1>
         inline T& createDrawable(Arg1& arg1) { return addDrawable<T>(new T(arg1)); }
 
         virtual void draw(DrawTarget& target, DrawStates states = DrawStates::getDefault()) {
@@ -106,10 +104,10 @@ namespace sceneDemo1
 
     template <class T>
     class Entity3 : public T {
-    public: 
+    public:
         Entity3() { }
 
-        template <class Arg1> 
+        template <class Arg1>
         Entity3(Arg1& arg1) : T(arg1) { }
 
         template <class Arg1>
@@ -121,7 +119,7 @@ namespace sceneDemo1
     };
 
     class MyEntity3 : public Entity3<Sprite> {
-    public: 
+    public:
         MyEntity3() { }
 
         MyEntity3(Texture& tex)
@@ -202,7 +200,7 @@ namespace sceneDemo1
     class Entity5 : public Drawable, public Transformable {
     public:
         virtual void drawSelf(DrawTarget& target, DrawStates states) = 0;
-        
+
         virtual void draw(DrawTarget& target, DrawStates states) {
             states.transform *= getTransform();
             drawSelf(target, states);
@@ -215,7 +213,7 @@ namespace sceneDemo1
         Sprite _sprite;
     public:
         SpriteEntity5(Texture& tex) : _sprite(tex) { }
-        
+
         virtual void drawSelf(DrawTarget& target, DrawStates states) {
             target.draw(_sprite, states);
         }
@@ -256,7 +254,7 @@ namespace sceneDemo1
         Window window;
         Assets assets;
         Scene5 scene;
-        
+
         window.setFramerateLimit(65);
         SpriteEntity5& entity = scene.create<SpriteEntity5>(assets.greenBlock);
         entity.setScale(100);
@@ -271,7 +269,7 @@ namespace sceneDemo1
         }
     }
 
-    // https://stackoverflow.com/questions/2631585/c-how-to-require-that-one-template-type-is-derived-from-the-other  
+    // https://stackoverflow.com/questions/2631585/c-how-to-require-that-one-template-type-is-derived-from-the-other
     template <typename B, typename D>
     struct is_base_of6 // check if B is a base of D
     {
@@ -279,13 +277,13 @@ namespace sceneDemo1
         typedef char no[2];
 
 #ifdef __GNUC__
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wreturn-type"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
 #endif
         static yes& test(B*) { }
         static no& test(...) { }
 #ifdef __GNUC__
-    #pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
 #endif
 
         static D* get(void) { };
@@ -530,7 +528,7 @@ namespace sceneDemo1
         virtual ~Scene9() {
             deleteAll(_entities);
         }
-        
+
         template <class TEntity, class Arg1>
         inline TEntity& create(Arg1& arg1) {
             return add(new TEntity(arg1));
@@ -598,7 +596,7 @@ namespace sceneDemo1
 
     //template <class SomeType, template <class> class OtherType> class NestedTemplateClass
     //{
-    //   
+    //
     //};
 
     void demo10() {
@@ -608,11 +606,9 @@ namespace sceneDemo1
 
         create10<Entity9>();
 
-
         // func2<Sprite, Entity9<Sprite>>();
 
         //test<Entity9<Sprite>>();
-
 
         // Assets assets;
         // Scene10 scene;
@@ -634,12 +630,10 @@ namespace sceneDemo1
     };
 
     class BaseEntity11 : public Creatable11<BaseEntity11> {
-
     };
 
     template <class TDrawable>
     class Entity11 : public BaseEntity11 {
-
     };
 
     void demo11() {
@@ -653,7 +647,7 @@ namespace sceneDemo1
 
     void demo12() {
         Assets assets;
-       /* SpriteEntity9& entity = */create12<SpriteEntity9>(assets.yellowBlock);
+        /* SpriteEntity9& entity = */create12<SpriteEntity9>(assets.yellowBlock);
         Sprite* sprite = new Sprite(assets.greenBlock);
         /*Entity9<Sprite>& spriteAsEntity = */create12<Entity9<Sprite>>(sprite);
     }
@@ -669,7 +663,6 @@ namespace sceneDemo1
 
         Arg13(const TVal& val) : _val(val), _valRef(_val), _isRef(false)
         {
-
         }
 
         TVal& get() { return _isRef ? _valRef : _val; }
@@ -705,23 +698,19 @@ namespace sceneDemo1
 
     template <class T>
     void testOne13(Arg13<T> arg) {
-
     }
 
     template <class T>
     void testTwo13(T arg) {
-
     }
 
     template <class T>
     void testThree(IntArg<T> arg) {
-
     }
 
     class MyClass {
-    public: 
+    public:
         MyClass(int val) {
-
         }
     };
 
@@ -852,7 +841,7 @@ namespace sceneDemo1
 
     class FirstClass15 {
     public:
-        FirstClass15(int val) { 
+        FirstClass15(int val) {
             cout << val << endl;
         }
     };
@@ -952,7 +941,6 @@ namespace sceneDemo1
         cin.get();
     }
 
-
     template <class TArg1>
     ArgList15<TArg1> args16(const TArg1& arg1) {
         return ArgList15<TArg1>(Arg15<TArg1>(arg1));
@@ -975,7 +963,7 @@ namespace sceneDemo1
 
         cin.get();
     }
-   
+
     class Class17 {
     public:
         Class17() {
@@ -984,7 +972,7 @@ namespace sceneDemo1
 
         Class17(const Class17& other) {
             cout << "copied" << endl;
-         }
+        }
     };
 
     template <class T>
@@ -1020,21 +1008,21 @@ namespace sceneDemo1
 
     class Class19a {
     public:
-        Class19a(int val) { 
+        Class19a(int val) {
             cout << val << endl;
         }
     };
 
     class Class19b {
     public:
-        Class19b(int& val) { 
+        Class19b(int& val) {
             cout << val << endl;
         }
     };
 
     class Class19c {
     public:
-        Class19c(const int& val) { 
+        Class19c(const int& val) {
             cout << val << endl;
         }
     };
@@ -1071,7 +1059,7 @@ namespace sceneDemo1
 
     class Sprite20a {
     public:
-        Sprite20a(Texture20 texture) { 
+        Sprite20a(Texture20 texture) {
             cout << "Sprite20a created with " << texture.getName() << endl;
         }
     };
@@ -1145,10 +1133,10 @@ namespace sceneDemo1
             delete _drawable;
         }
 
-        DrawableEntity21(TDrawable* ownedDrawable) : _drawable(ownedDrawable) 
+        DrawableEntity21(TDrawable* ownedDrawable) : _drawable(ownedDrawable)
         { }
 
-        virtual void drawSelf(DrawTarget& target, DrawStates drawStates) { 
+        virtual void drawSelf(DrawTarget& target, DrawStates drawStates) {
             _drawable->draw(target, drawStates);
         }
 
@@ -1264,7 +1252,7 @@ namespace sceneDemo1
             states.transform *= getTransform();
             drawSelf(target, states);
 
-            for (size_t i = 0; i < getChildren().size(); i++) 
+            for (size_t i = 0; i < getChildren().size(); i++)
                 getChildren()[i]->draw(target, states);
         }
 
@@ -1296,7 +1284,7 @@ namespace sceneDemo1
 
         void drawSelf(DrawTarget& target, DrawStates states = DrawStates::getDefault()) {
             Vector2f globalPosition = getGlobalPosition(states.transform);
-            cout << "MyEntity22: " << " depth: " << _depth  << " position: " << globalPosition.x << " " << globalPosition.y << endl;
+            cout << "MyEntity22: " << " depth: " << _depth << " position: " << globalPosition.x << " " << globalPosition.y << endl;
         }
     };
 
@@ -1327,7 +1315,7 @@ namespace sceneDemo1
 
         template <class TElem, bool isEntity> struct adder { };
 
-        template <class TElem> struct adder <TElem, true> { 
+        template <class TElem> struct adder <TElem, true> {
             static TElem& add(Node23& that, TElem* elem) {
                 that._children.push_back(elem);
                 return *elem;
@@ -1354,7 +1342,7 @@ namespace sceneDemo1
             deleteAll(_children);
         }
 
-        Node23() : _parent(NULL) { 
+        Node23() : _parent(NULL) {
         }
 
         inline Entity23& getParent() { return (Entity23&)(*_parent); }
@@ -1464,7 +1452,7 @@ namespace sceneDemo1
         }
     };
 
-    class MyEntity23 : public Entity23 { 
+    class MyEntity23 : public Entity23 {
     public:
         virtual void drawSelf(DrawTarget& target, DrawStates drawStates) {
             cout << "MyEntity23::draw()" << endl;
@@ -1510,7 +1498,7 @@ namespace sceneDemo1
     public:
         Rotator100(float omega) : _omega(omega) { }
 
-        void updateSelf() { 
+        void updateSelf() {
             cout << getComponents().size() << endl;
             getParent().rotate(_omega);
         }
@@ -1534,7 +1522,7 @@ namespace sceneDemo1
 
         window.setFramerateLimit(65);
         window.getCamera().setCenter(200);
-        DrawableEntity23<Sprite>& sprite = 
+        DrawableEntity23<Sprite>& sprite =
             scene.createDrawableEntity<Sprite>(assets.yellowBlock);
         sprite.setScale(100);
         sprite.setPosition(200);

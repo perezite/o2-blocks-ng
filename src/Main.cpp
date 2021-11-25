@@ -4,7 +4,7 @@
 #include "SceneDemo1.h"
 #include "TweenDemo1.h"
 
-// TODO: 
+// TODO:
 // - Define tween interface
 // - Tween draft (in Demos), must have:
 //   - tweening functions OK
