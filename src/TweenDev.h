@@ -78,6 +78,9 @@ namespace sb
 			std::vector<my::Transition<T>> _transitions;
 
 		public:
+            Tween()
+            { }
+
 			Tween(const T& startValue) : _startValue(startValue) 
 			{ }
 

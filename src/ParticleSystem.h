@@ -115,8 +115,8 @@ namespace sb
 			_hasLifetime(false), _lifetime(1), _emissionRatePerSecond(1), _drag(0), _angularDrag(0),
 			_particleDrag(0), _angularParticleDrag(0), _particleIntertia(1), _particleLifetimeRange(1, 1),
 			_particleSizeRange(0.1f, 0.1f), _particleRotationRange(0, 0), _particleSpeedRange(1, 1),
-			_particleVertexColors(4, Color(1, 1, 1, 1)), _hasParticleColorChannelsOverLifetime(4, false), 
-			_particleColorChannelsOverLifetime(4), _hasParticleScaleTween(false), _particleScaleTween(0),
+			_particleVertexColors(4, Color(1, 1, 1, 1)), _hasParticleColorChannelTweens(4, false), 
+			_particleColorChannelTweens(4), _hasParticleScaleTween(false), _particleScaleTween(0),
 			_emissionType(EmissionType::Concentric), _emissionDirection(1, 0), _state(State::Alive)
 		{ }
 
@@ -169,7 +169,7 @@ namespace sb
 
 		void setParticleColor(const Color& color);
 
-		void setParticleColorChannelTween(std::size_t channelIndex, const Tweenf& particleColorChannelTween);
+		void setParticleColorChannelTween(std::size_t channelIndex, const v2::Tweenf& particleColorChannelTween);
 
 		void setParticleScaleTween(const v2::Tweenf& particleScaleTween);
 
@@ -274,8 +274,8 @@ namespace sb
 		Vector2f _particleSpeedRange;
 		Vector2f _particleAngularVelocityRange;
 		std::vector<Color> _particleVertexColors;
-		std::vector<bool> _hasParticleColorChannelsOverLifetime;
-		std::vector<Tweenf> _particleColorChannelsOverLifetime;
+		std::vector<bool> _hasParticleColorChannelTweens;
+		std::vector<v2::Tweenf> _particleColorChannelTweens;
 		bool _hasParticleScaleTween;
 		v2::Tweenf _particleScaleTween;
 		Emission _emission;

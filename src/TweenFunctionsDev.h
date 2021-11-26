@@ -38,7 +38,7 @@ namespace sb
 			}
 
 			inline float quadInOut(float x) {
-				return x < 0.5 ? 2 * x * x : 1 - pow(-2 * x + 2, 2) / 2;
+				return x < .5f ? 2 * x * x : 1 - (float)pow(-2 * x + 2, 2) / 2;
 			}
 		}
 	

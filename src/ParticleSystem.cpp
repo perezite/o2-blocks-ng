@@ -44,12 +44,11 @@ namespace sb
 		std::fill(_particleVertexColors.begin(), _particleVertexColors.end(), color);
 	}
 
-	void ParticleSystem::setParticleColorChannelTween(std::size_t channelIndex, const Tweenf& particleColorChannelOverLifetime) 
+	void ParticleSystem::setParticleColorChannelTween(std::size_t channelIndex, const v2::Tweenf& particsleColorChannelTween) 
 	{
 		SB_ERROR_IF(channelIndex > 4, "Color channel index out of range");
-		SB_ERROR_IF(particleColorChannelOverLifetime.getDuration() > 1, "Tween duration out of range");
-		_particleColorChannelsOverLifetime[channelIndex] = particleColorChannelOverLifetime;
-		_hasParticleColorChannelsOverLifetime[channelIndex] = true;
+		_particleColorChannelTweens[channelIndex] = particsleColorChannelTween;
+		_hasParticleColorChannelTweens[channelIndex] = true;
 	}
 
 	void ParticleSystem::setParticleScaleTween(const v2::Tweenf& particleScaleTween) {
@@ -297,8 +296,8 @@ namespace sb
 
 	void ParticleSystem::updateVertexColorChannel(std::size_t channelIndex, float& colorChannel, const float& startColorChannel, float t)
 	{
-		if (_hasParticleColorChannelsOverLifetime[channelIndex])
-			colorChannel = startColorChannel * _particleColorChannelsOverLifetime[channelIndex].value(t);
+		if (_hasParticleColorChannelTweens[channelIndex])
+			colorChannel = startColorChannel * _particleColorChannelTweens[channelIndex].getValue(t);
 	}
 
 	void ParticleSystem::updateVertexColor(Color& color, const Color& startColor, Particle& particle) 
