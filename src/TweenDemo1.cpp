@@ -2,7 +2,6 @@
 #include "Window.h"
 #include "Input.h"
 #include "Quad.h"
-#include "Tween.h"
 #include "TweenDev.h"
 #include "TweenChainDev.h"
 #include "TweenerDev.h"
@@ -176,7 +175,7 @@ namespace tweenDemo1
             emitter.setEmissionRatePerSecond(100);
             emitter.setParticleInertia(0.5f);
             emitter.setEmissionShape(Disk(0, 0.6f, (270 - halfAngle) * ToRadians, (270 + halfAngle) * ToRadians));
-            emitter.setParticleColorChannelTween(3, v2::Tweenf(1).to(.3f, 1, linear));
+            emitter.setParticleColorChannelTween(3, v2::Tweenf(1).to(.3f, 1, smoothstep));
             emitter.setParticleScaleTween(v2::Tweenf(0).to(1, 0.1f, bounceOut).to(0.3f, 0.9f, quadInOut));
 
             while (window.isOpen())

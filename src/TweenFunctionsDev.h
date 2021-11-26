@@ -5,6 +5,7 @@
 namespace sb 
 {
 	namespace v1 {
+		// source for easing functions: Can't really remember. Some stuff seems to come from easings.net
 		namespace tweenFunctions
 		{
 			inline float linear(float x)

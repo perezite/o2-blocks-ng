@@ -126,9 +126,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Image.h">
       <Filter>_Orbis2D\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Tween.h">
-      <Filter>_Orbis2D\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Easing.h">
       <Filter>_Orbis2D\Headers</Filter>
     </ClInclude>
