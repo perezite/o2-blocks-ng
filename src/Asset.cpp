@@ -81,6 +81,7 @@ namespace sb
 			// get executable file path
 			HMODULE hModule = GetModuleHandle(NULL);
 			SB_ERROR_IF(hModule == NULL, "GetModuleHandle() failed");
+			// TODO: https://cplusplus.com/reference/cstdlib/wcstombs/?kw=wcstombs
 			GetModuleFileName(hModule, filePath, (sizeof(filePath)));
 
 			// get file path as string

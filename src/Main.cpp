@@ -5,10 +5,8 @@
 #include "TweenDemo1.h"
 
 // TODO:
-// - Define tween interface
-// - Tween draft (in Demos), must have:
-//   - make compatible with particle systems
-//   - replace existing tweens by new ones
+// use https://cplusplus.com/reference/cstdlib/wcstombs/?kw=wcstombs in Asset.cpp to fix the conversion warning
+// create final tween implementation file with demo
 
 
 using namespace blocks;

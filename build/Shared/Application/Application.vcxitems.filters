@@ -210,6 +210,12 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TweenerDev.h">
       <Filter>Development</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\TweenFunctions.h">
+      <Filter>_Orbis2D\Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Tween.h">
+      <Filter>_Orbis2D\Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Window.cpp">

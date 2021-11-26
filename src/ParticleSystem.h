@@ -6,7 +6,7 @@
 #include "Vector2.h"
 #include "Mesh.h"
 #include "Texture.h"
-#include "TweenDev.h"
+#include "Tween.h"
 #include "Shape.h"
 #include "Disk.h"
 #include "Math.h"
@@ -168,9 +168,9 @@ namespace sb
 
 		void setParticleColor(const Color& color);
 
-		void setParticleColorChannelTween(std::size_t channelIndex, const v2::Tweenf& particleColorChannelTween);
+		void setParticleColorChannelTween(std::size_t channelIndex, const Tweenf& particleColorChannelTween);
 
-		void setParticleScaleTween(const v2::Tweenf& particleScaleTween);
+		void setParticleScaleTween(const Tweenf& particleScaleTween);
 
 		void setLifetime(float lifetime);
 
@@ -274,9 +274,9 @@ namespace sb
 		Vector2f _particleAngularVelocityRange;
 		std::vector<Color> _particleVertexColors;
 		std::vector<bool> _hasParticleColorChannelTweens;
-		std::vector<v2::Tweenf> _particleColorChannelTweens;
+		std::vector<Tweenf> _particleColorChannelTweens;
 		bool _hasParticleScaleTween;
-		v2::Tweenf _particleScaleTween;
+		Tweenf _particleScaleTween;
 		Emission _emission;
 		EmissionType _emissionType;
 		sb::Vector2f _emissionDirection;
