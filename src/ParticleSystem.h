@@ -135,13 +135,13 @@ namespace sb
 
 		inline void setParticleInertia(float intertia) { _particleIntertia = intertia; }
 
-		inline void setParticleLifetimeRange(const Vector2f& lifetimeRange) { _particleLifetimeRange = lifetimeRange; }
+		inline void setParticleLifetime(const Vector2f& lifetimeRange) { _particleLifetimeRange = lifetimeRange; }
 
-		inline void setParticleSizeRange(const Vector2f& sizeRange) { _particleSizeRange = sizeRange; }
+		inline void setParticleSize(const Vector2f& sizeRange) { _particleSizeRange = sizeRange; }
 
-		inline void setParticleRotationRange(const Vector2f& rotationRange) { _particleRotationRange = rotationRange; }
+		inline void setParticleRotation(const Vector2f& rotationRange) { _particleRotationRange = rotationRange; }
 
-		inline void setParticleSpeedRange(const Vector2f& speedRange) { _particleSpeedRange = speedRange; }
+		inline void setParticleSpeed(const Vector2f& speedRange) { _particleSpeedRange = speedRange; }
 
 		inline void setParticleAngularVelocityRange(const Vector2f& range) { _particleAngularVelocityRange = range; }
 
