@@ -6,104 +6,115 @@
 using namespace std;
 using namespace sb;
 
-namespace blocks 
+namespace blocks
 {
-    Tetromino& BoardCollisionLogic::getTetromino()
-    {
-        return _parent.getTetromino();
-    }
-      
-    bool BoardCollisionLogic::tetrominoIsOutsideBounds()
-    {
-        vector<Vector2i> positions; getTetromino().getTransformedSquarePositions(positions);
-        IntRect boardRect(0, 0, _parent.getSize().x, _parent.getSize().y);
+	Tetromino& BoardCollisionLogic::getTetromino()
+	{
+		return _parent.getTetromino();
+	}
 
-        for (size_t i = 0; i < positions.size(); i++)
-            if (!boardRect.contains(positions[i]))
-                return true;
+	bool BoardCollisionLogic::tetrominoIsOutsideBounds()
+	{
+		vector<Vector2i> positions; 
+		getTetromino().getTransformedSquarePositions(positions);
+		IntRect boardRect(0, 0, _parent.getSize().x, _parent.getSize().y);
 
-        return false;
-    }
+		for (size_t i = 0; i < positions.size(); i++)
+			if (!boardRect.contains(positions[i]))
+				return true;
 
-    bool BoardCollisionLogic::tetrominoCollidesWithBlock()
-    {
-        vector<Vector2i> blockPositions; _parent.getBlockPositions(blockPositions);
-        vector<Vector2i> tetrominoPositions; getTetromino().getTransformedSquarePositions(tetrominoPositions);
+		return false;
+	}
 
-        for (size_t i = 0; i < blockPositions.size(); i++)
-            for (size_t j = 0; j < tetrominoPositions.size(); j++)
-                if (blockPositions[i] == tetrominoPositions[j])
-                    return true;
+	bool BoardCollisionLogic::tetrominoCollidesWithBlock()
+	{
+		vector<Vector2i> blockPositions; 
+		vector<Vector2i> tetrominoPositions; 
+		_parent.getBlockPositions(blockPositions);
+		getTetromino().getTransformedSquarePositions(tetrominoPositions);
 
-        return false;
-    }
+		for (size_t i = 0; i < blockPositions.size(); i++)
+			for (size_t j = 0; j < tetrominoPositions.size(); j++)
+				if (blockPositions[i] == tetrominoPositions[j])
+					return true;
 
-    bool BoardCollisionLogic::resolveTetrominoCollisionStep()
-    {
-        float deltaAngle = getTetromino().getRotation() - _lastTetromino.getRotation();
-        int deltaAngleSteps = (int)round(deltaAngle * ToDegrees / 90);
-        Vector2i deltaPosition = toVector2i(getTetromino().getPosition() - _lastTetromino.getPosition());
-        bool canResolveCollision = deltaAngleSteps != 0 || deltaPosition != Vector2i(0);
+		return false;
+	}
 
-        if (canResolveCollision) {
-            if (deltaAngleSteps != 0)
-                getTetromino().rotate(deltaAngleSteps > 0 ? -90 * ToRadians : 90 * ToRadians);
+	bool BoardCollisionLogic::resolveTetrominoCollisionStep()
+	{
+		float deltaAngle = getTetromino().getRotation() - _lastTetromino.getRotation();
+		int deltaAngleSteps = (int)round(deltaAngle * ToDegrees / 90);
+		Vector2i deltaPosition = toVector2i(getTetromino().getPosition() - _lastTetromino.getPosition());
+		bool canResolveCollision = deltaAngleSteps != 0 || deltaPosition != Vector2i(0);
 
-            else if (deltaPosition.y < 0) {
-                getTetromino().translate(0, 1);
-                _isTetrominoDead = true;        // downwards collisions kill the tetromino
-            }
+		if (canResolveCollision) {
+			if (deltaAngleSteps != 0)
+				getTetromino().rotate(deltaAngleSteps > 0 ? -90 * ToRadians : 90 * ToRadians);
 
-            else if (deltaPosition.y > 0)
-                getTetromino().translate(0, -1);
-            
-            else if (deltaPosition.x != 0)
-                getTetromino().translate(deltaPosition.x > 0 ? Vector2f(-1, 0) : Vector2f(1, 0));
-        }
+			else if (deltaPosition.y < 0) {
+				getTetromino().translate(0, 1);
+				_isTetrominoDead = true;        // downwards collisions kill the tetromino
+			}
 
-        return canResolveCollision;
-    }
+			else if (deltaPosition.y > 0)
+				getTetromino().translate(0, -1);
 
-    void BoardCollisionLogic::resolveTetrominoCollisions()
-    {
-        while (hasTetrominoCollision()) {
-            bool collisionResolved = resolveTetrominoCollisionStep();
-            if (!collisionResolved) {
-                _isTetrominoStuck = true;
-                break;
-            }
-        }
-    }
+			else if (deltaPosition.x != 0)
+				getTetromino().translate(deltaPosition.x > 0 ? Vector2f(-1, 0) : Vector2f(1, 0));
+		}
 
-    void BoardCollisionLogic::updateTetrominoCollisions()
-    {
-        if (_mustResetTetrominoData) {
-            resetTetrominoData();
-            _mustResetTetrominoData = false;
-        }
+		return canResolveCollision;
+	}
 
-        resolveTetrominoCollisions();
+	void BoardCollisionLogic::resolveTetrominoCollisions()
+	{
+		while (hasTetrominoCollision()) {
+			bool collisionResolved = resolveTetrominoCollisionStep();
+			if (!collisionResolved) {
+				_isTetrominoStuck = true;
+				break;
+			}
+		}
+	}
 
-        _lastTetromino = (Transformable)_parent.getTetromino();
-    }
+	void BoardCollisionLogic::updateTetrominoCollisions()
+	{
+		if (_mustResetTetrominoData) {
+			resetTetrominoData();
+			_mustResetTetrominoData = false;
+		}
 
-    bool BoardCollisionLogic::hasTetrominoCollision()
-    {
-        bool hasCollision = tetrominoCollidesWithBlock();
-        hasCollision |= tetrominoIsOutsideBounds();
+		resolveTetrominoCollisions();
+		_lastTetromino = (Transformable)_parent.getTetromino();
 
-        return hasCollision;
-    }
+		if (_mustResetTetrominoData) {
+			resetTetrominoData();
+			_mustResetTetrominoData = false;
+		}
 
-    void BoardCollisionLogic::resetTetrominoData()
-    {
-        _lastTetromino = (Transformable)_parent.getTetromino();
-        _isTetrominoDead = false;
-        _isTetrominoStuck = false;
-    }
+		resolveTetrominoCollisions();
 
-    void BoardCollisionLogic::update() 
-    {
-        updateTetrominoCollisions();
-    }
+		_lastTetromino = (Transformable)_parent.getTetromino();
+	}
+
+	bool BoardCollisionLogic::hasTetrominoCollision()
+	{
+		bool hasCollision = tetrominoCollidesWithBlock();
+		hasCollision |= tetrominoIsOutsideBounds();
+
+		return hasCollision;
+	}
+
+	void BoardCollisionLogic::resetTetrominoData()
+	{
+		_lastTetromino = (Transformable)_parent.getTetromino();
+		_isTetrominoDead = false;
+		_isTetrominoStuck = false;
+	}
+
+	void BoardCollisionLogic::update()
+	{
+		updateTetrominoCollisions();
+	}
 }

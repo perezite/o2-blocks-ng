@@ -26,6 +26,7 @@ namespace sb
 			m_glContext = SDL_GL_CreateContext(m_sdlWindow);
 			SDL_CHECK(m_glContext);
 			GLenum glewError = glewInit();
+
 		#elif defined(__ANDROID__)
 			SDL_DisplayMode mode;
 			SDL_CHECK(SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES) == 0);

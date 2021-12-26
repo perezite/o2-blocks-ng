@@ -175,10 +175,11 @@ namespace tweenDemo1
 			emitter.setParticleColor(Color(1, 1, 1, 0.3f));
 			emitter.setParticleSize(0.8f * Vector2f(0.175f, 0.75f));
 			emitter.setEmissionShape(Disk(0, 0.6f, (270 - halfAngle) * ToRadians, (270 + halfAngle) * ToRadians));
-			emitter.setParticleColorChannelTween(3, Tweenf(1).to(.3f, 1, smoothstep));
-			emitter.setParticleScaleTween(Tweenf(0).to(1, 0.1f, bounceOut).to(0.3f, 0.9f, quadInOut));
+			emitter.setParticleColorChannel(3, Tweenf(1).to(.3f, 1, smoothstep));
+			// emitter.setParticleScale(Tweenf(0).to(1, 0.1f, bounceOut).to(0.3f, 0.9f, quadInOut));
+			emitter.setParticleScale(0).to(1, .1f, bounceOut).to(.3f, .9f, quadInOut);
 
-			while (window.isOpen())
+			while (window.isOpen()) 
 			{
 				float ds = my::getDeltaSeconds();
 				Input::update();
@@ -195,7 +196,7 @@ namespace tweenDemo1
 	{
 		d200::demo();
 		//d100::demo();
-		//demo1();
-		//demo0();
+		//d1::demo();
+		//d0::demo();
 	}
 }

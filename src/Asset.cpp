@@ -4,6 +4,29 @@
 	#include <Windows.h>
 #endif
 #include <algorithm>
+#include <stdlib.h>
+
+namespace {
+	#ifdef WIN32	
+		void convertWideStringToMultibyteString(const std::wstring& wideString, std::string& result) 
+		{
+			#pragma warning( push )
+			#pragma warning( disable : 4996 )
+
+			// determine the length of the resulting multibyte string
+			size_t multibyteLength = wcstombs(NULL, wideString.c_str(), 0);
+
+			// convert wide string to multibyte string
+			char* resultLength = new char[multibyteLength + 1];		// one extra byte for null-termination character
+			wcstombs(resultLength, wideString.c_str(), multibyteLength + 1);
+			result.assign(resultLength);
+		
+			delete[] resultLength;
+
+			#pragma warning ( pop )
+		}
+	#endif
+}
 
 namespace sb
 {
@@ -86,7 +109,8 @@ namespace sb
 
 			// get file path as string
 			std::wstring filePathAsWideString(filePath);
-			std::string filePathAsString(filePathAsWideString.begin(), filePathAsWideString.end());
+			std::string filePathAsString;
+			convertWideStringToMultibyteString(filePathAsWideString, filePathAsString);
 
 			// remove trailing file name
 			size_t lastPathSeparatorPosition = filePathAsString.rfind('\\');

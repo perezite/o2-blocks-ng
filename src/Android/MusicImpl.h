@@ -29,5 +29,3 @@ namespace sb
 		std::string m_assetPath;
 	};
 }
-
-

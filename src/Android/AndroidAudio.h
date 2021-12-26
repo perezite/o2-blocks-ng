@@ -14,6 +14,5 @@ namespace sb
 		static bool m_isInit;
 
 		static bool m_isValid;
-
 	};
 }

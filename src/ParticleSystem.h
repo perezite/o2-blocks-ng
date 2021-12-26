@@ -168,9 +168,9 @@ namespace sb
 
 		void setParticleColor(const Color& color);
 
-		void setParticleColorChannelTween(std::size_t channelIndex, const Tweenf& particleColorChannelTween);
+		void setParticleColorChannel(std::size_t channelIndex, const Tweenf& particleColorChannelTween);
 
-		void setParticleScaleTween(const Tweenf& particleScaleTween);
+		Tweenf& setParticleScale(const Tweenf& particleScaleTween);
 
 		void setLifetime(float lifetime);
 
