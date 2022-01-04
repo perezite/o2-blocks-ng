@@ -10,6 +10,7 @@ namespace {
 	#ifdef WIN32	
 		void convertWideStringToMultibyteString(const std::wstring& wideString, std::string& result) 
 		{
+			// disable visual studio warning about wcstombs being deprecated
 			#pragma warning( push )
 			#pragma warning( disable : 4996 )
 
@@ -17,11 +18,11 @@ namespace {
 			size_t multibyteLength = wcstombs(NULL, wideString.c_str(), 0);
 
 			// convert wide string to multibyte string
-			char* resultLength = new char[multibyteLength + 1];		// one extra byte for null-termination character
-			wcstombs(resultLength, wideString.c_str(), multibyteLength + 1);
-			result.assign(resultLength);
+			char* multibyteResult = new char[multibyteLength + 1];		// one extra byte for null-termination character
+			wcstombs(multibyteResult, wideString.c_str(), multibyteLength + 1);
+			result.assign(multibyteResult);
 		
-			delete[] resultLength;
+			delete[] multibyteResult;
 
 			#pragma warning ( pop )
 		}
@@ -104,7 +105,6 @@ namespace sb
 			// get executable file path
 			HMODULE hModule = GetModuleHandle(NULL);
 			SB_ERROR_IF(hModule == NULL, "GetModuleHandle() failed");
-			// TODO: https://cplusplus.com/reference/cstdlib/wcstombs/?kw=wcstombs
 			GetModuleFileName(hModule, filePath, (sizeof(filePath)));
 
 			// get file path as string
