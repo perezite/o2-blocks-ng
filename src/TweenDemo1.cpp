@@ -170,13 +170,12 @@ namespace tweenDemo1
 			emitter.setTexture(texture);
 			emitter.setParticleSpeed(1);
 			emitter.setParticleLifetime(1);
-			emitter.setParticleInertia(0.5f);
+			emitter.setParticleInertia(.5f);
 			emitter.setEmissionRatePerSecond(100);
-			emitter.setParticleColor(Color(1, 1, 1, 0.3f));
-			emitter.setParticleSize(0.8f * Vector2f(0.175f, 0.75f));
-			emitter.setEmissionShape(Disk(0, 0.6f, (270 - halfAngle) * ToRadians, (270 + halfAngle) * ToRadians));
+			emitter.setParticleColor(Color(1, 1, 1, .3f));
+			emitter.setParticleSize(.8f * Vector2f(.175f, .75f));
+			emitter.setEmissionShape(Disk(0, .6f, (270 - halfAngle) * ToRadians, (270 + halfAngle) * ToRadians));
 			emitter.setParticleColorChannel(3, Tweenf(1).to(.3f, 1, smoothstep));
-			// emitter.setParticleScale(Tweenf(0).to(1, 0.1f, bounceOut).to(0.3f, 0.9f, quadInOut));
 			emitter.setParticleScale(0).to(1, .1f, bounceOut).to(.3f, .9f, quadInOut);
 
 			while (window.isOpen()) 
