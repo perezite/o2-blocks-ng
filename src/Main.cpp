@@ -5,8 +5,8 @@
 #include "TweenDemo1.h"
 
 // TODO
-// - Implement Fluent Syntax for Tween Setters in the Particle System
-// - Create final tween implementation file with demo
+// Implement fluent syntax for tween setters in the particle system
+// Create final tween implementation file with demo
 
 using namespace blocks;
 
