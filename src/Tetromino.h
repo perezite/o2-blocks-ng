@@ -13,8 +13,12 @@
 
 namespace blocks
 {
+    class Board;
+
     class Tetromino : public sb::Drawable, public sb::Transformable
     {
+        Board& _board;
+
         BlockType _type;
 
         TextureAtlas& _squareTextures;
@@ -34,10 +38,14 @@ namespace blocks
 
         void updateInput();
 
-        void checkMoveInput(sb::KeyCode keyCode, int deltaX, int deltaY);
+        bool wouldCollide(int dx, int dy);
+
+        void tryMove(int dx, int dy);
+
+        void checkMoveInput(sb::KeyCode keyCode, int dx, int dy);
 
     public:
-        Tetromino(TextureAtlas& squareTextures, BlockType type = BlockType::Simple);
+        Tetromino(Board& board, TextureAtlas& squareTextures, BlockType type = BlockType::Simple);
 
         void getTransformedSquarePositions(std::vector<sb::Vector2i>& result);
 

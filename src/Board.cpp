@@ -30,16 +30,10 @@ namespace blocks
             cout << "respawn from position " << _tetromino->getPosition().x << " " << _tetromino->getPosition().y << endl;     
         safeDelete(_tetromino);
         
-        _tetromino = new Tetromino(_assets.squareTextureAtlas, BlockType::T);
+        _tetromino = new Tetromino(*this, _assets.squareTextureAtlas, BlockType::T);
         _tetromino->setPosition(5, 16);
         
         _collisionLogic.resetTetrominoData();
-    }
-
-    void Board::handleInput()
-    {
-        if (Input::isKeyGoingDown(KeyCode::Space))
-            harddropTetromino();
     }
 
     void Board::handleCollisions()
@@ -90,9 +84,8 @@ namespace blocks
     void Board::update(Window& window)
     {
         _tetromino->update();
-        handleInput();
-        _collisionLogic.update();
-        handleCollisions();
+        // _collisionLogic.update();
+        // handleCollisions();
     }
 
     void Board::draw(DrawTarget& target, DrawStates states)

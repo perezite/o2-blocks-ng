@@ -1,5 +1,6 @@
 #include "Tetromino.h"
 #include "DrawTarget.h"
+#include "Board.h"
 #include "Rect.h"
 #include "Memory.h"
 #include "Input.h"
@@ -38,18 +39,45 @@ namespace blocks
             SB_ERROR("Invalid block type " << (int)type);
     }
 
-    void Tetromino::checkMoveInput(sb::KeyCode keyCode, int deltaX, int deltaY)
+    bool Tetromino::wouldCollide(int dx, int dy)
+    {
+        vector<Vector2i> blockPositions;
+        vector<Vector2i> squarePositions;
+        _board.getBlockPositions(blockPositions);
+        getTransformedSquarePositions(squarePositions);
+
+        for (size_t i = 0; i < blockPositions.size(); i++) {
+            for (size_t j = 0; j < squarePositions.size(); j++) {
+                if (blockPositions[i] == squarePositions[j] + Vector2i(dx, dy))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    void Tetromino::tryMove(int dx, int dy)
+    {
+        bool _wouldCollide = wouldCollide(dx, dy);
+
+        if (_wouldCollide)
+            SB_DEBUG("collision");
+        else 
+            translate((float)dx, (float)dy);
+    }
+
+    void Tetromino::checkMoveInput(sb::KeyCode keyCode, int dx, int dy)
     {
         if (Input::isKeyGoingDown(keyCode))
-            translate((float)deltaX, (float)deltaY);
+            tryMove(dx, dy);
     }
 
     void Tetromino::updateInput()
     {
-        checkMoveInput(KeyCode::Left, -1, 0);
-        checkMoveInput(KeyCode::Right, +1, 0);
-        checkMoveInput(KeyCode::Up, 0, +1);
-        checkMoveInput(KeyCode::Down, 0, -1);
+        checkMoveInput(KeyCode::Left,  -1,  0);
+        checkMoveInput(KeyCode::Right, +1,  0);
+        checkMoveInput(KeyCode::Up,     0, +1);
+        checkMoveInput(KeyCode::Down,   0, -1);
 
         if (Input::isKeyGoingDown(KeyCode::r))
             rotate(-90 * ToRadians);
@@ -66,8 +94,8 @@ namespace blocks
             translate(0, -1);
     }
 
-    Tetromino::Tetromino(TextureAtlas& squareTextures, BlockType type)
-        : _squareTextures(squareTextures), _autodropTimer(settings::autodropSeconds)
+    Tetromino::Tetromino(Board& board, TextureAtlas& squareTextures, BlockType type)
+        : _board(board), _squareTextures(squareTextures), _autodropTimer(settings::autodropSeconds)
     {
         setType(type);
     }
