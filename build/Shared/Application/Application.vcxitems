@@ -33,7 +33,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\DrawBatch.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\DrawStates.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\DrawTarget.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Easing.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Game.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Image.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Input.h" />
@@ -44,7 +43,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Music.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\ParticleSystem.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Physics.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Scene.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Math.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Mesh.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\PrimitiveType.h" />

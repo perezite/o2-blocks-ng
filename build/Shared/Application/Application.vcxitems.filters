@@ -84,9 +84,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Input.h">
       <Filter>_Orbis2D\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Scene.h">
-      <Filter>_Orbis2D\Headers</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Transformable.h">
       <Filter>_Orbis2D\Headers</Filter>
     </ClInclude>
@@ -124,9 +121,6 @@
       <Filter>_Orbis2D\Headers</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Image.h">
-      <Filter>_Orbis2D\Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Easing.h">
       <Filter>_Orbis2D\Headers</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Shape.h">
