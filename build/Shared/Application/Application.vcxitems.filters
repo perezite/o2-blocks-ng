@@ -144,7 +144,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Box.h">
       <Filter>_Orbis2D\Headers</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Game.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Scene.h">
       <Filter>Blocks\Headers</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\src\Backdrop.h">
@@ -291,7 +291,7 @@
       <Filter>_Orbis2D</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Main.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Game.cpp">
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Scene.cpp">
       <Filter>Blocks</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\..\src\Backdrop.cpp">
