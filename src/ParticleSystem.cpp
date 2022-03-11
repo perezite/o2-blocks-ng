@@ -44,11 +44,13 @@ namespace sb
 		std::fill(_particleVertexColors.begin(), _particleVertexColors.end(), color);
 	}
 
-	void ParticleSystem::setParticleColorChannel(std::size_t channelIndex, const Tweenf& particsleColorChannelTween) 
+	Tweenf& ParticleSystem::setParticleColorChannel(std::size_t channelIndex, const Tweenf& particleColorChannelTween) 
 	{
 		SB_ERROR_IF(channelIndex > 4, "Color channel index out of range");
-		_particleColorChannelTweens[channelIndex] = particsleColorChannelTween;
+		_particleColorChannelTweens[channelIndex] = particleColorChannelTween;
 		_hasParticleColorChannelTweens[channelIndex] = true;
+		return _particleColorChannelTweens[channelIndex];
+		
 	}
 
 	Tweenf& ParticleSystem::setParticleScale(const Tweenf& particleScaleTween) {

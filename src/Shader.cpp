@@ -17,6 +17,7 @@ namespace sb
 			defaultShader.loadFromMemory(getDefaultVertexShaderCode(), getDefaultFragmentShaderCode());
 			isLoaded = true;
 		}
+
 		return defaultShader;
 	}
 

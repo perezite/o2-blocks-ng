@@ -175,7 +175,7 @@ namespace tweenDemo1
 			emitter.setParticleColor(Color(1, 1, 1, .3f));
 			emitter.setParticleSize(.8f * Vector2f(.175f, .75f));
 			emitter.setEmissionShape(Disk(0, .6f, (270 - halfAngle) * ToRadians, (270 + halfAngle) * ToRadians));
-			emitter.setParticleColorChannel(3, Tweenf(1).to(.3f, 1, smoothstep));
+			emitter.setParticleColorChannel(3, 1).to(.3f, 1, smoothstep);
 			emitter.setParticleScale(0).to(1, .1f, bounceOut).to(.3f, .9f, quadInOut);
 
 			while (window.isOpen()) 
