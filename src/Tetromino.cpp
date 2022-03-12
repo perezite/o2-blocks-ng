@@ -39,16 +39,29 @@ namespace blocks
             SB_ERROR("Invalid block type " << (int)type);
     }
 
-    bool Tetromino::wouldCollide(int dx, int dy)
+    void Tetromino::getTransformedSquarePositions(const Vector2i& deltaPosition, 
+        float deltaDegrees, vector<Vector2i>& result)
+    {
+        result.clear(); result.reserve(_squarePositions.size());
+        Transform transform(getPosition() + toVector2f(deltaPosition), 
+            1, getRotation() + deltaDegrees * ToRadians);
+
+        for (size_t i = 0; i < _squarePositions.size(); i++) {
+            Vector2f temp = transform * toVector2f(_squarePositions[i]);
+            result.push_back(toVector2i(temp));
+        }
+    }
+
+    bool Tetromino::wouldCollide(int dx, int dy, float deltaDegrees)
     {
         vector<Vector2i> blockPositions;
         vector<Vector2i> squarePositions;
         _board.getBlockPositions(blockPositions);
-        getTransformedSquarePositions(squarePositions);
+        getTransformedSquarePositions(Vector2i(dx, dy), deltaDegrees, squarePositions);
 
         for (size_t i = 0; i < blockPositions.size(); i++) {
             for (size_t j = 0; j < squarePositions.size(); j++) {
-                if (blockPositions[i] == squarePositions[j] + Vector2i(dx, dy))
+                if (blockPositions[i] == squarePositions[j])
                     return true;
             }
         }
@@ -56,31 +69,34 @@ namespace blocks
         return false;
     }
 
-    void Tetromino::tryMove(int dx, int dy)
+    void Tetromino::tryMove(int dx, int dy, float deltaDegrees)
     {
-        bool _wouldCollide = wouldCollide(dx, dy);
+        bool _wouldCollide = wouldCollide(dx, dy, deltaDegrees);
 
         if (_wouldCollide)
             SB_DEBUG("collision");
-        else 
+        else {
             translate((float)dx, (float)dy);
+            rotate(deltaDegrees * ToRadians);
+        }
     }
 
-    void Tetromino::checkMoveInput(sb::KeyCode keyCode, int dx, int dy)
+    void Tetromino::checkMoveInput(sb::KeyCode keyCode, int dx, int dy, float deltaDegrees)
     {
         if (Input::isKeyGoingDown(keyCode))
-            tryMove(dx, dy);
+            tryMove(dx, dy, deltaDegrees);
     }
 
     void Tetromino::updateInput()
     {
-        checkMoveInput(KeyCode::Left,  -1,  0);
-        checkMoveInput(KeyCode::Right, +1,  0);
-        checkMoveInput(KeyCode::Up,     0, +1);
-        checkMoveInput(KeyCode::Down,   0, -1);
+        checkMoveInput(KeyCode::Left,  -1,  0,  0 );
+        checkMoveInput(KeyCode::Right, +1,  0,  0 );
+        checkMoveInput(KeyCode::Up,     0, +1,  0 );
+        checkMoveInput(KeyCode::Down,   0, -1,  0 );
+        checkMoveInput(KeyCode::r,      0,  0, -90);
 
-        if (Input::isKeyGoingDown(KeyCode::r))
-            rotate(-90 * ToRadians);
+        //if (Input::isKeyGoingDown(KeyCode::r))
+        //    rotate(-90 * ToRadians);
 
         #if _DEBUG
             if(Input::isKeyGoingDown(KeyCode::d))

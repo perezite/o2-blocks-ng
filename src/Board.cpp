@@ -59,6 +59,7 @@ namespace blocks
     { 
         _blocks.push_back(new Block(assets.blockTextureAtlas));
         _blocks[0]->setPosition(3, 14);
+        //_blocks[0]->setPosition(0, 0);
         respawnTetromino();
 
         //_blocks[0]->setPosition(3, 3);

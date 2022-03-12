@@ -38,11 +38,14 @@ namespace blocks
 
         void updateInput();
 
-        bool wouldCollide(int dx, int dy);
+        void getTransformedSquarePositions(const sb::Vector2i& deltaPosition, 
+            float deltaDegrees, std::vector<sb::Vector2i>& result);
 
-        void tryMove(int dx, int dy);
+        bool wouldCollide(int dx, int dy, float deltaDegrees);
 
-        void checkMoveInput(sb::KeyCode keyCode, int dx, int dy);
+        void tryMove(int dx, int dy, float deltaDegrees);
+
+        void checkMoveInput(sb::KeyCode keyCode, int dx, int dy, float deltaDegrees);
 
     public:
         Tetromino(Board& board, TextureAtlas& squareTextures, BlockType type = BlockType::Simple);

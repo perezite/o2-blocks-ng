@@ -5,11 +5,11 @@
 #include "TweenDemo1.h"
 
 // TODO
+// Simplify collision detection
 // Make simple board a one liner by creating function: Scene::enableSimpleMode(x, y)
 //   Shrinks the board
 //   Creates a simple tetromino at the right position
 //   Creates a simple block at the right position
-// Simplify collision detection
 
 using namespace blocks;
 
