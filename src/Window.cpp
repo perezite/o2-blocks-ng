@@ -11,7 +11,7 @@ namespace sb
 	{
 		SB_ERROR_IF(SDL_Init(SDL_INIT_VIDEO) < 0, SDL_GetError());
 
-		int flags = IMG_INIT_PNG && IMG_INIT_JPG;
+		int flags = IMG_INIT_PNG & IMG_INIT_JPG;
 		int imgResult = IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG) & flags;
 		SB_ERROR_IF(imgResult != flags, IMG_GetError());
 
