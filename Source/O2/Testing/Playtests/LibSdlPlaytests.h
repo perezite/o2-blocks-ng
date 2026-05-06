@@ -5,6 +5,7 @@ namespace o2
 		class LibSdlPlaytests
 		{
 			public:
+				static void openGlWindow();
 				static void simpleWindow();
 		};
 	}
