@@ -1,3 +1,5 @@
+#pragma once
+
 namespace o2
 {
 	namespace my

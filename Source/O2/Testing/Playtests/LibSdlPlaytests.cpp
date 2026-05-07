@@ -1,12 +1,12 @@
-#include <iostream>
+#include "LibSdlPlaytests.h"
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_opengl.h>
-#include "LibSdlPlaytests.h"
+#include <iostream>
 using namespace std;
 
 namespace o2 
 {
-	namespace my 
+	namespace my
 	{
         void LibSdlPlaytests::openGlWindow()
         {
@@ -14,9 +14,8 @@ namespace o2
             cout << "- A simple window, filled with a teal background color, is displayed" << endl;
             cout << "- The background color is rendered using OpenGL, internally" << endl;
 
-            if (SDL_Init(SDL_INIT_VIDEO) < 0) 
+            if (!SDL_Init(SDL_INIT_VIDEO)) 
                 throw "Failed to create SDL video: %s\n", SDL_GetError();
-
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -33,10 +32,11 @@ namespace o2
 
             while (running) {
                 while (SDL_PollEvent(&event)) {
+                    SDL_Event test = event;
                     if (event.type == SDL_EVENT_QUIT) 
                         running = 0;
                 }
-
+                
                 glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
                 glClear(GL_COLOR_BUFFER_BIT);
 
@@ -60,10 +60,13 @@ namespace o2
             SDL_Event event;
 
             while (running) {
+                auto count = 0;
                 while (SDL_PollEvent(&event)) {
+                    count++;
                     if (event.type == SDL_EVENT_QUIT)
                         running = false;
                 }
+                cout << count << " ";
 
                 SDL_SetRenderDrawColor(renderer, 0, 128, 128, 255);
                 SDL_RenderClear(renderer);
