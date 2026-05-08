@@ -1,5 +1,4 @@
 #include "Events.h"
-#include "StlHelper.h"
 #include <SDL3/SDL.h>
 #include <iostream>
 using namespace std;
@@ -11,7 +10,6 @@ namespace o2
 
 	void Events::update()
 	{
-		// clear current event list
 		_windowQuitEvents.clear();
 
 		SDL_Event event;
@@ -24,10 +22,5 @@ namespace o2
 				break;
 			}
 		}
-	}
-
-	bool Events::isWindowCloseRequested(uint32_t windowId)
-	{
-		return contains(_windowQuitEvents, windowId);
 	}
 }
