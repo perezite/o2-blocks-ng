@@ -3,75 +3,96 @@
 #include <SDL3/SDL_opengl.h>
 #include <iostream>
 #include <tuple>
+#include <exception>
+#include <stdexcept>
 using namespace std;
 
-namespace o2 
+namespace o2  
 {
-	namespace my
-	{
-        tuple<SDL_Window*, SDL_GLContext> createGlWindow(int width, int height, const string& title)
+	namespace my 
+    {
+        struct SdlWindow 
         {
-            auto window = SDL_CreateWindow(title.c_str(), width, height, SDL_WINDOW_OPENGL);
-            if (!window) SDL_GetError();
-            auto context = SDL_GL_CreateContext(window);
-            if (!context) SDL_GetError();
+            int width, height;
+            SDL_Window* window = nullptr;
+            SDL_GLContext context = nullptr;
+            SDL_WindowID windowId = 0;
+            const bool isOpen() const { return window != nullptr; }
+        };
 
-            return {window, context};
+        inline static void sdlCheck(const bool okCondition) 
+        {
+            if (!okCondition)
+                throw runtime_error(SDL_GetError());
         }
 
-        void clearAndSwapGlWindow(SDL_Window* window, SDL_GLContext context, 
-            GLclampf r, GLclampf g, GLclampf b, GLclampf alpha)
+        static void destroyGlWindow(SdlWindow& sdlWindow) 
         {
-            SDL_GL_MakeCurrent(window, context);
+            if (!sdlWindow.isOpen()) return;
+            SDL_GL_DestroyContext(sdlWindow.context);
+            sdlWindow.context = nullptr;
+            SDL_DestroyWindow(sdlWindow.window);
+            sdlWindow.window = nullptr;
+        }
+
+        static void clearAndSwapGlWindow(const SdlWindow& sdlWindow, GLclampf r, GLclampf g, GLclampf b, GLclampf alpha) 
+        {
+            SDL_GL_MakeCurrent(sdlWindow.window, sdlWindow.context);
+            glViewport(0, 0, sdlWindow.width, sdlWindow.height);
             glClearColor(r, g, b, alpha);
             glClear(GL_COLOR_BUFFER_BIT);
-            SDL_GL_SwapWindow(window);
+            SDL_GL_SwapWindow(sdlWindow.window);
         }
 
-        void destroyGlWindow(SDL_Window* window, SDL_GLContext context)
+        static SdlWindow createGlWindow(int width, int height, const string& title) 
         {
-            SDL_GL_DestroyContext(context);
-            SDL_DestroyWindow(window);
+            auto window = SDL_CreateWindow(title.c_str(), width, height, SDL_WINDOW_OPENGL);
+            sdlCheck(window);
+            auto context = SDL_GL_CreateContext(window);
+            sdlCheck(context);
+            sdlCheck(SDL_GL_MakeCurrent(window, context));
+            auto windowId = SDL_GetWindowID(window);
+            sdlCheck(windowId);
+            sdlCheck(SDL_GL_SetSwapInterval(1));
+
+            return SdlWindow{ width, height, window, context, windowId };
         }
 
-        void LibSdlPlaytests::twoOpenGlWindows()
+        void LibSdlPlaytests::twoOpenGlWindows() 
         {
             cout << "Expected behaviour:" << endl;
             cout << "- Two windows, filled with different background colors and sizes, are displayed" << endl;
             cout << "- The background colors are rendered using OpenGL, internally" << endl;
 
-            if (!SDL_Init(SDL_INIT_VIDEO))
-                throw SDL_GetError();
+            if (!SDL_Init(SDL_INIT_VIDEO)) throw runtime_error(SDL_GetError());
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-            auto firstWindow = createGlWindow(800, 600, "First window with OpenGL");
-            auto secondWindow = createGlWindow(400, 300, "Second window with OpenGL");
+            auto firstSdlWindow = createGlWindow(800, 600, "First window with OpenGL");
+            auto secondSdlWindow = createGlWindow(400, 300, "Second window with OpenGL");
 
-            SDL_GL_SetSwapInterval(1);
-
-            auto running = true;
             SDL_Event event;
-
-            while (running) {
+            while (firstSdlWindow.isOpen() || secondSdlWindow.isOpen()) {
                 while (SDL_PollEvent(&event)) {
-                    if (event.type == SDL_EVENT_QUIT)
-                        running = false;
-                    if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
-                        running = false;
+                    if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED) {
+                        if (event.window.windowID == firstSdlWindow.windowId) 
+                            destroyGlWindow(firstSdlWindow);
+                        else if (event.window.windowID == secondSdlWindow.windowId) 
+                            destroyGlWindow(secondSdlWindow); 
+                    }
                 }
-
-                clearAndSwapGlWindow(get<0>(firstWindow), get<1>(firstWindow), 1, 0, 0, 1);
-                clearAndSwapGlWindow(get<0>(secondWindow), get<1>(secondWindow), 0, 0, 1, 1);
+                    
+                if (firstSdlWindow.isOpen())
+                    clearAndSwapGlWindow(firstSdlWindow, 1, 0, 0, 1);
+                if (secondSdlWindow.isOpen())
+                    clearAndSwapGlWindow(secondSdlWindow, 0, 0, 1, 1);
             }
 
-            destroyGlWindow(get<0>(firstWindow), get<1>(firstWindow));
-            destroyGlWindow(get<0>(secondWindow), get<1>(secondWindow));
             SDL_Quit();
         }
 
-        void LibSdlPlaytests::openGlWindow()
+        void LibSdlPlaytests::openGlWindow() 
         {
             cout << "Expected behaviour:" << endl;
             cout << "- A simple window, filled with a teal background color, is displayed" << endl;
@@ -99,7 +120,7 @@ namespace o2
                         running = 0;
                 }
                 
-                glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
+                glClearColor(.1f, .2f, .3f, 1);
                 glClear(GL_COLOR_BUFFER_BIT);
 
                 SDL_GL_SwapWindow(window);
@@ -110,8 +131,8 @@ namespace o2
             SDL_Quit();
         }
 
-        void LibSdlPlaytests::simpleWindow()
-		{
+        void LibSdlPlaytests::simpleWindow() 
+        {
             cout << "Expected behaviour:" << endl;
             cout << "- A simple window, filled with a teal background color, is displayed" << endl;
 

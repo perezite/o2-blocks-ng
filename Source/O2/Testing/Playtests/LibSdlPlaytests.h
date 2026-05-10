@@ -1,10 +1,10 @@
 #pragma once
 
-namespace o2
+namespace o2 
 {
-	namespace my
+	namespace my 
 	{
-		class LibSdlPlaytests
+		class LibSdlPlaytests 
 		{
 			public:
 				static void twoOpenGlWindows();
