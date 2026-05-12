@@ -9,6 +9,14 @@ using namespace std;
 
 namespace o2 
 {
+	SDL_WindowID Window::GlCurrentWindowId = 0;
+
+	void Window::makeCurrent() const 
+	{
+		if (isCurrent()) return;
+		GlCurrentWindowId = _windowId;
+		SDL_GL_MakeCurrent(_sdlWindow, _glContext);
+	}
 
 	Window::Window(int width, int height, const string& title) 
 		: _width(width), _height(height)
@@ -22,7 +30,7 @@ namespace o2
 		_glContext = SDL_GL_CreateContext(_sdlWindow);
 		sdlCheck(_glContext != nullptr);
 
-		sdlCheck(SDL_GL_MakeCurrent(_sdlWindow, _glContext));
+		makeCurrent();
 		_windowId = SDL_GetWindowID(_sdlWindow);
 		sdlCheck(_windowId);
 		sdlCheck(SDL_GL_SetSwapInterval(1));

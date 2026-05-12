@@ -5,4 +5,4 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
     "*.h"
 )
 add_executable (Blocks ${SOURCES} )
-target_link_libraries(Blocks PRIVATE SDL3::SDL3 OpenGL::GL)
+target_link_libraries(Blocks PRIVATE SDL3::SDL3 imgui OpenGL::GL)

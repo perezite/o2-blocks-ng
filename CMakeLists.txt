@@ -11,5 +11,30 @@ endif()
 
 project ("Blocks")
 
+# SDL3
+set(SDL_TEST_LIBRARY OFF)
+set(SDL_TESTS OFF)
 add_subdirectory(ThirdParty/SDL)
+
+# ImGui
+add_library(imgui STATIC
+    ThirdParty/imgui/imgui.cpp
+    ThirdParty/imgui/imgui_draw.cpp
+    ThirdParty/imgui/imgui_tables.cpp
+    ThirdParty/imgui/imgui_widgets.cpp
+
+    ThirdParty/imgui/backends/imgui_impl_sdl3.cpp
+    ThirdParty/imgui/backends/imgui_impl_sdlrenderer3.cpp
+)
+
+target_include_directories(imgui PUBLIC
+    ThirdParty/imgui
+    ThirdParty/imgui/backends
+)
+
+target_link_libraries(imgui PUBLIC
+    SDL3::SDL3
+)
+
+# App
 add_subdirectory ("Source")

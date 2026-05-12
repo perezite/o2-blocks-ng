@@ -2,7 +2,8 @@
 
 namespace o2 {
 	namespace my {
-		class WindowPlaytests {
+		class WindowPlaytests 
+		{
 		public:
 			static void twoWindows();
 			static void simpleWindow();

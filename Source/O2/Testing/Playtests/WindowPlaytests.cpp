@@ -20,13 +20,11 @@ namespace o2
 			Window firstWindow(800, 600, "First window");
 			Window secondWindow(400, 300, "First window");
 
-			while (true)
+			while (firstWindow.isOpen() || secondWindow.isOpen())
 			{
 				Events::update();
 				firstWindow.update();
 				secondWindow.update();
-				if (!firstWindow.isOpen() && !secondWindow.isOpen())
-					break;
 				firstWindow.clear(255, 0, 0);
 				secondWindow.clear(0, 0, 255);
 				firstWindow.display();

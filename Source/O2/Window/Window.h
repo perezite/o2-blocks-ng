@@ -9,6 +9,7 @@ namespace o2
 {
 	class Window
 	{
+		static SDL_WindowID GlCurrentWindowId;
 		SdlContext _sdlContext;
 		SDL_Window* _sdlWindow = {};
 		SDL_WindowID _windowId;
@@ -18,7 +19,8 @@ namespace o2
 		int _width, _height;
 		bool _isOpen = true;
 
-		inline void makeCurrent() { SDL_GL_MakeCurrent(_sdlWindow, _glContext); }
+		inline bool isCurrent() const { return GlCurrentWindowId == _windowId; }
+		void makeCurrent() const;
 	public:
 		Window(int width, int height, const std::string& title);
 		~Window();
