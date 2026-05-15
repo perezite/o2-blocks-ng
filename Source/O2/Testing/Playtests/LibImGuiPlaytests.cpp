@@ -18,56 +18,39 @@ namespace o2
         struct TreeNode
         {
             string text;
-
             bool isLeaf = false;
-
             vector<TreeNode> children;
-
             function<void()> action;
         };
 
-        void executeDummyAction(const string& name)
+        static void drawTreeNode(TreeNode& node)
         {
-            SDL_Log("Action executed for: %s", name.c_str());
-        }
-
-        void drawTreeNode(TreeNode& node)
-        {
-            // -----------------------------
-            // Blatt
-            // -----------------------------
-            if (node.isLeaf)
-            {
+            if (node.isLeaf) {
                 ImGui::PushID(&node);
 
                 // Kleiner Action-Button
-                if (ImGui::SmallButton(">"))
-                {
+                if (ImGui::SmallButton(">")) {
                     if (node.action)
                         node.action();
                 }
 
                 ImGui::SameLine();
-
                 ImGui::Selectable(node.text.c_str());
 
-                if (ImGui::IsItemHovered() &&
-                    ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-                {
+                if (ImGui::IsItemHovered() && (ImGui::IsMouseClicked(ImGuiMouseButton_Left) 
+                    || ImGui::IsKeyPressed(ImGuiKey_Enter))) {
                     if (node.action)
                         node.action();
                 }
 
                 ImGui::PopID();
-
                 return;
             }
 
-            // -----------------------------
-            // Ordner / Gruppe
-            // -----------------------------
-            if (ImGui::TreeNode(node.text.c_str()))
-            {
+            if (node.text == "Root" || node.text == "Items")
+                ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+
+            if (ImGui::TreeNode(node.text.c_str())) {
                 for (auto& child : node.children)
                     drawTreeNode(child);
 
@@ -77,56 +60,20 @@ namespace o2
 
         void LibImGuiPlaytests::drawTree()
         {
-            //
-            // -----------------------------
-            // SDL initialisieren
-            // -----------------------------
-            //
-
-            if (!SDL_Init(SDL_INIT_VIDEO))
-            {
-                SDL_Log("SDL_Init failed: %s", SDL_GetError());
-                throw runtime_error("fail");
-            }
-
-            //
-            // -----------------------------
-            // Fenster
-            // -----------------------------
-            //
+            sdlCheck(SDL_Init(SDL_INIT_VIDEO));
 
             float mainDisplayScale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
             SDL_WindowFlags windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY;
             SDL_Window* window = SDL_CreateWindow("Simple ImGUI", (int)(400 * mainDisplayScale), (int)(800 * mainDisplayScale), windowFlags);
-
-            if (!window)
-            {
-                SDL_Log("SDL_CreateWindow failed: %s", SDL_GetError());
-                throw runtime_error("fail");
-            }
-
-            //
-            // -----------------------------
-            // Renderer
-            // -----------------------------
-            //
+            sdlCheck(window);
 
             SDL_Renderer* renderer = SDL_CreateRenderer(window, nullptr);
-
-            if (!renderer)
-            {
-                SDL_Log("SDL_CreateRenderer failed: %s", SDL_GetError());
-                throw runtime_error("fail");
-            }
-
-            //
-            // -----------------------------
-            // ImGui initialisieren
-            // -----------------------------
-            //
+            sdlCheck(renderer);
 
             IMGUI_CHECKVERSION();
             ImGui::CreateContext();
+            ImGuiIO& io = ImGui::GetIO();
+            io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
             ImGui::StyleColorsDark();
             ImGuiStyle& style = ImGui::GetStyle();
             style.ScaleAllSizes(mainDisplayScale);        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
@@ -134,13 +81,7 @@ namespace o2
             ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
             ImGui_ImplSDLRenderer3_Init(renderer);
 
-            //
-            // -----------------------------
-            // Demo-Daten
-            // -----------------------------
-            //
-
-            TreeNode root =
+            TreeNode root = 
             {
                 "Root",
                 false,
@@ -149,156 +90,62 @@ namespace o2
                         "Characters",
                         false,
                         {
-                            {
-                                "Player",
-                                true,
-                                {},
-                                []()
-                                {
-                                    executeDummyAction("Player");
-                                }
-                            },
-                            {
-                                "Enemy",
-                                true,
-                                {},
-                                []()
-                                {
-                                    executeDummyAction("Enemy");
-                                }
-                            }
+                            { "Player", true, {}, []() { SDL_Log("Action executed for: Player"); }},
+                            { "Enemy", true, {}, []() { SDL_Log("Action executed for: Enemy"); }}
                         }
                     },
-
                     {
                         "Items",
                         false,
                         {
-                            {
-                                "Sword",
-                                true,
-                                {},
-                                []()
-                                {
-                                    executeDummyAction("Sword");
-                                }
-                            },
-                            {
-                                "Potion",
-                                true,
-                                {},
-                                []()
-                                {
-                                    executeDummyAction("Potion");
-                                }
-                            }
+                            { "Sword", true, {}, []() { SDL_Log("Action executed for: Sword"); } },
+                            { "Potion", true, {}, []() { SDL_Log("Action executed for: Potion"); }}
                         }
                     }
                 }
             };
 
-            //
-            // -----------------------------
-            // Main Loop
-            // -----------------------------
-            //
-
             bool running = true;
 
-            while (running)
-            {
-                //
-                // -----------------------------
-                // Events
-                // -----------------------------
-                //
-
+            while (running) {
                 SDL_Event event;
-
-                while (SDL_PollEvent(&event))
-                {
+                while (SDL_PollEvent(&event)) {
                     ImGui_ImplSDL3_ProcessEvent(&event);
-
                     if (event.type == SDL_EVENT_QUIT)
                         running = false;
-
                     if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
                         running = false;
                 }
 
-                //
-                // -----------------------------
-                // ImGui Frame starten
-                // -----------------------------
-                //
-
                 ImGui_ImplSDLRenderer3_NewFrame();
                 ImGui_ImplSDL3_NewFrame();
-
                 ImGui::NewFrame();
 
-                //
-                // -----------------------------
-                // GUI
-                // -----------------------------
-                //
-
                 ImGuiViewport* viewport = ImGui::GetMainViewport();
-
                 ImGui::SetNextWindowPos(viewport->WorkPos);
                 ImGui::SetNextWindowSize(viewport->WorkSize);
-
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-
-                ImGuiWindowFlags flags =
-                    ImGuiWindowFlags_NoMove |
-                    ImGuiWindowFlags_NoResize |
-                    ImGuiWindowFlags_NoCollapse |
-                    ImGuiWindowFlags_NoTitleBar;
+                ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar;
 
                 ImGui::Begin("Hierarchy", nullptr, flags);
-
                 drawTreeNode(root);
-
                 ImGui::End();
 
                 ImGui::PopStyleVar(2);
-
-                //
-                // -----------------------------
-                // Rendern
-                // -----------------------------
-                //
-
                 ImGui::Render();
 
                 SDL_SetRenderDrawColor(renderer, 35, 35, 35, 255);
-
                 SDL_RenderClear(renderer);
-
-                ImGui_ImplSDLRenderer3_RenderDrawData(
-                    ImGui::GetDrawData(),
-                    renderer
-                );
-
+                ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
                 SDL_RenderPresent(renderer);
             }
 
-            //
-            // -----------------------------
-            // Cleanup
-            // -----------------------------
-            //
-
             ImGui_ImplSDLRenderer3_Shutdown();
             ImGui_ImplSDL3_Shutdown();
-
             ImGui::DestroyContext();
-
             SDL_DestroyRenderer(renderer);
             SDL_DestroyWindow(window);
-
             SDL_Quit();
         }
 
@@ -310,186 +157,67 @@ namespace o2
                 << "- The GUI window uses ImGui with SDL_Renderer3" << endl
                 << "- The background colored window uses SDL3 with OpenGL" << endl;
 
-            // SDL initialisieren
-            if (!SDL_Init(SDL_INIT_VIDEO))
-            {
-                SDL_Log("SDL_Init failed: %s", SDL_GetError());
-                throw runtime_error("fail");
-            }
+            sdlCheck(SDL_Init(SDL_INIT_VIDEO));
 
-            //
-            // -----------------------------
-            // ImGui / SDL_Renderer Fenster
-            // -----------------------------
-            //
-
-            SDL_Window* imguiWindow = SDL_CreateWindow(
-                "ImGui Window",
-                800,
-                600,
-                0
-            );
-
-            if (!imguiWindow)
-            {
-                SDL_Log("Failed to create ImGui window: %s", SDL_GetError());
-                throw runtime_error("fail");
-            }
-
+            SDL_Window* imguiWindow = SDL_CreateWindow("ImGui Window", 800, 600, 0);
+            sdlCheck(imguiWindow);
             SDL_Renderer* renderer = SDL_CreateRenderer(imguiWindow, nullptr);
-
-            if (!renderer)
-            {
-                SDL_Log("Failed to create renderer: %s", SDL_GetError());
-                throw runtime_error("fail");
-            }
-
-            //
-            // -----------------------------
-            // OpenGL Fenster
-            // -----------------------------
-            //
+            sdlCheck(renderer);
 
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
-                SDL_GL_CONTEXT_PROFILE_CORE);
-
-            SDL_Window* glWindow = SDL_CreateWindow(
-                "OpenGL Window",
-                800,
-                600,
-                SDL_WINDOW_OPENGL
-            );
-
-            if (!glWindow)
-            {
-                SDL_Log("Failed to create GL window: %s", SDL_GetError());
-                throw runtime_error("fail");
-            }
-
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+            SDL_Window* glWindow = SDL_CreateWindow("OpenGL Window", 800, 600, SDL_WINDOW_OPENGL);
+            sdlCheck(glWindow);
             SDL_GLContext glContext = SDL_GL_CreateContext(glWindow);
-
-            if (!glContext)
-            {
-                SDL_Log("Failed to create GL context: %s", SDL_GetError());
-                throw runtime_error("fail");
-            }
-
-            //
-            // -----------------------------
-            // ImGui initialisieren
-            // -----------------------------
-            //
+            sdlCheck(glContext);
 
             IMGUI_CHECKVERSION();
-
             ImGui::CreateContext();
-
             ImGui::StyleColorsDark();
-
             ImGui_ImplSDL3_InitForSDLRenderer(imguiWindow, renderer);
             ImGui_ImplSDLRenderer3_Init(renderer);
 
-            //
-            // -----------------------------
-            // Main Loop
-            // -----------------------------
-            //
-
             bool running = true;
-
-            while (running)
-            {
+            while (running) {
                 SDL_Event event;
-
-                while (SDL_PollEvent(&event))
-                {
-                    // ImGui Events
+                while (SDL_PollEvent(&event)) {
                     ImGui_ImplSDL3_ProcessEvent(&event);
-
                     if (event.type == SDL_EVENT_QUIT)
                         running = false;
-
                     if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
                         running = false;
                 }
 
-                //
-                // -----------------------------
-                // ImGui Frame
-                // -----------------------------
-                //
-
                 ImGui_ImplSDLRenderer3_NewFrame();
                 ImGui_ImplSDL3_NewFrame();
-
                 ImGui::NewFrame();
-
                 ImGui::Begin("Hello");
-
                 ImGui::Text("This is SDL_Renderer3 + ImGui");
-
                 static float value = 0.5f;
-
                 ImGui::SliderFloat("Value", &value, 0.0f, 1.0f);
-
                 ImGui::End();
-
                 ImGui::Render();
 
-                //
-                // -----------------------------
-                // ImGui Fenster rendern
-                // -----------------------------
-                //
-
                 SDL_SetRenderDrawColor(renderer, 40, 40, 40, 255);
-
                 SDL_RenderClear(renderer);
-
-                ImGui_ImplSDLRenderer3_RenderDrawData(
-                    ImGui::GetDrawData(),
-                    renderer
-                );
-
+                ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
                 SDL_RenderPresent(renderer);
 
-                //
-                // -----------------------------
-                // OpenGL Fenster rendern
-                // -----------------------------
-                //
-
                 SDL_GL_MakeCurrent(glWindow, glContext);
-
                 glViewport(0, 0, 800, 600);
-
                 glClearColor(0.2f, 0.1f, 0.7f, 1.0f);
-
                 glClear(GL_COLOR_BUFFER_BIT);
-
                 SDL_GL_SwapWindow(glWindow);
             }
 
-            //
-            // -----------------------------
-            // Cleanup
-            // -----------------------------
-            //
-
             ImGui_ImplSDLRenderer3_Shutdown();
             ImGui_ImplSDL3_Shutdown();
-
             ImGui::DestroyContext();
-
             SDL_GL_DestroyContext(glContext);
-
             SDL_DestroyRenderer(renderer);
-
             SDL_DestroyWindow(imguiWindow);
             SDL_DestroyWindow(glWindow);
-
             SDL_Quit();
         }
 
@@ -510,6 +238,9 @@ namespace o2
 
             IMGUI_CHECKVERSION();
             ImGui::CreateContext();
+            ImGuiIO& io = ImGui::GetIO(); (void)io;
+            io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+            io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
             ImGui::StyleColorsDark();
             ImGuiStyle& style = ImGui::GetStyle();
             style.ScaleAllSizes(mainDisplayScale);        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
