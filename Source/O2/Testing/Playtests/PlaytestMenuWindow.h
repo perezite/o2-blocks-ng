@@ -1,5 +1,6 @@
 #pragma once
 #include "../../Core/SdlContext.h"
+#include "../../Core/StlHelper.h"
 #include "imgui.h"
 #include <SDL3/SDL.h>
 #include <string>
@@ -12,11 +13,12 @@ namespace o2
 	struct TreeNode
 	{
 		std::string text;
-		std::vector<std::unique_ptr<TreeNode>> children = {};
+		std::vector<TreeNode*> children = {};
 		std::function<void()> action = nullptr;
-		inline TreeNode(std::string t) : text(t) { }
-		inline TreeNode(std::string t, std::function<void()> a) : text(move(t)), action(move(a)) { }
 		inline bool isLeaf() const { return children.empty(); }
+		TreeNode(const std::string& text_) : text(text_) { }
+		TreeNode(const std::string& text_, std::function<void()> action_) : text(text_), action(action_) {}
+		inline ~TreeNode() { deleteAll(children); }	
 	};
 
 	class PlaytestMenuWindow

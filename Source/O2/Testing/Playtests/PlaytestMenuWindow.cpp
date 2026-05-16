@@ -1,7 +1,6 @@
 #include "PlaytestMenuWindow.h"
 #include "../../Core/Events.h"
 #include "../../Core/StdHelper.h"
-#include "../../Core/StlHelper.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_sdlrenderer3.h"
 #include <iostream>
@@ -15,8 +14,8 @@ namespace o2
         string indent(2 * depth, ' ');
 
         if (node.isLeaf()) {
-            auto hasAction = node.action != nullptr;
-            cout << indent << "> " << node.text << (hasAction ? " (has action)" : " (has NO action)") << endl;
+            if (node.action == nullptr) throw runtime_error("Node has no action");
+            cout << indent << "> " << node.text << endl;
             return;
         }
         
@@ -30,13 +29,48 @@ namespace o2
         printTheTree(_tree);
     }
 
-	PlaytestMenuWindow::PlaytestMenuWindow()
+    static void drawTree(const TreeNode& node)
+    {
+        // draw leaf
+        if (node.isLeaf()) {
+            ImGui::PushID(&node);
+
+            if (ImGui::SmallButton(">")) {
+                if (node.action) node.action();
+            }
+
+            ImGui::SameLine();
+            ImGui::Selectable(node.text.c_str());
+            if (ImGui::IsItemHovered() && (ImGui::IsMouseClicked(ImGuiMouseButton_Left)
+                || ImGui::IsKeyPressed(ImGuiKey_Enter))) {
+                if (node.action) node.action();
+            }
+
+            ImGui::PopID();
+            return;
+        }
+
+        // draw inner node
+        if (ImGui::TreeNode(node.text.c_str())) {
+            for (auto& child : node.children)
+                drawTree(*child);
+
+            ImGui::TreePop();
+        }
+    }
+
+    PlaytestMenuWindow::PlaytestMenuWindow()
 	{
         auto mainDisplayScale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
         auto windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY;
-        _window = SDL_CreateWindow("Playtests", (int)(400 * mainDisplayScale), (int)(800 * mainDisplayScale), windowFlags);
+        auto primaryDisplayId = SDL_GetPrimaryDisplay();
+        sdlCheck(primaryDisplayId);
+        SDL_Rect bounds;
+        sdlCheck(SDL_GetDisplayUsableBounds(primaryDisplayId, &bounds));
+        _window = SDL_CreateWindow("Playtests", (int)(400 * mainDisplayScale), (int)(bounds.h * 0.75f), windowFlags);
         sdlCheck(_window);
-        _windowId = SDL_GetWindowID(_window);
+        _windowId = SDL_GetWindowID(_window); 
+        SDL_SetWindowPosition(_window, int(30 * mainDisplayScale), int(40 * mainDisplayScale));
         _renderer = SDL_CreateRenderer(_window, nullptr);
         sdlCheck(_renderer);
 
@@ -69,26 +103,24 @@ namespace o2
         TreeNode* node = &_tree;
         auto pathElements = split(path, "/");
 
-        // Create/find all inner nodes
+        // Create/find and then add all inner nodes
         for (size_t i = 0; i < pathElements.size() - 1; i++){
             const auto& pathElement = pathElements[i];
-            auto* foundNode = singleOrNull(node->children, [&](const TreeNode& child) {
-                return child.text == pathElement;
+            auto* foundChild = singleOrNull(node->children, [&](const TreeNode* child) {
+                return child->text == pathElement;
             });
 
-            if (!foundNode) {
-                auto newNode = make_unique<TreeNode>(pathElement);
-                node->children.emplace_back(move(newNode));
-                foundNode = node->children.back().get();
+            if (!foundChild) {
+                node->children.push_back(new TreeNode(pathElement));
+                foundChild = node->children.back();
             }
 
-            node = foundNode;
+            node = foundChild;
         }
 
         // Add leaf node
         const auto& leafName = pathElements.back();
-        auto leaf = make_unique<TreeNode>(leafName, action);
-        node->children.emplace_back(move(leaf));
+        node->children.push_back(new TreeNode(leafName, action));
     }
 
     void PlaytestMenuWindow::update()
@@ -109,10 +141,11 @@ namespace o2
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
         ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar;
 
-        ImGui::Begin("Hello");
-        ImGui::Text("This is SDL_Renderer3 + ImGui");
-        static float value = 0.5f;
-        ImGui::SliderFloat("Value", &value, 0.0f, 1.0f);
+        ImGui::Begin("Hello", nullptr, flags);
+        drawTree(_tree);
+        // ImGui::Text("This is SDL_Renderer3 + ImGui");
+        //static float value = 0.5f;
+        // ImGui::SliderFloat("Value", &value, 0.0f, 1.0f);
         ImGui::End();
         ImGui::PopStyleVar(2);
         ImGui::Render();

@@ -5,20 +5,28 @@
 
 namespace o2
 {
-    template<class T, typename Pred> T* singleOrNull(const std::vector<std::unique_ptr<T>>& vec, Pred pred)
+    template<class T, typename Pred> T* singleOrNull(const std::vector<T*>& vec, Pred pred)
     {
         T* result = nullptr;
 
         for (const auto& item : vec) {
-            if (pred(*item)) {
+            if (pred(item)) {
                 if (result != nullptr)
                     throw std::runtime_error("More than one element found");
 
-                result = item.get();
+                result = item;
             }
         }
 
         return result;
+    }
+
+    template<class T> void deleteAll(const std::vector<T*>& vec)
+    {
+        for (auto* t : vec) {
+            delete(t);
+            t = nullptr;
+        }
     }
 
 	template<class T, class U> bool contains(const T& container, const U& elem)
