@@ -1,13 +1,13 @@
-﻿#include "O2/Testing/Playtests/LibSdlPlaytests.h"
+﻿#include "O2/Testing/TestMenuWindow.h"
+#include "O2/Testing/Playtests/LibSdlPlaytests.h"
 #include "O2/Testing/Playtests/WindowPlaytests.h"
 #include "O2/Testing/Playtests/LibImGuiPlaytests.h"
-#include "O2/Testing/Playtests/PlaytestMenuWindow.h"
-#include "O2/Testing/Playtests/PlaytestMenuWindowPlaytest.h"
+#include "O2/Testing/Playtests/TestMenuWindowPlaytest.h"
 using namespace o2;
 
 int main(int argc, char* argv[])
 {
-    my::PlaytestMenuWindowPlaytest::showWindow();
+    my::TestMenuWindowPlaytest::showWindow();
     //my::LibImGuiPlaytests::treeView();
     //my::LibImGuiPlaytests::glWindowAndImGuiWindow();
     //my::LibImGuiPlaytests::simpleGui();

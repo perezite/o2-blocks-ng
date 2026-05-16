@@ -1,6 +1,6 @@
 #pragma once
-#include "../../Core/SdlContext.h"
-#include "../../Core/StlHelper.h"
+#include "../Core/SdlContext.h"
+#include "../Core/StlHelper.h"
 #include "imgui.h"
 #include <SDL3/SDL.h>
 #include <string>
@@ -21,23 +21,26 @@ namespace o2
 		inline ~TreeNode() { deleteAll(children); }	
 	};
 
-	class PlaytestMenuWindow
+	class TestMenuWindow
 	{
 		SdlContext _sdlContext;
 		SDL_Window* _window = nullptr;
 		SDL_WindowID _windowId;
 		SDL_Renderer* _renderer = nullptr;
 		ImGuiContext* _imGuiContext = nullptr;
-		TreeNode _tree{"Playtests"};
+		TreeNode _playtestTree{"Playtests"};
+		TreeNode _autotestTree{ "Auto Tests" };
 		bool _isOpen = true;
+		void drawTree(TreeNode& node, bool isAutotestTree);
 	public:
-		PlaytestMenuWindow();
-		~PlaytestMenuWindow();
+		TestMenuWindow();
+		~TestMenuWindow();
 		void addPlaytest(const std::string& path, const std::function<void()>& action);
+		void addAutotest(const std::string& path, const std::function<void()>& action);
 		void update();
 		void display();
 		const inline bool isOpen() const { return _isOpen; }
 
-		void printTree();
+		//void printTree();
 	};
 }
