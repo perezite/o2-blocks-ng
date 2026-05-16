@@ -1,12 +1,35 @@
 #include "PlaytestMenuWindow.h"
 #include "../../Core/Events.h"
+#include "../../Core/StdHelper.h"
+#include "../../Core/StlHelper.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_sdlrenderer3.h"
 #include <iostream>
+#include <functional>
 using namespace std;
 
 namespace o2
 {
+    static void printTheTree(TreeNode& node, size_t depth = 0)
+    {
+        string indent(2 * depth, ' ');
+
+        if (node.isLeaf()) {
+            auto hasAction = node.action != nullptr;
+            cout << indent << "> " << node.text << (hasAction ? " (has action)" : " (has NO action)") << endl;
+            return;
+        }
+        
+        cout << indent << "- " << node.text << endl;
+        for (auto& child : node.children)
+            printTheTree(*child, depth + 1);
+    }
+
+    void PlaytestMenuWindow::printTree()
+    {
+        printTheTree(_tree);
+    }
+
 	PlaytestMenuWindow::PlaytestMenuWindow()
 	{
         auto mainDisplayScale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
@@ -36,6 +59,36 @@ namespace o2
         ImGui::DestroyContext();
         SDL_DestroyRenderer(_renderer);
         SDL_DestroyWindow(_window);
+    }
+
+    void PlaytestMenuWindow::addPlaytest(const string& path,const function<void()>& action)
+    {
+        if (path.empty())
+            throw runtime_error("Path must not be empty");
+
+        TreeNode* node = &_tree;
+        auto pathElements = split(path, "/");
+
+        // Create/find all inner nodes
+        for (size_t i = 0; i < pathElements.size() - 1; i++){
+            const auto& pathElement = pathElements[i];
+            auto* foundNode = singleOrNull(node->children, [&](const TreeNode& child) {
+                return child.text == pathElement;
+            });
+
+            if (!foundNode) {
+                auto newNode = make_unique<TreeNode>(pathElement);
+                node->children.emplace_back(move(newNode));
+                foundNode = node->children.back().get();
+            }
+
+            node = foundNode;
+        }
+
+        // Add leaf node
+        const auto& leafName = pathElements.back();
+        auto leaf = make_unique<TreeNode>(leafName, action);
+        node->children.emplace_back(move(leaf));
     }
 
     void PlaytestMenuWindow::update()

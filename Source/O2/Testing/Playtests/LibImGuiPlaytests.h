@@ -7,7 +7,7 @@ namespace o2
 		class LibImGuiPlaytests 
 		{
 		public:
-			static void drawTree();
+			static void treeView();
 			static void glWindowAndImGuiWindow();
 			static void simpleGui();
 		};

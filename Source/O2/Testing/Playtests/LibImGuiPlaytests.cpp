@@ -57,7 +57,7 @@ namespace o2
             }
         }
 
-        void LibImGuiPlaytests::drawTree()
+        void LibImGuiPlaytests::treeView()
         {
             sdlCheck(SDL_Init(SDL_INIT_VIDEO));
 

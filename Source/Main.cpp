@@ -2,25 +2,13 @@
 #include "O2/Testing/Playtests/WindowPlaytests.h"
 #include "O2/Testing/Playtests/LibImGuiPlaytests.h"
 #include "O2/Testing/Playtests/PlaytestMenuWindow.h"
-#include "O2/Core/Events.h"
-#include <iostream>
-using namespace std;
+#include "O2/Testing/Playtests/PlaytestMenuWindowPlaytest.h"
 using namespace o2;
-
-void playtestMenuWindowTest()
-{
-    PlaytestMenuWindow playtestMenuWindow;
-    while (playtestMenuWindow.isOpen()) {
-        Events::update();
-        playtestMenuWindow.update();
-        playtestMenuWindow.display();
-    }
-}
 
 int main(int argc, char* argv[])
 {
-    playtestMenuWindowTest();
-    //my::LibImGuiPlaytests::drawTree();
+    my::PlaytestMenuWindowPlaytest::showWindow();
+    //my::LibImGuiPlaytests::treeView();
     //my::LibImGuiPlaytests::glWindowAndImGuiWindow();
     //my::LibImGuiPlaytests::simpleGui();
     //my::WindowPlaytests::twoWindows();
