@@ -15,15 +15,15 @@ namespace o2
 {
 	namespace my
 	{
-        struct TreeNode
+        struct Node
         {
             string text;
             bool isLeaf = false;
-            vector<TreeNode> children;
+            vector<Node> children;
             function<void()> action;
         };
 
-        static void drawTreeNode(TreeNode& node)
+        static void drawTreeNode(Node& node)
         {
             if (node.isLeaf) {
                 ImGui::PushID(&node);
@@ -49,7 +49,7 @@ namespace o2
             if (node.text == "Root" || node.text == "Items")
                 ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 
-            if (ImGui::TreeNode(node.text.c_str())) {
+            if (ImGui::Node(node.text.c_str())) {
                 for (auto& child : node.children)
                     drawTreeNode(child);
 
@@ -80,7 +80,7 @@ namespace o2
             ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
             ImGui_ImplSDLRenderer3_Init(renderer);
 
-            TreeNode root = 
+            Node root = 
             {
                 "Root",
                 false,

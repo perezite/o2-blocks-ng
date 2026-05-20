@@ -6,7 +6,7 @@ namespace o2
 {
 	namespace my
 	{
-		class TestMenuWindowPlaytest
+		class TestMenuWindowPlaytests
 		{
 		public:
 			static void showWindow();

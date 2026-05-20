@@ -1,24 +1,27 @@
 #pragma once
 #include "../Core/SdlContext.h"
-#include "../Core/StlHelper.h"
+#include "../Helpers/VectorHelper.h"
 #include "imgui.h"
 #include <SDL3/SDL.h>
 #include <string>
 #include <functional>
 #include <vector>
 #include <memory>
+#include <deque>
 
 namespace o2
 {
-	struct TreeNode
+	struct Node
 	{
+		enum class State { Running, Pending, Failed, Succeeded, None };
 		std::string text;
-		std::vector<TreeNode*> children = {};
+		std::vector<Node*> children = {};
 		std::function<void()> action = nullptr;
+		State state = State::None;
 		inline bool isLeaf() const { return children.empty(); }
-		TreeNode(const std::string& text_) : text(text_) { }
-		TreeNode(const std::string& text_, std::function<void()> action_) : text(text_), action(action_) {}
-		inline ~TreeNode() { deleteAll(children); }	
+		Node(const std::string& text_) : text(text_) { }
+		Node(const std::string& text_, std::function<void()> action_) : text(text_), action(action_) {}
+		inline ~Node() { deleteAll(children); }
 	};
 
 	class TestMenuWindow
@@ -28,10 +31,10 @@ namespace o2
 		SDL_WindowID _windowId;
 		SDL_Renderer* _renderer = nullptr;
 		ImGuiContext* _imGuiContext = nullptr;
-		TreeNode _playtestTree{"Playtests"};
-		TreeNode _autotestTree{ "Auto Tests" };
+		Node _playtestTree{ "Playtests" };
+		Node _autotestTree{ "Auto Tests" };
 		bool _isOpen = true;
-		void drawTree(TreeNode& node, bool isAutotestTree);
+		void drawTree(Node& node, bool isAutotestTree);
 	public:
 		TestMenuWindow();
 		~TestMenuWindow();
@@ -40,7 +43,5 @@ namespace o2
 		void update();
 		void display();
 		const inline bool isOpen() const { return _isOpen; }
-
-		//void printTree();
 	};
 }

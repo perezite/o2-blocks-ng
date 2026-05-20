@@ -1,9 +1,9 @@
-#include "TestMenuWindowPlaytest.h"
+#include "TestMenuWindowPlaytests.h"
 #include "../TestMenuWindow.h"
 #include "../../Core/Events.h"
-#include "backends/imgui_impl_sdl3.h"
-#include "backends/imgui_impl_sdlrenderer3.h"
 #include <iostream>
+#include <thread>
+#include <chrono>
 using namespace std;
 
 namespace o2
@@ -16,8 +16,18 @@ namespace o2
 		static void writeAllTextTest() { cout << "writeAllTextTest" << endl; }
 		static void writeAllTextTransactionalTest() { cout << "writeAllTextTransactionalTest" << endl; }
 		static void miscAutotest1() { cout << "writeAllTextTransactionalTest" << endl; }
+		static void failingTest() { 
+			cout << "This test will fail" << endl; 
+			throw runtime_error("fail");
+		}
+		static void slowTest() {
+			cout << "This test takes 500 ms.." << endl;
+			this_thread::sleep_for(chrono::milliseconds(500));
+			cout << "Finished!" << endl;
+		}
 
-		void my::TestMenuWindowPlaytest::showWindow()
+
+		void my::TestMenuWindowPlaytests::showWindow()
 		{
 			TestMenuWindow testMenuWindow;
 			testMenuWindow.addPlaytest("Simple Playtests/Some simple Playtest", simplePlaytest);
@@ -26,9 +36,10 @@ namespace o2
 
 			testMenuWindow.addAutotest("FileHelper/writeAllText", writeAllTextTest);
 			testMenuWindow.addAutotest("FileHelper/writeAllTextTransactional", writeAllTextTransactionalTest);
-			testMenuWindow.addAutotest("Misc Autotests/miscAutotest1", miscAutotest1);
+			testMenuWindow.addAutotest("FileHelper/fail", failingTest);
 
-			// testMenuWindow.printTree();
+			testMenuWindow.addAutotest("Misc Autotests/miscAutotest1", miscAutotest1);
+			testMenuWindow.addAutotest("Misc Autotests/slowTest", slowTest);
 
 			while (testMenuWindow.isOpen()) {
 				Events::update();
