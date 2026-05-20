@@ -171,7 +171,7 @@ namespace o2
         auto state = getState(node);
         auto color = getColor(state);
         ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(color.r, color.g, color.b, color.a));
-        bool open = ImGui::Node(node.text.c_str());
+        bool open = ImGui::TreeNode(node.text.c_str());
         ImGui::PopStyleColor();
         auto someKeyPressed = isKeyPressed({ ImGuiKey_LeftCtrl, ImGuiKey_RightCtrl });
         if (isAutotestTree && ImGui::IsItemHovered() && someKeyPressed) {

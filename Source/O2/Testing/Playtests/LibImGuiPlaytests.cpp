@@ -49,7 +49,7 @@ namespace o2
             if (node.text == "Root" || node.text == "Items")
                 ImGui::SetNextItemOpen(true, ImGuiCond_Once);
 
-            if (ImGui::Node(node.text.c_str())) {
+            if (ImGui::TreeNode(node.text.c_str())) {
                 for (auto& child : node.children)
                     drawTreeNode(child);
 
