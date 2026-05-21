@@ -2,6 +2,7 @@
 #include "../Core/Events.h"
 #include "../Core/Color.h"
 #include "../Helpers/StringHelper.h"
+#include "../Helpers/ConsoleHelper.h"
 #include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_sdlrenderer3.h"
 #include <iostream>
@@ -10,34 +11,18 @@ using namespace std;
 
 namespace o2
 {
-    //static void printTheTree(TreeNode& node, size_t depth = 0)
-    //{
-    //    string indent(2 * depth, ' ');
-
-    //    if (node.isLeaf()) {
-    //        if (node.action == nullptr) throw runtime_error("Leaf has no action");
-    //        cout << indent << "> " << node.text << endl;
-    //        return;
-    //    }
-    //    
-    //    cout << indent << "- " << node.text << endl;
-    //    for (auto& child : node.children)
-    //        printTheTree(*child, depth + 1);
-    //}
-
-    inline static bool isKeyPressed(vector<ImGuiKey> keys)
+    static bool isKeyPressed(vector<ImGuiKey> keys)
     {
         for (auto key : keys)
-            if (ImGui::IsKeyPressed(key)) return true;
-
+            if (ImGui::IsKeyPressed(key, false)) return true;
         return false;
     }
 
     static bool isItemSelected() 
     {
-        auto someKeyPressed = isKeyPressed({ ImGuiKey_Space, ImGuiKey_Enter, ImGuiKey_LeftCtrl, ImGuiKey_RightCtrl });
-        auto isMouseClicked = ImGui::IsMouseClicked(ImGuiMouseButton_Left);
-        auto selected = ImGui::IsItemHovered() && (someKeyPressed || isMouseClicked);
+        auto someKeyPressed = isKeyPressed({ 
+            ImGuiKey_Space, ImGuiKey_Enter, ImGuiKey_LeftCtrl, ImGuiKey_RightCtrl });
+        auto selected = ImGui::IsItemHovered() && someKeyPressed;
         return selected;
     }
 
@@ -51,9 +36,8 @@ namespace o2
         // Create / find and then add inner nodes
         for (size_t i = 0; i < pathElements.size() - 1; i++) {
             const auto& pathElement = pathElements[i];
-            auto* foundChild = singleOrNull(node->children, [&](const Node* child) {
-                return child->text == pathElement;
-                });
+            auto* foundChild = singleOrNull(node->children, 
+                [&](const Node* child) { return child->text == pathElement; });
 
             if (!foundChild) {
                 node->children.push_back(new Node(pathElement));
@@ -78,18 +62,18 @@ namespace o2
             getAllLeaves(*child, allLeaves);
     }
 
-    const Color getColor(const Node::State& state) {
+    static const Color getColor(const Node::State& state) {
         switch (state) {
             case Node::State::None:         return Color(255, 255, 255, 255);
-            case Node::State::Pending:      return Color(255, 255,   0, 255);
-            case Node::State::Running:      return Color(255, 165,   0, 255);
-            case Node::State::Failed:       return Color(255,   0,   0, 255);
-            case Node::State::Succeeded:    return Color(  0, 255,   0, 255);
+            case Node::State::Pending:      return Color(255, 255, 0, 255);
+            case Node::State::Running:      return Color(255, 165, 0, 255);
+            case Node::State::Failed:       return Color(255, 0, 0, 255);
+            case Node::State::Succeeded:    return Color(0, 255, 0, 255);
             default: throw runtime_error("Not implemented");
         }
     }
 
-    const Node::State getState(const Node& node)
+    static const Node::State getState(const Node& node)
     {
         if (node.isLeaf()) return node.state;
 
@@ -111,26 +95,69 @@ namespace o2
 
         if (hasRunning) return Node::State::Running;
         if (hasPending) return Node::State::Pending;
-        if (hasFailed) return Node::State::Failed;
-        if (hasNone) return Node::State::None;
+        if (hasFailed)  return Node::State::Failed;
+        if (hasNone)    return Node::State::None;
         if (hasSucceeded) return Node::State::Succeeded;
         throw runtime_error("not implemented");
     }
 
-    void runNextAutotest(Node& autotestTree)
+    static void drawTree(Node& node, bool isAutotestTree)
+    {
+        // draw leaf
+        if (node.isLeaf()) {
+            ImGui::PushID(&node);
+            auto color = getColor(node.state);
+            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(color.r, color.g, color.b, color.a));
+            auto selected = ImGui::Selectable(node.text.c_str());
+            ImGui::PopStyleColor();
+            ImGui::PopID();
+
+            //if (selected || isItemSelected()) {
+            auto itemSelected = isItemSelected();
+            if (selected) cout << "selected" << endl;
+            if (itemSelected) cout << "itemSelected" << endl;
+
+            if (selected || itemSelected) {
+                if (isAutotestTree) node.state = Node::State::Pending;
+                else if (node.action) node.action();
+            }
+
+            return;
+        }
+
+        // draw inner node
+        auto state = getState(node);
+        auto color = getColor(state);
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(color.r, color.g, color.b, color.a));
+        bool open = ImGui::TreeNode(node.text.c_str());
+        ImGui::PopStyleColor();
+
+        auto someKeyPressed = isKeyPressed({ ImGuiKey_LeftCtrl, ImGuiKey_RightCtrl });
+        if (isAutotestTree && ImGui::IsItemHovered() && someKeyPressed) {
+            vector<Node*> leaves;
+            getAllLeaves(node, leaves);
+            for (auto* leave : leaves)
+                leave->state = Node::State::Pending;
+        }
+
+        if (open) {
+            for (auto& child : node.children)
+                drawTree(*child, isAutotestTree);
+            ImGui::TreePop();
+        }
+    }
+
+    static void runNextAutotest(Node& autotestTree)
     {
         vector<Node*> autotests;
         getAllLeaves(autotestTree, autotests);
-        auto nextRunningAutotest = firstOrDefault(autotests, [](const Node* n) {
-            return n->state == Node::State::Running;
-            });
-        auto nextPendingAutotest = firstOrDefault(autotests, [](const Node* n) {
-            return n->state == Node::State::Pending;
-        });
+        auto nextRunningAutotest = firstOrDefault(autotests, 
+            [](const Node* n) { return n->state == Node::State::Running; });
+        auto nextPendingAutotest = firstOrDefault(autotests, 
+            [](const Node* n) { return n->state == Node::State::Pending; });
 
         // execute running autotest
-        if (nextRunningAutotest)
-        {
+        if (nextRunningAutotest) {
             try {
                 nextRunningAutotest->action();
                 nextRunningAutotest->state = Node::State::Succeeded;
@@ -143,51 +170,6 @@ namespace o2
         // set pending autotest to running
         if (nextPendingAutotest)
             nextPendingAutotest->state = Node::State::Running;
-    }
-
-    void TestMenuWindow::drawTree(Node& node, bool isAutotestTree)
-    {
-        // draw leaf
-        if (node.isLeaf()) {
-
-            ImGui::PushID(&node);
-            auto color = getColor(node.state);
-            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(color.r, color.g, color.b, color.a));
-            auto selected = ImGui::Selectable(node.text.c_str());
-            ImGui::PopStyleColor();
-            ImGui::PopID();
-
-            if (selected || isItemSelected()) {
-                if (isAutotestTree)
-                    node.state = Node::State::Pending;
-                else if (node.action) 
-                    node.action();
-            }
-
-            return;
-        }
-
-        // draw inner node
-        auto state = getState(node);
-        auto color = getColor(state);
-        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(color.r, color.g, color.b, color.a));
-        bool open = ImGui::TreeNode(node.text.c_str());
-        ImGui::PopStyleColor();
-        auto someKeyPressed = isKeyPressed({ ImGuiKey_LeftCtrl, ImGuiKey_RightCtrl });
-        if (isAutotestTree && ImGui::IsItemHovered() && someKeyPressed) {
-            vector<Node*> leaves;
-            getAllLeaves(node, leaves);
-            //cout << "Selected tests: " << endl;
-            for (auto* leave : leaves)
-                leave->state = Node::State::Pending;
-                //cout << selectedTest->text << endl;
-        }
-
-        if (open) {
-            for (auto& child : node.children)
-                drawTree(*child, isAutotestTree);
-            ImGui::TreePop();
-        }
     }
 
     TestMenuWindow::TestMenuWindow()
@@ -243,6 +225,9 @@ namespace o2
         // process events
         if (Events::isWindowCloseRequested(_windowId))
             _isOpen = false;
+        if (Events::hasWindowGainedFocus(_windowId))
+            bringConsoleToForeground();
+
         for (auto& event : Events::getSdlEvents())
             ImGui_ImplSDL3_ProcessEvent(&event);
 

@@ -6,8 +6,6 @@
 #include <string>
 #include <functional>
 #include <vector>
-#include <memory>
-#include <deque>
 
 namespace o2
 {
@@ -19,8 +17,9 @@ namespace o2
 		std::function<void()> action = nullptr;
 		State state = State::None;
 		inline bool isLeaf() const { return children.empty(); }
-		Node(const std::string& text_) : text(text_) { }
-		Node(const std::string& text_, std::function<void()> action_) : text(text_), action(action_) {}
+		inline Node(const std::string& text_) : text(text_) { }
+		inline Node(const std::string& text_, std::function<void()> action_) 
+			: text(text_), action(action_) { }
 		inline ~Node() { deleteAll(children); }
 	};
 
@@ -34,7 +33,6 @@ namespace o2
 		Node _playtestTree{ "Playtests" };
 		Node _autotestTree{ "Auto Tests" };
 		bool _isOpen = true;
-		void drawTree(Node& node, bool isAutotestTree);
 	public:
 		TestMenuWindow();
 		~TestMenuWindow();

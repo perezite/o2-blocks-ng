@@ -10,7 +10,9 @@ namespace o2
 {
 	namespace my
 	{
-		static void simplePlaytest() { cout << "Simple playtest" << endl; }
+		static void simplePlaytest() { 
+			cout << "Simple playtest" << endl; 
+		}
 		static void miscPlaytest1() { cout << "Misc playtest 1" << endl; }
 		static void miscPlaytest2() { cout << "Misc playtest 2" << endl; }
 		static void writeAllTextTest() { cout << "writeAllTextTest" << endl; }
@@ -25,7 +27,6 @@ namespace o2
 			this_thread::sleep_for(chrono::milliseconds(500));
 			cout << "Finished!" << endl;
 		}
-
 
 		void my::TestMenuWindowPlaytests::showWindow()
 		{
